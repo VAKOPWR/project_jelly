@@ -10,7 +10,6 @@
 .svn/
 .vscode
 migrate_working_dir/
-ios/Flutter/Debug.xcconfig
 
 # IntelliJ related
 *.iml
@@ -26,6 +25,7 @@ ios/Flutter/Debug.xcconfig
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
+**/ios/Flutter/Debug.xcconfig
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
