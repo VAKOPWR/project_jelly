@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:label="project_jelly"
-        android:name="${applicationName}"
+        android:name="ProjectJelly"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -29,5 +29,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyB_GK2NleKVaxbb270QfZZdY-22gm5lV8k"/>
     </application>
 </manifest>
