@@ -8,7 +8,9 @@
 .buildlog/
 .history
 .svn/
+.vscode
 migrate_working_dir/
+ios/Flutter/Debug.xcconfig
 
 # IntelliJ related
 *.iml
