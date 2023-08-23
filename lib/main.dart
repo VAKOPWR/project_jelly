@@ -5,7 +5,7 @@ import 'package:project_jelly/pages/login.dart';
 
 void main() {
   runApp(MaterialApp(
-    initialRoute: '/home',
+    initialRoute: '/login',
     routes: {
       '/loading': (context) => const Loading(),
       '/login': (context) => const Login(),
