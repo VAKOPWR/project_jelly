@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_jelly/widgets/map.dart';
+import 'package:project_jelly/widgets/navButtons.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,8 +14,11 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: MapWidget(),
+    return Scaffold(
+      body: Stack(children: [
+        MapWidget(),
+        const NavButtons(),
+      ]),
     );
   }
 }
