@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+.vscode
 migrate_working_dir/
 
 # IntelliJ related
@@ -24,6 +25,7 @@ migrate_working_dir/
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
+**/ios/Flutter/Debug.xcconfig
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
