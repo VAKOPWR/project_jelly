@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../classes/Friend.dart';
 
+const int _numberOfTabs = 3;
+
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
 
@@ -50,19 +52,40 @@ class _FriendsPageState extends State<FriendsPage> {
           });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Friends"),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // #TODO why Navigator.of(context).pop(); does not work? Fix this
-            Navigator.pushReplacementNamed(context, '/map');
-          },
+    return DefaultTabController(
+      length: _numberOfTabs,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Friends"),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/map');
+            },
+          ),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: "List"),
+              Tab(text: "Find"),
+              Tab(text: "Pending"),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            SearchBarWidget(
+              content: widget,
+            ),
+            const SearchBarWidget(
+              content: Center(child: Text("Find")),
+            ),
+            const SearchBarWidget(
+              content: Center(child: Text("Pending")),
+            ),
+          ],
         ),
       ),
-      body: widget,
     );
   }
 
@@ -82,18 +105,15 @@ class _FriendsPageState extends State<FriendsPage> {
         children: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -139,7 +159,8 @@ class _FriendsPageState extends State<FriendsPage> {
           String avatar =
               'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
 
-          Friend friendModel = Friend(name, avatar, LatLng(latitude, longitude));
+          Friend friendModel = Friend(
+              name, avatar, LatLng(latitude, longitude));
           listFriends.add(friendModel);
         }
       }
@@ -153,5 +174,36 @@ class _FriendsPageState extends State<FriendsPage> {
       _listFriends = listFriends;
       _isProgressBarShown = false;
     });
+  }
+}
+
+
+
+class SearchBarWidget extends StatelessWidget {
+  final Widget content;
+
+  const SearchBarWidget({super.key, required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: "Search",
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ),
+        Expanded(child: content),
+      ],
+    );
   }
 }
