@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import 'package:project_jelly/classes/person.dart';
+import 'package:project_jelly/service/location_service.dart';
 
 class MapWidget extends StatefulWidget {
   @override
@@ -23,50 +24,11 @@ class _MapWidgetState extends State<MapWidget> {
     getCurrentLocation();
   }
 
-  void loadMarkers() {
-    // BitmapDescriptor orestAvatar = BitmapDescriptor.defaultMarker;
-    // BitmapDescriptor andriiAvatar = BitmapDescriptor.defaultMarker;
-    // BitmapDescriptor viktorAvatar = BitmapDescriptor.defaultMarker;
-    List<Person> friendList = [];
-
-    BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(size: Size(300, 300)), "assets/N01.png")
-        .then((icon) {
-      friendList.add(Person(
-          name: 'Orest',
-          avatar: icon,
-          location: LatLng(37.30952302005339, -122.03900959279422)));
-      // orestAvatar = icon;
-    });
-    BitmapDescriptor.fromAssetImage(ImageConfiguration.empty, "assets/N02.png")
-        .then((icon) {
-      friendList.add(Person(
-          name: 'Viktor',
-          avatar: icon,
-          location: LatLng(37.329863949614406, -122.06115391055518)));
-    });
-    BitmapDescriptor.fromAssetImage(ImageConfiguration.empty, "assets/N03.png")
-        .then((icon) {
-      friendList.add(Person(
-          name: 'Andrii',
-          avatar: icon,
-          location: LatLng(37.352109801487344, -122.03506138110038)));
+  void loadMarkers() async {
+    List<Person> friendList = await LocationService().getFriendsLocation();
       setState(() {
         markers = friendList.map((friend) => createMarker(friend)).toSet();
       });
-    });
-
-    // friendList = [
-    //   ,
-    //   Person(
-    //       name: 'Viktor',
-    //       avatar: viktorAvatar,
-    //       location: LatLng(37.329863949614406, -122.06115391055518)),
-    //   Person(
-    //       name: 'Andrii',
-    //       avatar: andriiAvatar,
-    //       location: LatLng(37.352109801487344, -122.03506138110038))
-    // ];
   }
 
   void getCurrentLocation() async {
@@ -90,6 +52,7 @@ class _MapWidgetState extends State<MapWidget> {
     location.getLocation().then((location) {
       setState(() {
         currentLocation = location;
+        LocationService().sendLocation(location);
       });
     });
 
