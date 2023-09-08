@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class NavButtons extends StatelessWidget {
   const NavButtons({super.key});
@@ -19,11 +20,7 @@ class NavButtons extends StatelessWidget {
             child: FloatingActionButton(
               heroTag: "messagesBtn",
               onPressed: () {
-                ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
-                if (currentRoute?.settings?.name != '/messages') {
-                  // Only navigate to the '/friends' page if not already on it
-                  Navigator.pushReplacementNamed(context, '/messages');
-                }
+                Get.toNamed('/messages');
               },
               backgroundColor:
                   Colors.green[600], // Change the background color as desired
@@ -39,11 +36,7 @@ class NavButtons extends StatelessWidget {
             child: FloatingActionButton(
               heroTag: "friendsBtn",
               onPressed: () {
-                ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
-                if (currentRoute?.settings?.name != '/friends') {
-                  // Only navigate to the '/friends' page if not already on it
-                  Navigator.pushReplacementNamed(context, '/friends');
-                }
+                Get.toNamed('/friends');
               },
               backgroundColor:
                   Colors.green[600], // Change the background color as desired
@@ -53,37 +46,29 @@ class NavButtons extends StatelessWidget {
               child: const Icon(Icons.group_add_rounded, size: 40.0),
             ),
           ),
-          SizedBox(
-            height: 64,
-            width: 64,
-            child: FloatingActionButton(
-              heroTag: "mapBtn",
-              onPressed: () {
-                ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
-                if (currentRoute?.settings?.name != '/map') {
-                  // Only navigate to the '/friends' page if not already on it
-                  Navigator.pushReplacementNamed(context, '/map');
-                }
-              },
-              backgroundColor:
-                  Colors.green[600], // Change the background color as desired
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16.0)),
-              ),
-              child: const Icon(Icons.map_rounded, size: 40.0),
-            ),
-          ),
+          // SizedBox(
+          //   height: 64,
+          //   width: 64,
+          //   child: FloatingActionButton(
+          //     heroTag: "mapBtn",
+          //     onPressed: () {
+          //       Get.offNamed('/map');
+          //     },
+          //     backgroundColor:
+          //         Colors.green[600], // Change the background color as desired
+          //     shape: const RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          //     ),
+          //     child: const Icon(Icons.map_rounded, size: 40.0),
+          //   ),
+          // ),
           SizedBox(
             height: 64,
             width: 64,
             child: FloatingActionButton(
               heroTag: "profileBtn",
               onPressed: () {
-                ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
-                if (currentRoute?.settings?.name != '/profile') {
-                  // Only navigate to the '/friends' page if not already on it
-                  Navigator.pushReplacementNamed(context, '/profile');
-                }
+                Get.toNamed('/profile');
               },
               backgroundColor:
                   Colors.green[600], // Change the background color as desired

@@ -15,18 +15,31 @@ class _MapWidgetState extends State<MapWidget> {
   // bool followMarker = true;
   LocationData? currentLocation;
   Set<Marker> markers = {};
+  MapType mapType = MapType.normal;
 
   @override
   void initState() {
     super.initState();
-    loadMarkers();
+    // loadMarkers();
     getCurrentLocation();
   }
 
+  MapType getNextMap(MapType currentMapType) {
+    switch (currentMapType) {
+      case MapType.normal:
+        return MapType.satellite;
+      case MapType.satellite:
+        return MapType.terrain;
+      case MapType.terrain:
+        return MapType.hybrid;
+      case MapType.hybrid:
+        return MapType.normal;
+      case MapType.none:
+        return MapType.normal;
+    }
+  }
+
   void loadMarkers() {
-    // BitmapDescriptor orestAvatar = BitmapDescriptor.defaultMarker;
-    // BitmapDescriptor andriiAvatar = BitmapDescriptor.defaultMarker;
-    // BitmapDescriptor viktorAvatar = BitmapDescriptor.defaultMarker;
     List<Person> friendList = [];
 
     BitmapDescriptor.fromAssetImage(
@@ -55,18 +68,6 @@ class _MapWidgetState extends State<MapWidget> {
         markers = friendList.map((friend) => createMarker(friend)).toSet();
       });
     });
-
-    // friendList = [
-    //   ,
-    //   Person(
-    //       name: 'Viktor',
-    //       avatar: viktorAvatar,
-    //       location: LatLng(37.329863949614406, -122.06115391055518)),
-    //   Person(
-    //       name: 'Andrii',
-    //       avatar: andriiAvatar,
-    //       location: LatLng(37.352109801487344, -122.03506138110038))
-    // ];
   }
 
   void getCurrentLocation() async {
@@ -94,16 +95,6 @@ class _MapWidgetState extends State<MapWidget> {
     });
 
     GoogleMapController googleMapController = await _controller.future;
-    // location.onLocationChanged.listen((newLoc) {
-    //   if (followMarker) {
-    //     googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-    //       CameraPosition(
-    //         target: LatLng(newLoc.latitude!, newLoc.longitude!),
-    //         zoom: 15,
-    //       ),
-    //     ));
-    //   }
-    // });
   }
 
   Marker createMarker(Person friend) {
@@ -121,21 +112,36 @@ class _MapWidgetState extends State<MapWidget> {
     return Scaffold(
         body: currentLocation == null
             ? const Center(child: Text("Loading"))
-            : GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                    currentLocation!.latitude!,
-                    currentLocation!.longitude!,
+            : Stack(children: [
+                GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(
+                        currentLocation!.latitude!,
+                        currentLocation!.longitude!,
+                      ),
+                      zoom: 13,
+                    ),
+                    onMapCreated: (mapController) {
+                      _controller.complete(mapController);
+                    },
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
+                    padding: EdgeInsets.only(bottom: 100, left: 0),
+                    mapType: mapType,
+                    markers: markers),
+                Positioned(
+                  top: 50.0, // Adjust the top position as needed
+                  right: 10.0, // Adjust the right position as needed
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        mapType = getNextMap(mapType);
+                      });
+                    },
+                    child: const Icon(
+                        Icons.map_rounded), // Customize the FAB's icon
                   ),
-                  zoom: 13,
                 ),
-                onMapCreated: (mapController) {
-                  _controller.complete(mapController);
-                },
-                myLocationButtonEnabled: true,
-                myLocationEnabled: true,
-                padding: EdgeInsets.only(bottom: 100, left: 0),
-                mapType: MapType.satellite,
-                markers: markers));
+              ]));
   }
 }

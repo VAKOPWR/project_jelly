@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:project_jelly/widgets/map.dart';
-import 'package:project_jelly/widgets/navButtons.dart';
+import 'package:project_jelly/widgets/nav_buttons.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomeState extends State<Home> {
+class _HomePageState extends State<HomePage> {
   void getData() {}
 
   @override
