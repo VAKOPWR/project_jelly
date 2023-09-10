@@ -9,9 +9,8 @@ class Person {
 
   factory Person.fromJson(Map<String, dynamic> json) {
     return Person(
-      name: json['userId'],
-      avatar: BitmapDescriptor.defaultMarker,
-      location: LatLng(json['latitude'], json['longitude'])
-    );
+        name: json['userId'],
+        avatar: BitmapDescriptor.defaultMarker,
+        location: LatLng(json['latitude'], json['longitude']));
   }
 }

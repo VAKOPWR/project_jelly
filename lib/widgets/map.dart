@@ -7,8 +7,10 @@ import 'package:project_jelly/classes/person.dart';
 import 'package:project_jelly/service/location_service.dart';
 
 class MapWidget extends StatefulWidget {
+  const MapWidget({super.key});
+
   @override
-  _MapWidgetState createState() => _MapWidgetState();
+  State<MapWidget> createState() => _MapWidgetState();
 }
 
 class _MapWidgetState extends State<MapWidget> {
@@ -16,11 +18,12 @@ class _MapWidgetState extends State<MapWidget> {
   // bool followMarker = true;
   LocationData? currentLocation;
   Set<Marker> markers = {};
+  MapType mapType = MapType.normal;
 
   @override
   void initState() {
     super.initState();
-    loadMarkers();
+    // loadMarkers();
     getCurrentLocation();
   }
 
@@ -29,6 +32,20 @@ class _MapWidgetState extends State<MapWidget> {
       setState(() {
         markers = friendList.map((friend) => createMarker(friend)).toSet();
       });
+    
+  MapType getNextMap(MapType currentMapType) {
+    switch (currentMapType) {
+      case MapType.normal:
+        return MapType.satellite;
+      case MapType.satellite:
+        return MapType.terrain;
+      case MapType.terrain:
+        return MapType.hybrid;
+      case MapType.hybrid:
+        return MapType.normal;
+      case MapType.none:
+        return MapType.normal;
+    }
   }
 
   void getCurrentLocation() async {
@@ -57,16 +74,6 @@ class _MapWidgetState extends State<MapWidget> {
     });
 
     GoogleMapController googleMapController = await _controller.future;
-    // location.onLocationChanged.listen((newLoc) {
-    //   if (followMarker) {
-    //     googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-    //       CameraPosition(
-    //         target: LatLng(newLoc.latitude!, newLoc.longitude!),
-    //         zoom: 15,
-    //       ),
-    //     ));
-    //   }
-    // });
   }
 
   Marker createMarker(Person friend) {
@@ -84,21 +91,35 @@ class _MapWidgetState extends State<MapWidget> {
     return Scaffold(
         body: currentLocation == null
             ? const Center(child: Text("Loading"))
-            : GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                    currentLocation!.latitude!,
-                    currentLocation!.longitude!,
+            : Stack(children: [
+                GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(
+                        currentLocation!.latitude!,
+                        currentLocation!.longitude!,
+                      ),
+                      zoom: 13,
+                    ),
+                    onMapCreated: (mapController) {
+                      _controller.complete(mapController);
+                    },
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
+                    padding: EdgeInsets.only(bottom: 100, left: 0),
+                    mapType: mapType,
+                    markers: markers),
+                Positioned(
+                  top: 50.0,
+                  right: 10.0,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        mapType = getNextMap(mapType);
+                      });
+                    },
+                    child: const Icon(Icons.map_rounded),
                   ),
-                  zoom: 13,
                 ),
-                onMapCreated: (mapController) {
-                  _controller.complete(mapController);
-                },
-                myLocationButtonEnabled: true,
-                myLocationEnabled: true,
-                padding: EdgeInsets.only(bottom: 100, left: 0),
-                mapType: MapType.satellite,
-                markers: markers));
+              ]));
   }
 }
