@@ -40,10 +40,14 @@ dependencies:
   geolocator: ^10.0.0
   form_field_validator: ^1.1.0
   http: ^1.1.0
+  injectable: 1.5.3
+  get_it: 7.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  injectable_generator: 1.5.2
+  build_runner: 2.1.7
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

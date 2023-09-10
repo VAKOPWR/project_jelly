@@ -18,4 +18,5 @@ void main() {
       '/profile': (context) => const ProfilePage()
     },
   ));
+
 }
