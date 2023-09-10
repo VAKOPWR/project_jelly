@@ -1,15 +1,16 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:project_jelly/logic/permissions.dart';
 
-class ContactsPage extends StatefulWidget {
-  const ContactsPage({super.key});
+class AddFriendsPage extends StatefulWidget {
+  const AddFriendsPage({super.key});
 
   @override
-  State<ContactsPage> createState() => _ContactsPageState();
+  State<AddFriendsPage> createState() => _AddFriendsPageState();
 }
 
-class _ContactsPageState extends State<ContactsPage> {
+class _AddFriendsPageState extends State<AddFriendsPage> {
   List<Contact> _contacts = [];
 
   @override
@@ -27,7 +28,7 @@ class _ContactsPageState extends State<ContactsPage> {
         _contacts = contacts.toList();
       });
     } else {
-      print('No contacts permission');
+      log('No contacts permission');
     }
   }
 
@@ -41,8 +42,6 @@ class _ContactsPageState extends State<ContactsPage> {
         itemCount: _contacts.length,
         itemBuilder: (context, index) {
           final contact = _contacts[index];
-          // Display contact information and add friend button if applicable
-          // Handle the logic for adding friends or sending invitations
         },
       ),
     );

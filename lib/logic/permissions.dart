@@ -1,12 +1,14 @@
+import 'dart:developer';
+
 import 'package:permission_handler/permission_handler.dart';
 
 Future<bool> requestGalleryPermission() async {
-  final status = await Permission.photos.status;
+  final status = await Permission.storage.status;
 
   if (status.isGranted) {
     return true;
   } else if (status.isDenied) {
-    final result = await Permission.photos.request();
+    final result = await Permission.storage.request();
 
     if (result.isGranted) {
       return true;
@@ -22,6 +24,7 @@ Future<bool> requestGalleryPermission() async {
 
 Future<bool> requestContactsPermission() async {
   final status = await Permission.contacts.status;
+  log((status.isDenied).toString());
 
   if (status.isGranted) {
     return true;

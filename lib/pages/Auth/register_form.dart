@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
@@ -41,6 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
         });
       } else {
         _registerBtnController.success();
+        Get.offNamed('/register_avatar');
       }
     } else {
       _registerBtnController.error();
@@ -62,16 +64,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    // Padding(
-                    //   padding: const EdgeInsets.only(top: 20.0),
-                    //   child: Center(
-                    //     child: SizedBox(
-                    //       width: 200,
-                    //       height: 150,
-                    //       child: Image.asset('assets/logo.jpg'),
-                    //     ),
-                    //   ),
-                    // ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextFormField(

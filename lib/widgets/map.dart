@@ -6,8 +6,10 @@ import 'package:location/location.dart';
 import 'package:project_jelly/classes/person.dart';
 
 class MapWidget extends StatefulWidget {
+  const MapWidget({super.key});
+
   @override
-  _MapWidgetState createState() => _MapWidgetState();
+  State<MapWidget> createState() => _MapWidgetState();
 }
 
 class _MapWidgetState extends State<MapWidget> {
@@ -130,16 +132,15 @@ class _MapWidgetState extends State<MapWidget> {
                     mapType: mapType,
                     markers: markers),
                 Positioned(
-                  top: 50.0, // Adjust the top position as needed
-                  right: 10.0, // Adjust the right position as needed
+                  top: 50.0,
+                  right: 10.0,
                   child: FloatingActionButton(
                     onPressed: () {
                       setState(() {
                         mapType = getNextMap(mapType);
                       });
                     },
-                    child: const Icon(
-                        Icons.map_rounded), // Customize the FAB's icon
+                    child: const Icon(Icons.map_rounded),
                   ),
                 ),
               ]));

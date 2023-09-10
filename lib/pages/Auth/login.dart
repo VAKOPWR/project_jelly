@@ -104,9 +104,6 @@ class _LogInPageState extends State<LogInPage> {
                                         Icons.email,
                                         color: Colors.blue,
                                       ),
-                                      // errorStyle: _isLogInFail
-                                      //     ? const TextStyle(fontSize: 0.0)
-                                      //     : const TextStyle(fontSize: 14.0),
                                       errorStyle:
                                           const TextStyle(fontSize: 14.0),
                                       border: const OutlineInputBorder(
@@ -184,20 +181,7 @@ class _LogInPageState extends State<LogInPage> {
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 22),
                                   ),
-                                )
-                                // child: ElevatedButton(
-                                //     onPressed: _submitForm,
-                                //     style: ElevatedButton.styleFrom(
-                                //         backgroundColor: Colors.blue,
-                                //         shape: RoundedRectangleBorder(
-                                //             borderRadius:
-                                //                 BorderRadius.circular(30))),
-                                //     child: const Text(
-                                //       'Log In',
-                                //       style: TextStyle(
-                                //           color: Colors.white, fontSize: 22),
-                                //     )),
-                                ),
+                                )),
                           ),
                           const Center(
                             child: Padding(
@@ -233,11 +217,9 @@ class _LogInPageState extends State<LogInPage> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              // Get.toNamed('/signup');
                               Get.to(() => const RegisterPage(),
                                   transition: Transition.downToUp,
                                   duration: const Duration(seconds: 1));
-                              // Get.offNamed('/register');
                             },
                             child: Center(
                               child: Container(
@@ -247,9 +229,7 @@ class _LogInPageState extends State<LogInPage> {
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
-                                      color:
-                                          Colors.lightBlue // Add an underline
-                                      ),
+                                      color: Colors.lightBlue),
                                 ),
                               ),
                             ),

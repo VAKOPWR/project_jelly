@@ -9,10 +9,9 @@ class NavButtons extends StatelessWidget {
     return Positioned(
       left: 0,
       right: 0,
-      bottom: 30, // Adjust this value to control the vertical positioning
+      bottom: 30,
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceEvenly, // Adjust button spacing
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           SizedBox(
             height: 64,
@@ -22,8 +21,7 @@ class NavButtons extends StatelessWidget {
               onPressed: () {
                 Get.toNamed('/messages');
               },
-              backgroundColor:
-                  Colors.green[600], // Change the background color as desired
+              backgroundColor: Colors.green[600],
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
@@ -38,30 +36,13 @@ class NavButtons extends StatelessWidget {
               onPressed: () {
                 Get.toNamed('/friends');
               },
-              backgroundColor:
-                  Colors.green[600], // Change the background color as desired
+              backgroundColor: Colors.green[600],
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
               child: const Icon(Icons.group_add_rounded, size: 40.0),
             ),
           ),
-          // SizedBox(
-          //   height: 64,
-          //   width: 64,
-          //   child: FloatingActionButton(
-          //     heroTag: "mapBtn",
-          //     onPressed: () {
-          //       Get.offNamed('/map');
-          //     },
-          //     backgroundColor:
-          //         Colors.green[600], // Change the background color as desired
-          //     shape: const RoundedRectangleBorder(
-          //       borderRadius: BorderRadius.all(Radius.circular(16.0)),
-          //     ),
-          //     child: const Icon(Icons.map_rounded, size: 40.0),
-          //   ),
-          // ),
           SizedBox(
             height: 64,
             width: 64,
@@ -70,8 +51,7 @@ class NavButtons extends StatelessWidget {
               onPressed: () {
                 Get.toNamed('/profile');
               },
-              backgroundColor:
-                  Colors.green[600], // Change the background color as desired
+              backgroundColor: Colors.green[600],
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
