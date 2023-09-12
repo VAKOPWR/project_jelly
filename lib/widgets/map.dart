@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
-import 'package:project_jelly/classes/person.dart';
+import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/service_locatior.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -19,20 +22,28 @@ class _MapWidgetState extends State<MapWidget> {
   LocationData? currentLocation;
   Set<Marker> markers = {};
   MapType mapType = MapType.normal;
+  String _darkMapStyle = '';
+  String _lightMapStyle = '';
 
   @override
   void initState() {
     super.initState();
-    // loadMarkers();
+    loadMarkers();
+    loadMapStyles();
     getCurrentLocation();
   }
 
   void loadMarkers() async {
-    List<Person> friendList = await LocationService().getFriendsLocation();
-      setState(() {
-        markers = friendList.map((friend) => createMarker(friend)).toSet();
-      });
-    
+    List<Friend> friendList =
+        await serviceLocator.get<LocationService>().getFriendsLocation();
+    setState(() {
+      markers = friendList
+          .map((friend) => createMarker(friend))
+          .whereType<Marker>()
+          .toSet();
+    });
+  }
+
   MapType getNextMap(MapType currentMapType) {
     switch (currentMapType) {
       case MapType.normal:
@@ -46,6 +57,11 @@ class _MapWidgetState extends State<MapWidget> {
       case MapType.none:
         return MapType.normal;
     }
+  }
+
+  Future loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/map/dark_map.json');
+    _lightMapStyle = await rootBundle.loadString('assets/map/light_map.json');
   }
 
   void getCurrentLocation() async {
@@ -69,21 +85,26 @@ class _MapWidgetState extends State<MapWidget> {
     location.getLocation().then((location) {
       setState(() {
         currentLocation = location;
-        LocationService().sendLocation(location);
+        serviceLocator.get<LocationService>().sendLocation(location);
       });
     });
 
     GoogleMapController googleMapController = await _controller.future;
   }
 
-  Marker createMarker(Person friend) {
-    return Marker(
-        markerId: MarkerId(friend.name),
-        position: friend.location,
-        infoWindow: InfoWindow(
-          title: friend.name,
-        ),
-        icon: friend.avatar);
+  Marker? createMarker(Friend friend) {
+    BitmapDescriptor.fromAssetImage(
+            const ImageConfiguration(size: Size(300, 300)), friend.avatar)
+        .then((icon) {
+      return Marker(
+          markerId: MarkerId(friend.name),
+          position: friend.location,
+          infoWindow: InfoWindow(
+            title: friend.name,
+          ),
+          icon: icon);
+    });
+    return null;
   }
 
   @override
@@ -101,6 +122,11 @@ class _MapWidgetState extends State<MapWidget> {
                       zoom: 13,
                     ),
                     onMapCreated: (mapController) {
+                      if (Theme.of(context).brightness == Brightness.light) {
+                        mapController.setMapStyle(_lightMapStyle);
+                      } else {
+                        mapController.setMapStyle(_darkMapStyle);
+                      }
                       _controller.complete(mapController);
                     },
                     myLocationButtonEnabled: true,
@@ -112,13 +138,16 @@ class _MapWidgetState extends State<MapWidget> {
                   top: 50.0,
                   right: 10.0,
                   child: FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        mapType = getNextMap(mapType);
-                      });
-                    },
-                    child: const Icon(Icons.map_rounded),
-                  ),
+                      onPressed: () {
+                        setState(() {
+                          mapType = getNextMap(mapType);
+                        });
+                      },
+                      child: Icon(
+                        Icons.map_rounded,
+                        color: Colors.grey[700],
+                      ),
+                      backgroundColor: Colors.grey[50]),
                 ),
               ]));
   }

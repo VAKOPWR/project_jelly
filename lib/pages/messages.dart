@@ -19,7 +19,7 @@ class _MessagesPageState extends State<MessagesPage> {
           centerTitle: true,
         ),
         body: const Stack(
-          children: [NavButtons()],
+          children: [],
         ));
   }
 }

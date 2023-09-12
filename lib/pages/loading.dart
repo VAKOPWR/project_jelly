@@ -11,11 +11,12 @@ class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen.withScreenFunction(
-      splash: Column(children: [Lottie.asset('assets/loading_animation.json')]),
+      splash: Column(
+          children: [Lottie.asset('assets/animations/loading_animation.json')]),
       screenFunction: () async {
         return nextScreen;
       },
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       splashIconSize: 300,
       duration: 3000,
       pageTransitionType: PageTransitionType.fade,

@@ -3,6 +3,8 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
+import 'package:project_jelly/pages/home.dart';
+import 'package:project_jelly/pages/loading.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -36,7 +38,7 @@ class _LogInPageState extends State<LogInPage> {
         });
       } else {
         _submitBtnController.success();
-        Get.offNamed('/map');
+        Get.off(() => const LoadingPage(nextScreen: HomePage()));
       }
     } else {
       _submitBtnController.error();
@@ -62,7 +64,7 @@ class _LogInPageState extends State<LogInPage> {
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(40),
                       border: Border.all(color: Colors.blueGrey)),
-                  child: Image.asset('assets/logo.jpg'),
+                  child: Image.asset('assets/logo.png'),
                 ),
               ),
             ),
@@ -100,15 +102,17 @@ class _LogInPageState extends State<LogInPage> {
                                       errorText: _isEmailValid
                                           ? null
                                           : 'Email is not valid',
-                                      prefixIcon: const Icon(
+                                      prefixIcon: Icon(
                                         Icons.email,
                                         color: Colors.blue,
                                       ),
                                       errorStyle:
                                           const TextStyle(fontSize: 14.0),
-                                      border: const OutlineInputBorder(
-                                          borderSide:
-                                              BorderSide(color: Colors.red),
+                                      border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .error),
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(9.0)))))),
                           Padding(
@@ -149,8 +153,11 @@ class _LogInPageState extends State<LogInPage> {
                                   color: Colors.green,
                                 ),
                                 errorStyle: const TextStyle(fontSize: 14.0),
-                                border: const OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.red),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error),
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(9.0))),
                               ),
@@ -175,11 +182,10 @@ class _LogInPageState extends State<LogInPage> {
                                 child: RoundedLoadingButton(
                                   controller: _submitBtnController,
                                   onPressed: _submitForm,
-                                  color: Colors.blue,
+                                  color: Theme.of(context).colorScheme.primary,
                                   child: const Text(
                                     'Log In',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 22),
+                                    style: TextStyle(fontSize: 22),
                                   ),
                                 )),
                           ),
@@ -189,8 +195,7 @@ class _LogInPageState extends State<LogInPage> {
                               child: Center(
                                 child: Text(
                                   'Or Sign In Using!',
-                                  style: TextStyle(
-                                      fontSize: 18, color: Colors.black),
+                                  style: TextStyle(fontSize: 18),
                                 ),
                               ),
                             ),
@@ -206,7 +211,7 @@ class _LogInPageState extends State<LogInPage> {
                                       height: 50,
                                       width: 50,
                                       child: Image.asset(
-                                        'assets/google.svg',
+                                        'assets/google.png',
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -224,12 +229,14 @@ class _LogInPageState extends State<LogInPage> {
                             child: Center(
                               child: Container(
                                 padding: const EdgeInsets.only(top: 50),
-                                child: const Text(
+                                child: Text(
                                   'REGISTER',
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.lightBlue),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
                                 ),
                               ),
                             ),

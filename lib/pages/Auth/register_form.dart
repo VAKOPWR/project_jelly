@@ -42,7 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
         });
       } else {
         _registerBtnController.success();
-        Get.offNamed('/register_avatar');
+        Get.offNamedUntil('/register_avatar', (route) => false);
       }
     } else {
       _registerBtnController.error();
@@ -79,7 +79,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             _registerBtnController.reset();
                           }
                         },
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             hintText: 'Name',
                             labelText: 'Name',
                             prefixIcon: Icon(
@@ -88,7 +88,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             errorStyle: TextStyle(fontSize: 14.0),
                             border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.red),
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(9.0)))),
                       ),
@@ -143,8 +144,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               color: Colors.grey,
                             ),
                             errorStyle: const TextStyle(fontSize: 14.0),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.red),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(9.0)))),
                       ),
@@ -165,7 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             _registerBtnController.reset();
                           }
                         },
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             hintText: '+1 (555) 555-1234',
                             labelText: 'Phone number',
                             prefixIcon: Icon(
@@ -174,7 +176,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             errorStyle: TextStyle(fontSize: 14.0),
                             border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.red),
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(9.0)))),
                       ),
@@ -216,8 +219,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               color: Colors.grey,
                             ),
                             errorStyle: const TextStyle(fontSize: 14.0),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.red),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(9.0)))),
                       ),
@@ -260,8 +264,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               color: Colors.grey,
                             ),
                             errorStyle: const TextStyle(fontSize: 14.0),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.red),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(9.0)))),
                       ),
@@ -275,11 +280,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: RoundedLoadingButton(
                                   controller: _registerBtnController,
                                   onPressed: _submitForm,
-                                  color: Colors.blue,
+                                  color: Theme.of(context).colorScheme.primary,
                                   child: const Text(
                                     'Sign Up',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 22),
+                                    style: TextStyle(fontSize: 22),
                                   ),
                                 )))),
                     const Center(
@@ -288,7 +292,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Center(
                           child: Text(
                             'Or Sign Up Using',
-                            style: TextStyle(fontSize: 18, color: Colors.black),
+                            style: TextStyle(fontSize: 18),
                           ),
                         ),
                       ),
@@ -304,7 +308,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 height: 50,
                                 width: 50,
                                 child: Image.asset(
-                                  'assets/google.svg',
+                                  'assets/google.png',
                                   fit: BoxFit.cover,
                                 ),
                               ),

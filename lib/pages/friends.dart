@@ -58,12 +58,6 @@ class _FriendsPageState extends State<FriendsPage> {
         appBar: AppBar(
           title: const Text("Friends"),
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/map');
-            },
-          ),
           bottom: const TabBar(
             tabs: [
               Tab(text: "List"),
@@ -160,7 +154,9 @@ class _FriendsPageState extends State<FriendsPage> {
               'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
 
           Friend friendModel = Friend(
-              name, avatar, LatLng(latitude, longitude));
+              name: name,
+              avatar: avatar,
+              location: LatLng(latitude, longitude));
           listFriends.add(friendModel);
         }
       }
@@ -177,8 +173,6 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 }
 
-
-
 class SearchBarWidget extends StatelessWidget {
   final Widget content;
 
@@ -194,7 +188,6 @@ class SearchBarWidget extends StatelessWidget {
             decoration: InputDecoration(
               hintText: "Search",
               filled: true,
-              fillColor: Colors.grey[200],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide.none,
