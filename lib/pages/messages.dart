@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_jelly/widgets/navButtons.dart';
+import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class MessagesPage extends StatefulWidget {
   const MessagesPage({super.key});
@@ -19,7 +19,7 @@ class _MessagesPageState extends State<MessagesPage> {
           centerTitle: true,
         ),
         body: const Stack(
-          children: [NavButtons()],
+          children: [],
         ));
   }
 }
