@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../classes/Friend.dart';
+import '../misc/enum.dart';
 import '../widgets/SearchBar.dart';
 
 const int _numberOfTabs = 3;
@@ -62,18 +63,21 @@ class _FriendsPageState extends State<FriendsPage>
             FriendListTab(
               friends: _listFriends,
               onTabChange: _handleTabChange,
-              buildRowForFriendList: _buildRowForFriendList,
+              trailingActions: tabTrailingActions[TabType.list]!,
+              buildRowForFriendList: _buildRow,
             ),
             FriendFindingTab(
               friends: _listFriends,
               onTabChange: _handleTabChange,
               onShakeButtonPressed: _handleShakeButtonPressed,
-              buildRowForFriendFinding: _buildRowForFriendFinding,
+              trailingActions: tabTrailingActions[TabType.find]!,
+              buildRowForFriendFinding: _buildRow,
             ),
             FriendPendingTab(
               friends: _listFriends,
               onTabChange: _handleTabChange,
-              buildRowForFriendPending: _buildRowForFriendPending,
+              trailingActions: tabTrailingActions[TabType.pending]!,
+              buildRowForFriendPending: _buildRow,
             ),
           ],
         ),
@@ -128,7 +132,7 @@ class _FriendsPageState extends State<FriendsPage>
     ];
   }
 
-  Widget _buildRowForFriendList(Friend friend) {
+  Widget _buildRow(Friend friend, List<Widget> trailingActions) {
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.grey,
@@ -141,76 +145,7 @@ class _FriendsPageState extends State<FriendsPage>
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      onTap: () {
-        setState(() {});
-      },
-    );
-  }
-
-  Widget _buildRowForFriendFinding(Friend friend) {
-    return ListTile(
-      leading: const CircleAvatar(
-        backgroundColor: Colors.grey,
-        backgroundImage: NetworkImage(
-            'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50'),
-      ),
-      title: Text(
-        friend.name,
-        style: _biggerFont,
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.person_add_alt_1),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      onTap: () {
-        setState(() {});
-      },
-    );
-  }
-
-  Widget _buildRowForFriendPending(Friend friend) {
-    return ListTile(
-      leading: const CircleAvatar(
-        backgroundColor: Colors.grey,
-        backgroundImage: NetworkImage(
-            'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50'),
-      ),
-      title: Text(
-        friend.name,
-        style: _biggerFont,
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {},
-          ),
-        ],
+        children: trailingActions,
       ),
       onTap: () {
         setState(() {});
@@ -273,12 +208,15 @@ class _FriendsPageState extends State<FriendsPage>
 class FriendListTab extends StatelessWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
-  final Widget Function(Friend) buildRowForFriendList;
+  final List<Widget> trailingActions;
+  final Widget Function(Friend, List<Widget>) buildRowForFriendList;
 
-  const FriendListTab({super.key,
+  const FriendListTab({
+    super.key,
     required this.friends,
     required this.onTabChange,
     required this.buildRowForFriendList,
+    required this.trailingActions,
   });
 
   @override
@@ -289,10 +227,9 @@ class FriendListTab extends StatelessWidget {
         itemBuilder: (context, i) {
           if (i.isOdd) return const Divider();
           final friendIndex = i ~/ 2;
-          if (friendIndex < friends.length) {
-            return buildRowForFriendList(friends[friendIndex]);
-          }
-          return null;
+          return (friendIndex < friends.length)
+              ? buildRowForFriendList(friends[friendIndex], trailingActions)
+              : null;
         },
       ),
     );
@@ -303,7 +240,8 @@ class FriendFindingTab extends StatelessWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final VoidCallback? onShakeButtonPressed;
-  final Widget Function(Friend) buildRowForFriendFinding;
+  final List<Widget> trailingActions;
+  final Widget Function(Friend, List<Widget>) buildRowForFriendFinding;
 
   const FriendFindingTab({
     Key? key,
@@ -311,6 +249,7 @@ class FriendFindingTab extends StatelessWidget {
     required this.onTabChange,
     this.onShakeButtonPressed,
     required this.buildRowForFriendFinding,
+    required this.trailingActions,
   }) : super(key: key);
 
   @override
@@ -324,10 +263,9 @@ class FriendFindingTab extends StatelessWidget {
               itemBuilder: (context, i) {
                 if (i.isOdd) return const Divider();
                 final friendIndex = i ~/ 2;
-                if (friendIndex < friends.length) {
-                  return buildRowForFriendFinding(friends[friendIndex]);
-                }
-                return null;
+                return (friendIndex < friends.length)
+                    ? buildRowForFriendFinding(friends[friendIndex], trailingActions)
+                    : null;
               },
             ),
           ),
@@ -360,12 +298,15 @@ class FriendFindingTab extends StatelessWidget {
 class FriendPendingTab extends StatelessWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
-  final Widget Function(Friend) buildRowForFriendPending;
+  final List<Widget> trailingActions;
+  final Widget Function(Friend, List<Widget>) buildRowForFriendPending;
 
-  const FriendPendingTab({super.key,
+  const FriendPendingTab({
+    super.key,
     required this.friends,
     required this.onTabChange,
     required this.buildRowForFriendPending,
+    required this.trailingActions,
   });
 
   @override
@@ -376,10 +317,9 @@ class FriendPendingTab extends StatelessWidget {
         itemBuilder: (context, i) {
           if (i.isOdd) return const Divider();
           final friendIndex = i ~/ 2;
-          if (friendIndex < friends.length) {
-            return buildRowForFriendPending(friends[friendIndex]);
-          }
-          return null;
+          return (friendIndex < friends.length)
+              ? buildRowForFriendPending(friends[friendIndex], trailingActions)
+              : null;
         },
       ),
     );
