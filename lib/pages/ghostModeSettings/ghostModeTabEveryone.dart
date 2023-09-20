@@ -154,6 +154,9 @@ class _GhostModeTabEveryoneState extends State<GhostModeTabEveryone> {
                 onPressed: (){
 
                 },
+                style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600]
+                ),
                 child: Text('Confirm'),
               ),
             ),
