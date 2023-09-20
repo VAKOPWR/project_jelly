@@ -11,16 +11,16 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: PreferredSize(
+      appBar: PreferredSize(
         preferredSize: const Size.fromHeight(250),
         child: AppBar(
           backgroundColor: Colors.green[600],
           title: const Text(
               "Profile",
               style: TextStyle(
-              fontSize: 30,
-                fontWeight: FontWeight.bold
-          )
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold
+              )
           ),
           centerTitle: true,
           actions: [
@@ -31,32 +31,32 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
           ],
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: (){
-            // Navigator.of(context).pop();
-            Navigator.pushReplacementNamed(context, "/map");
-          },
-        ),
-        flexibleSpace: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              width: 160,
-              height: 160,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage('assets/profile_image.jpg'),
-                  fit: BoxFit.cover,
-                    ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: (){
+              // Navigator.of(context).pop();
+              Navigator.pushReplacementNamed(context, "/map");
+            },
+          ),
+          flexibleSpace: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                width: 160,
+                height: 160,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: AssetImage('assets/profile_image.jpg'),
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
       body: const Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

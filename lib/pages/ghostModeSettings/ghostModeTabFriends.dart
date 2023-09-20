@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/person.dart';
 
 import '../../widgets/SearchBarWidget.dart';
+import '../FriendSpecificGhostMode.dart';
 
 class GhostModeTabFriends extends StatefulWidget {
   const GhostModeTabFriends({super.key});
@@ -84,22 +85,13 @@ class _GhostModeTabFriends extends State<GhostModeTabFriends> {
     }
 
   void _handleFriendClick(Person person) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Friend Clicked'),
-          content: Text('You clicked on ${person.name}'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FriendSpecificGhostMode(
+          person: person, // Replace 'personObject' with the actual Person object
+        ),
+      ),
     );
   }
 
