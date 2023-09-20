@@ -50,3 +50,6 @@ windows/
 web/
 macos/
 linux/
+
+#Yes
+/android/
