@@ -2,13 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/pages/shakeItScreen.dart';
 
 import '../classes/Friend.dart';
 import '../misc/enum.dart';
 import '../widgets/SearchBar.dart';
 
 const int _numberOfTabs = 3;
+String tutorialText = "You can add someone to your friend list if both of you "
+    "are standing close and shaking your phone at the same time!";
+String tutorialTitle = "SHAKE IT TUTORIAL";
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -46,9 +51,30 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   void _handleShakeButtonPressed() {
-    setState(() {
-      // Handle the "SHAKE IT" button action here
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(tutorialTitle),
+          content: Text(tutorialText),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+                Get.to(ShakeItScreen());
+              },
+              child: Text("Shake it"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -266,7 +292,8 @@ class FriendFindingTab extends StatelessWidget {
                 if (i.isOdd) return const Divider();
                 final friendIndex = i ~/ 2;
                 return (friendIndex < friends.length)
-                    ? buildRowForFriendFinding(friends[friendIndex], trailingActions)
+                    ? buildRowForFriendFinding(
+                        friends[friendIndex], trailingActions)
                     : null;
               },
             ),
