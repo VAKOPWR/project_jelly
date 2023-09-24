@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:project_jelly/controller/global_controllers.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/Auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/Auth/register_form_friends.dart';
@@ -10,14 +12,18 @@ import 'package:project_jelly/pages/Auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/profile.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/service/service_locatior.dart';
+import 'package:project_jelly/service/global_services.dart';
+import 'package:project_jelly/service/shared_preferences_service.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
 import 'package:project_jelly/theme/theme_manager.dart';
 
 // ThemeManager _themeManager = ThemeManager();
 
-void main() {
-  setUpServiceLocatior();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  GlobalControllers.init();
+  await GetStorage.init();
+  await GlobalServices.init();
   runApp(ProjectJelly());
 }
 

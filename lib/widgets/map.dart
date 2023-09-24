@@ -1,17 +1,15 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import 'package:lottie/lottie.dart' as lottie;
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
-import 'package:project_jelly/service/service_locatior.dart';
 import 'package:project_jelly/widgets/dialogs.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
 
@@ -22,7 +20,7 @@ class MapWidget extends StatefulWidget {
   State<MapWidget> createState() => _MapWidgetState();
 }
 
-class _MapWidgetState extends State<MapWidget> {
+class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
   LocationData? currentLocation;
   Set<Marker> markers = {};
@@ -33,6 +31,7 @@ class _MapWidgetState extends State<MapWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     loadMarkers();
     loadMapStyles();
     getCurrentLocation();
@@ -40,7 +39,7 @@ class _MapWidgetState extends State<MapWidget> {
 
   void loadMarkers() async {
     List<Friend> friendList =
-        await serviceLocator.get<LocationService>().getFriendsLocation();
+        await Get.find<LocationService>().getFriendsLocation();
     setState(() {
       markers = friendList
           .map((friend) => createMarker(friend))
@@ -69,36 +68,50 @@ class _MapWidgetState extends State<MapWidget> {
     _lightMapStyle = await rootBundle.loadString('assets/map/light_map.json');
   }
 
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+
+    Brightness brightness =
+        View.of(context).platformDispatcher.platformBrightness;
+    if (brightness == Brightness.light) {
+      _controller.future.then((value) => value.setMapStyle(_lightMapStyle));
+    } else {
+      _controller.future.then((value) => value.setMapStyle(_darkMapStyle));
+    }
+  }
+
   Future<void> getCurrentLocation() async {
     bool locationPermission = await requestLocationPermission();
     if (locationPermission) {
       Location location = Location();
+      location.enableBackgroundMode(enable: true);
       location.getLocation().then((location) {
         log(location.toString());
         setState(() {
           currentLocation = location;
-          serviceLocator.get<LocationService>().sendLocation(location);
+          Get.find<LocationService>().sendLocation(location);
         });
       });
       location.onLocationChanged.listen((newLocation) {
         currentLocation = newLocation;
-        serviceLocator.get<LocationService>().sendLocation(newLocation);
+        Get.find<LocationService>().sendLocation(newLocation);
       });
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Platform.isIOS
-              ? const IOSDialogWidget(
-                  dialogHeader: 'Oooops...',
-                  dialogText:
-                      'Please, enable location tracking in the app properties')
-              : const AndroidDialogWidget(
-                  dialogHeader: 'Oooops...',
-                  dialogText:
-                      'Please, enable location tracking in the app properties');
-        },
-      );
+      // } else {
+      //   showDialog(
+      //     context: context,
+      //     builder: (BuildContext context) {
+      //       return Platform.isIOS
+      //           ? const IOSDialogWidget(
+      //               dialogHeader: 'Oooops...',
+      //               dialogText:
+      //                   'Please, enable location tracking in the app properties')
+      //           : const AndroidDialogWidget(
+      //               dialogHeader: 'Oooops...',
+      //               dialogText:
+      //                   'Please, enable location tracking in the app properties');
+      //     },
+      //   );
     }
   }
 
@@ -115,6 +128,14 @@ class _MapWidgetState extends State<MapWidget> {
           icon: icon);
     });
     return null;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      requestLocationPermission()
+          .then((locationGranted) => {if (locationGranted) {}});
+    }
   }
 
   @override
@@ -161,5 +182,11 @@ class _MapWidgetState extends State<MapWidget> {
                 ),
                 NavButtons(),
               ]));
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
