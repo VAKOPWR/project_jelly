@@ -9,7 +9,7 @@ class LocationService {
     log('location sent');
     return http.post(
       Uri.parse(
-          'https://jelly-backend-1694012118516.azurewebsites.net/api/v1/location/store'),
+          'https://jelly-backend.azurewebsites.net/api/v1/location/store'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -24,7 +24,7 @@ class LocationService {
   Future<List<Friend>> getFriendsLocation() async {
     log('friends received');
     final response = await http.get(Uri.parse(
-        'https://jelly-backend-1694012118516.azurewebsites.net/api/v1/location/all'));
+        'https://jelly-backend.azurewebsites.net/api/v1/location/all'));
     if (response.statusCode == 200) {
       var people = (json.decode(response.body) as List)
           .map((i) => Friend.fromJson(i))

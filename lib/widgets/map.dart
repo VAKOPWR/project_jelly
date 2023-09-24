@@ -1,13 +1,19 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
+import 'package:lottie/lottie.dart' as lottie;
 import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/service_locatior.dart';
+import 'package:project_jelly/widgets/dialogs.dart';
+import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -18,7 +24,6 @@ class MapWidget extends StatefulWidget {
 
 class _MapWidgetState extends State<MapWidget> {
   final Completer<GoogleMapController> _controller = Completer();
-  // bool followMarker = true;
   LocationData? currentLocation;
   Set<Marker> markers = {};
   MapType mapType = MapType.normal;
@@ -64,32 +69,37 @@ class _MapWidgetState extends State<MapWidget> {
     _lightMapStyle = await rootBundle.loadString('assets/map/light_map.json');
   }
 
-  void getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error("Location services are disabled.");
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error("Location permission are denied");
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error("Location permission are permanently denied");
-    }
-
-    Location location = Location();
-    location.getLocation().then((location) {
-      setState(() {
-        currentLocation = location;
-        serviceLocator.get<LocationService>().sendLocation(location);
+  Future<void> getCurrentLocation() async {
+    bool locationPermission = await requestLocationPermission();
+    if (locationPermission) {
+      Location location = Location();
+      location.getLocation().then((location) {
+        log(location.toString());
+        setState(() {
+          currentLocation = location;
+          serviceLocator.get<LocationService>().sendLocation(location);
+        });
       });
-    });
-
-    GoogleMapController googleMapController = await _controller.future;
+      location.onLocationChanged.listen((newLocation) {
+        currentLocation = newLocation;
+        serviceLocator.get<LocationService>().sendLocation(newLocation);
+      });
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Platform.isIOS
+              ? const IOSDialogWidget(
+                  dialogHeader: 'Oooops...',
+                  dialogText:
+                      'Please, enable location tracking in the app properties')
+              : const AndroidDialogWidget(
+                  dialogHeader: 'Oooops...',
+                  dialogText:
+                      'Please, enable location tracking in the app properties');
+        },
+      );
+    }
   }
 
   Marker? createMarker(Friend friend) {
@@ -111,7 +121,7 @@ class _MapWidgetState extends State<MapWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: currentLocation == null
-            ? const Center(child: Text("Loading"))
+            ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
                     initialCameraPosition: CameraPosition(
@@ -149,6 +159,7 @@ class _MapWidgetState extends State<MapWidget> {
                       ),
                       backgroundColor: Colors.grey[50]),
                 ),
+                NavButtons(),
               ]));
   }
 }

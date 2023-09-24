@@ -10,15 +10,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void getData() {}
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Stack(children: [
-        MapWidget(),
-        NavButtons(),
-      ]),
+      body: Stack(children: [MapWidget()]),
     );
   }
 }

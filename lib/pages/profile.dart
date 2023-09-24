@@ -95,22 +95,17 @@ class CircularButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 80, // Adjust the width of the circular button as needed
-      height: 80, // Adjust the height of the circular button as needed
+      width: 80,
+      height: 80,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Theme.of(context)
-            .colorScheme
-            .primary, // Adjust the button's color as needed
+        color: Theme.of(context).colorScheme.primary,
       ),
       child: Center(
-        // Center the icon within the circular button
         child: Icon(
           icon,
-          size: 40, // Adjust the icon size as needed
-          color: Theme.of(context)
-              .colorScheme
-              .onPrimary, // Adjust the icon color as needed
+          size: 40,
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
     );
