@@ -21,11 +21,15 @@ class NavButtons extends StatelessWidget {
               onPressed: () {
                 Get.toNamed('/messages');
               },
-              backgroundColor: Colors.green[600],
+              backgroundColor: Theme.of(context).colorScheme.primary,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
-              child: const Icon(Icons.message_rounded, size: 40.0),
+              child: Icon(
+                Icons.message_rounded,
+                size: 40.0,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ),
           SizedBox(
@@ -36,11 +40,12 @@ class NavButtons extends StatelessWidget {
               onPressed: () {
                 Get.toNamed('/friends');
               },
-              backgroundColor: Colors.green[600],
+              backgroundColor: Theme.of(context).colorScheme.primary,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
-              child: const Icon(Icons.group_add_rounded, size: 40.0),
+              child: Icon(Icons.group_add_rounded,
+                  size: 40.0, color: Theme.of(context).colorScheme.onPrimary),
             ),
           ),
           SizedBox(
@@ -51,11 +56,12 @@ class NavButtons extends StatelessWidget {
               onPressed: () {
                 Get.toNamed('/profile');
               },
-              backgroundColor: Colors.green[600],
+              backgroundColor: Theme.of(context).colorScheme.primary,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
-              child: const Icon(Icons.person, size: 40.0),
+              child: Icon(Icons.person,
+                  size: 40.0, color: Theme.of(context).colorScheme.onPrimary),
             ),
           ),
         ],

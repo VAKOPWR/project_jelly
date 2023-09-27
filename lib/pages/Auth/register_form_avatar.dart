@@ -112,7 +112,7 @@ class _AvatarSelectionPageState extends State<AvatarSelectionPage> {
                     )
                   : null,
               child: _selectedImage == null
-                  ? const Icon(
+                  ? Icon(
                       Icons.person,
                       size: 200.0,
                       color: Colors.white,
@@ -142,10 +142,10 @@ class _AvatarSelectionPageState extends State<AvatarSelectionPage> {
                   child: RoundedLoadingButton(
                     controller: _submitBtnController,
                     onPressed: _submitImage,
-                    color: Colors.blue,
+                    color: Theme.of(context).colorScheme.primary,
                     child: const Text(
                       'Submit',
-                      style: TextStyle(color: Colors.white, fontSize: 22),
+                      style: TextStyle(fontSize: 22),
                     ),
                   )),
             ),
@@ -154,12 +154,12 @@ class _AvatarSelectionPageState extends State<AvatarSelectionPage> {
               onPressed: () {
                 Get.off(() => const LoadingPage(nextScreen: HomePage()));
               },
-              child: const Text(
+              child: Text(
                 'SKIP',
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
-                    color: Colors.lightBlue),
+                    color: Theme.of(context).colorScheme.primary),
               ),
             ),
           ],

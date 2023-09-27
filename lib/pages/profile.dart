@@ -15,7 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(250),
         child: AppBar(
-          backgroundColor: Colors.green[600],
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: const Text("Profile",
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
           centerTitle: true,
@@ -70,6 +70,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
+          SizedBox(
+            height: 20,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -92,18 +95,17 @@ class CircularButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100, // Adjust the width of the circular button as needed
-      height: 100, // Adjust the height of the circular button as needed
+      width: 80,
+      height: 80,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.blue, // Adjust the button's color as needed
+        color: Theme.of(context).colorScheme.primary,
       ),
       child: Center(
-        // Center the icon within the circular button
         child: Icon(
           icon,
-          size: 60, // Adjust the icon size as needed
-          color: Colors.white, // Adjust the icon color as needed
+          size: 40,
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
     );

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-Future<bool> apiLogIn(String email, String password) async {
+Future<String?> apiLogIn(String email, String password) async {
   await Future.delayed(const Duration(seconds: 2));
   if (email == 'root@r.c') {
     if (password == 'root') {
-      return true;
+      return 'ApiKey';
     }
   }
-  return false;
+  return null;
 }
 
 Future<bool> apiRegister(

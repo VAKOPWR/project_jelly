@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
-import 'package:project_jelly/classes/person.dart';
+import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/pages/loading.dart';
+import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -12,18 +18,31 @@ class MapWidget extends StatefulWidget {
   State<MapWidget> createState() => _MapWidgetState();
 }
 
-class _MapWidgetState extends State<MapWidget> {
+class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
-  // bool followMarker = true;
-  LocationData? currentLocation;
   Set<Marker> markers = {};
   MapType mapType = MapType.normal;
+  String _darkMapStyle = '';
+  String _lightMapStyle = '';
 
   @override
   void initState() {
     super.initState();
-    // loadMarkers();
-    getCurrentLocation();
+    WidgetsBinding.instance.addObserver(this);
+    loadMarkers();
+    loadMapStyles();
+    Get.find<LocationService>().startPositionStream();
+  }
+
+  void loadMarkers() async {
+    List<Friend> friendList =
+        await Get.find<LocationService>().getFriendsLocation();
+    setState(() {
+      markers = friendList
+          .map((friend) => createMarker(friend))
+          .whereType<Marker>()
+          .toSet();
+    });
   }
 
   MapType getNextMap(MapType currentMapType) {
@@ -41,89 +60,91 @@ class _MapWidgetState extends State<MapWidget> {
     }
   }
 
-  void loadMarkers() {
-    List<Person> friendList = [];
+  Future loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/map/dark_map.json');
+    _lightMapStyle = await rootBundle.loadString('assets/map/light_map.json');
+  }
 
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+
+    Brightness brightness =
+        View.of(context).platformDispatcher.platformBrightness;
+    if (brightness == Brightness.light) {
+      _controller.future.then((value) => value.setMapStyle(_lightMapStyle));
+    } else {
+      _controller.future.then((value) => value.setMapStyle(_darkMapStyle));
+    }
+  }
+
+  Marker? createMarker(Friend friend) {
     BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(size: Size(300, 300)), "assets/N01.png")
+            const ImageConfiguration(size: Size(300, 300)), friend.avatar)
         .then((icon) {
-      friendList.add(Person(
-          name: 'Orest',
-          avatar: icon,
-          location: LatLng(37.30952302005339, -122.03900959279422)));
-      // orestAvatar = icon;
+      return Marker(
+          markerId: MarkerId(friend.name),
+          position: friend.location,
+          infoWindow: InfoWindow(
+            title: friend.name,
+          ),
+          icon: icon);
     });
-    BitmapDescriptor.fromAssetImage(ImageConfiguration.empty, "assets/N02.png")
-        .then((icon) {
-      friendList.add(Person(
-          name: 'Viktor',
-          avatar: icon,
-          location: LatLng(37.329863949614406, -122.06115391055518)));
-    });
-    BitmapDescriptor.fromAssetImage(ImageConfiguration.empty, "assets/N03.png")
-        .then((icon) {
-      friendList.add(Person(
-          name: 'Andrii',
-          avatar: icon,
-          location: LatLng(37.352109801487344, -122.03506138110038)));
-      setState(() {
-        markers = friendList.map((friend) => createMarker(friend)).toSet();
-      });
-    });
+    return null;
   }
 
-  void getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error("Location services are disabled.");
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error("Location permission are denied");
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error("Location permission are permanently denied");
-    }
-
-    Location location = Location();
-    location.getLocation().then((location) {
-      setState(() {
-        currentLocation = location;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      log('State resumed');
+      requestLocationPermission().then((locationGranted) {
+        if (!locationGranted) {
+          Get.find<LocationService>().pausePositionStream();
+          Get.snackbar('No Location Avaliable',
+              "Try modifying application permissions in the settings",
+              icon: Icon(Icons.location_disabled_rounded,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              duration: Duration(days: 1),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        } else {
+          Get.find<LocationService>().resumePositionStream();
+          try {
+            Get.closeAllSnackbars();
+          } catch (LateInitializationError) {
+            log('Nothing to close');
+          }
+        }
       });
-    });
-
-    GoogleMapController googleMapController = await _controller.future;
-  }
-
-  Marker createMarker(Person friend) {
-    return Marker(
-        markerId: MarkerId(friend.name),
-        position: friend.location,
-        infoWindow: InfoWindow(
-          title: friend.name,
-        ),
-        icon: friend.avatar);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: currentLocation == null
-            ? const Center(child: Text("Loading"))
+        body: Get.find<LocationService>().getCurrentLocation() == null
+            ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: LatLng(
-                        currentLocation!.latitude!,
-                        currentLocation!.longitude!,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .latitude,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .longitude,
                       ),
                       zoom: 13,
                     ),
                     onMapCreated: (mapController) {
+                      if (Theme.of(context).brightness == Brightness.light) {
+                        mapController.setMapStyle(_lightMapStyle);
+                      } else {
+                        mapController.setMapStyle(_darkMapStyle);
+                      }
                       _controller.complete(mapController);
                     },
                     myLocationButtonEnabled: true,
@@ -135,14 +156,24 @@ class _MapWidgetState extends State<MapWidget> {
                   top: 50.0,
                   right: 10.0,
                   child: FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        mapType = getNextMap(mapType);
-                      });
-                    },
-                    child: const Icon(Icons.map_rounded),
-                  ),
+                      onPressed: () {
+                        setState(() {
+                          mapType = getNextMap(mapType);
+                        });
+                      },
+                      child: Icon(
+                        Icons.map_rounded,
+                        color: Colors.grey[700],
+                      ),
+                      backgroundColor: Colors.grey[50]),
                 ),
+                NavButtons(),
               ]));
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
