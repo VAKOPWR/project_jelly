@@ -13,18 +13,17 @@ import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/service/global_services.dart';
-import 'package:project_jelly/service/shared_preferences_service.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
-import 'package:project_jelly/theme/theme_manager.dart';
+// import 'package:project_jelly/theme/theme_manager.dart';
 
 // ThemeManager _themeManager = ThemeManager();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  GlobalControllers.init();
   await GetStorage.init();
   await GlobalServices.init();
   runApp(ProjectJelly());
+  GlobalControllers.init();
 }
 
 class ProjectJelly extends StatelessWidget {
@@ -33,7 +32,7 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/map',
+        initialRoute: '/home',
         theme: lightTheme,
         darkTheme: darkTheme,
         // themeMode: _themeManager.themeMode,
@@ -50,7 +49,7 @@ class ProjectJelly extends StatelessWidget {
               name: '/register_friends', page: () => const AddFriendsPage()),
           GetPage(name: '/forgotPass', page: () => ForgotPasswordPage()),
           GetPage(
-              name: '/map',
+              name: '/home',
               page: () => const HomePage(),
               transition: Transition.circularReveal,
               transitionDuration: const Duration(seconds: 2)),

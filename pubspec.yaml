@@ -41,7 +41,6 @@ dependencies:
   form_field_validator: ^1.1.0
   http: ^1.1.0
   injectable: 1.5.3
-  get_it: 7.2.0
   get: ^4.6.5
   get_storage: ^2.1.1
   image_picker: ^1.0.4
@@ -52,8 +51,8 @@ dependencies:
   lottie: ^2.6.0
   device_info_plus: ^9.0.3
   flutter_native_splash: ^2.3.2
-  shared_preferences: ^2.2.1
   connectivity_plus: ^4.0.2
+  internet_connection_checker: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:

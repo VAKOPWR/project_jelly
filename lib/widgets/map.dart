@@ -3,14 +3,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
-import 'package:lottie/lottie.dart' as lottie;
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
-import 'package:project_jelly/widgets/dialogs.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class MapWidget extends StatefulWidget {
@@ -22,7 +20,6 @@ class MapWidget extends StatefulWidget {
 
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
-  LocationData? currentLocation;
   Set<Marker> markers = {};
   MapType mapType = MapType.normal;
   String _darkMapStyle = '';
@@ -34,7 +31,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     loadMarkers();
     loadMapStyles();
-    getCurrentLocation();
+    Get.find<LocationService>().startPositionStream();
   }
 
   void loadMarkers() async {
@@ -81,40 +78,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> getCurrentLocation() async {
-    bool locationPermission = await requestLocationPermission();
-    if (locationPermission) {
-      Location location = Location();
-      location.enableBackgroundMode(enable: true);
-      location.getLocation().then((location) {
-        log(location.toString());
-        setState(() {
-          currentLocation = location;
-          Get.find<LocationService>().sendLocation(location);
-        });
-      });
-      location.onLocationChanged.listen((newLocation) {
-        currentLocation = newLocation;
-        Get.find<LocationService>().sendLocation(newLocation);
-      });
-      // } else {
-      //   showDialog(
-      //     context: context,
-      //     builder: (BuildContext context) {
-      //       return Platform.isIOS
-      //           ? const IOSDialogWidget(
-      //               dialogHeader: 'Oooops...',
-      //               dialogText:
-      //                   'Please, enable location tracking in the app properties')
-      //           : const AndroidDialogWidget(
-      //               dialogHeader: 'Oooops...',
-      //               dialogText:
-      //                   'Please, enable location tracking in the app properties');
-      //     },
-      //   );
-    }
-  }
-
   Marker? createMarker(Friend friend) {
     BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(size: Size(300, 300)), friend.avatar)
@@ -133,22 +96,46 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      requestLocationPermission()
-          .then((locationGranted) => {if (locationGranted) {}});
+      log('State resumed');
+      requestLocationPermission().then((locationGranted) {
+        if (!locationGranted) {
+          Get.find<LocationService>().pausePositionStream();
+          Get.snackbar('No Location Avaliable',
+              "Try modifying application permissions in the settings",
+              icon: Icon(Icons.location_disabled_rounded,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              duration: Duration(days: 1),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        } else {
+          Get.find<LocationService>().resumePositionStream();
+          try {
+            Get.closeAllSnackbars();
+          } catch (LateInitializationError) {
+            log('Nothing to close');
+          }
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: currentLocation == null
+        body: Get.find<LocationService>().getCurrentLocation() == null
             ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: LatLng(
-                        currentLocation!.latitude!,
-                        currentLocation!.longitude!,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .latitude,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .longitude,
                       ),
                       zoom: 13,
                     ),

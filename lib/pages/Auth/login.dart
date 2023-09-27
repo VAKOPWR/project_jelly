@@ -5,8 +5,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
-import 'package:project_jelly/pages/loading.dart';
-import 'package:project_jelly/service/shared_preferences_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
