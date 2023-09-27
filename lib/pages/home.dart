@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/widgets/map.dart';
-import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,15 +12,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void getData() {}
+  String? apiKey = GetStorage().read('apiKey');
+  // String? apiKey = null;
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Stack(children: [
-        MapWidget(),
-        NavButtons(),
-      ]),
+    if (apiKey == null) {
+      Future.delayed(Duration.zero, () {
+        Get.offNamed('/login');
+      });
+    }
+
+    return Scaffold(
+      body: Stack(
+        children: [MapWidget()],
+      ),
     );
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
-import 'package:project_jelly/pages/loading.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -27,10 +27,10 @@ class _LogInPageState extends State<LogInPage> {
 
   void _submitForm() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      bool logInSuccess =
+      String? apiKey =
           await apiLogIn(_emailController.text, _passwordController.text);
 
-      if (!logInSuccess) {
+      if (apiKey == null) {
         _submitBtnController.error();
         setState(() {
           _isEmailValid = false;
@@ -38,7 +38,8 @@ class _LogInPageState extends State<LogInPage> {
         });
       } else {
         _submitBtnController.success();
-        Get.off(() => const LoadingPage(nextScreen: HomePage()));
+        GetStorage().write('apiKey', apiKey);
+        Get.off(() => const HomePage());
       }
     } else {
       _submitBtnController.error();

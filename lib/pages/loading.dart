@@ -25,11 +25,14 @@ class LoadingPage extends StatelessWidget {
   }
 }
 
-class InitialLoadingPage extends StatelessWidget {
-  const InitialLoadingPage({super.key});
+class BasicLoadingPage extends StatelessWidget {
+  const BasicLoadingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+        body: Center(
+            child: Lottie.asset('assets/animations/loading_animation.json')),
+        backgroundColor: Theme.of(context).colorScheme.background);
   }
 }
