@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -76,20 +77,19 @@ class LocationService extends GetxService {
   }
 
   Future<http.Response> sendLocation(Position locationData) async {
-    log('location sent');
-    return http.Response('200', 200);
-    // return http.post(
-    //   Uri.parse(
-    //       'https://jelly-backend.azurewebsites.net/api/v1/location/store'),
-    //   headers: <String, String>{
-    //     'Content-Type': 'application/json; charset=UTF-8',
-    //   },
-    //   body: jsonEncode(<String, Object>{
-    //     "userId": "Orest",
-    //     "latitude": locationData.latitude,
-    //     "longitude": locationData.longitude
-    //   }),
-    // );
+    final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    return http.post(
+      Uri.parse(
+          'https://jelly-backend.azurewebsites.net/api/v1/location/store'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': authToken!
+      },
+      body: jsonEncode(<String, Object>{
+        "latitude": locationData.latitude,
+        "longitude": locationData.longitude
+      }),
+    );
   }
 
   Future<List<Friend>> getFriendsLocation() async {
