@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class MessagesPage extends StatefulWidget {
   const MessagesPage({super.key});

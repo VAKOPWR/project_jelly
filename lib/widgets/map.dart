@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
 import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
-import 'package:project_jelly/service/service_locatior.dart';
+import 'package:project_jelly/widgets/nav_buttons.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -16,10 +18,8 @@ class MapWidget extends StatefulWidget {
   State<MapWidget> createState() => _MapWidgetState();
 }
 
-class _MapWidgetState extends State<MapWidget> {
+class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
-  // bool followMarker = true;
-  LocationData? currentLocation;
   Set<Marker> markers = {};
   MapType mapType = MapType.normal;
   String _darkMapStyle = '';
@@ -28,14 +28,15 @@ class _MapWidgetState extends State<MapWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     loadMarkers();
     loadMapStyles();
-    getCurrentLocation();
+    Get.find<LocationService>().startPositionStream();
   }
 
   void loadMarkers() async {
     List<Friend> friendList =
-        await serviceLocator.get<LocationService>().getFriendsLocation();
+        await Get.find<LocationService>().getFriendsLocation();
     setState(() {
       markers = friendList
           .map((friend) => createMarker(friend))
@@ -64,32 +65,17 @@ class _MapWidgetState extends State<MapWidget> {
     _lightMapStyle = await rootBundle.loadString('assets/map/light_map.json');
   }
 
-  void getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error("Location services are disabled.");
-    }
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error("Location permission are denied");
-      }
+    Brightness brightness =
+        View.of(context).platformDispatcher.platformBrightness;
+    if (brightness == Brightness.light) {
+      _controller.future.then((value) => value.setMapStyle(_lightMapStyle));
+    } else {
+      _controller.future.then((value) => value.setMapStyle(_darkMapStyle));
     }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error("Location permission are permanently denied");
-    }
-
-    Location location = Location();
-    location.getLocation().then((location) {
-      setState(() {
-        currentLocation = location;
-        serviceLocator.get<LocationService>().sendLocation(location);
-      });
-    });
-
-    GoogleMapController googleMapController = await _controller.future;
   }
 
   Marker? createMarker(Friend friend) {
@@ -108,16 +94,48 @@ class _MapWidgetState extends State<MapWidget> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      log('State resumed');
+      requestLocationPermission().then((locationGranted) {
+        if (!locationGranted) {
+          Get.find<LocationService>().pausePositionStream();
+          Get.snackbar('No Location Avaliable',
+              "Try modifying application permissions in the settings",
+              icon: Icon(Icons.location_disabled_rounded,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              duration: Duration(days: 1),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        } else {
+          Get.find<LocationService>().resumePositionStream();
+          try {
+            Get.closeAllSnackbars();
+          } catch (LateInitializationError) {
+            log('Nothing to close');
+          }
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: currentLocation == null
-            ? const Center(child: Text("Loading"))
+        body: Get.find<LocationService>().getCurrentLocation() == null
+            ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: LatLng(
-                        currentLocation!.latitude!,
-                        currentLocation!.longitude!,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .latitude,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .longitude,
                       ),
                       zoom: 13,
                     ),
@@ -149,6 +167,13 @@ class _MapWidgetState extends State<MapWidget> {
                       ),
                       backgroundColor: Colors.grey[50]),
                 ),
+                NavButtons(),
               ]));
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

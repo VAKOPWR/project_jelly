@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:project_jelly/controller/global_controllers.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/Auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/Auth/register_form_friends.dart';
@@ -10,15 +12,18 @@ import 'package:project_jelly/pages/Auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/profile.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/service/service_locatior.dart';
+import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
-import 'package:project_jelly/theme/theme_manager.dart';
+// import 'package:project_jelly/theme/theme_manager.dart';
 
 // ThemeManager _themeManager = ThemeManager();
 
-void main() {
-  setUpServiceLocatior();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+  await GlobalServices.init();
   runApp(ProjectJelly());
+  GlobalControllers.init();
 }
 
 class ProjectJelly extends StatelessWidget {
@@ -27,7 +32,7 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/login',
+        initialRoute: '/home',
         theme: lightTheme,
         darkTheme: darkTheme,
         // themeMode: _themeManager.themeMode,
@@ -44,7 +49,7 @@ class ProjectJelly extends StatelessWidget {
               name: '/register_friends', page: () => const AddFriendsPage()),
           GetPage(name: '/forgotPass', page: () => ForgotPasswordPage()),
           GetPage(
-              name: '/map',
+              name: '/home',
               page: () => const HomePage(),
               transition: Transition.circularReveal,
               transitionDuration: const Duration(seconds: 2)),
