@@ -2,11 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/pages/shakeItScreen.dart';
 
 import '../classes/Friend.dart';
+import '../misc/enum.dart';
+import '../widgets/SearchBar.dart';
 
 const int _numberOfTabs = 3;
+String tutorialText = "You can add someone to your friend list if both of you "
+    "are standing close and shaking your phone at the same time!";
+String tutorialTitle = "SHAKE IT TUTORIAL";
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -15,67 +22,88 @@ class FriendsPage extends StatefulWidget {
   State<FriendsPage> createState() => _FriendsPageState();
 }
 
-class _FriendsPageState extends State<FriendsPage> {
-  void getData() {}
-
-  bool _isProgressBarShown = true;
+class _FriendsPageState extends State<FriendsPage>
+    with SingleTickerProviderStateMixin {
   final _biggerFont = const TextStyle(fontSize: 18.0);
   List<Friend> _listFriends = [];
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: _numberOfTabs, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
     _fetchFriendsList();
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _handleTabChange(int newIndex) {
+    setState(() {
+      _tabController.index = newIndex;
+    });
+  }
+
+  void _handleShakeButtonPressed() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(tutorialTitle),
+          content: Text(tutorialText),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+                Get.to(ShakeItScreen());
+              },
+              child: Text("Shake it"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Widget widget;
-
-    if (_isProgressBarShown) {
-      widget = const Center(
-          child: Padding(
-              padding: EdgeInsets.only(left: 16.0, right: 16.0),
-              child: CircularProgressIndicator()));
-    } else {
-      widget = ListView.builder(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(0.0),
-          itemBuilder: (context, i) {
-            if (i.isOdd) return const Divider();
-            final friendIndex = i ~/ 2;
-            // # TODO delete this condition
-            if (friendIndex != _listFriends.length) {
-              return _buildRow(_listFriends[friendIndex]);
-            }
-            return null;
-          });
-    }
-
     return DefaultTabController(
       length: _numberOfTabs,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Friends"),
-          centerTitle: true,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: "List"),
-              Tab(text: "Find"),
-              Tab(text: "Pending"),
-            ],
-          ),
-        ),
+        appBar: _buildAppBar(),
         body: TabBarView(
+          controller: _tabController,
           children: [
-            SearchBarWidget(
-              content: widget,
+            FriendListTab(
+              friends: _listFriends,
+              onTabChange: _handleTabChange,
+              trailingActions: tabTrailingActions[TabType.list]!,
+              buildRowForFriendList: _buildRow,
             ),
-            const SearchBarWidget(
-              content: Center(child: Text("Find")),
+            FriendFindingTab(
+              friends: _listFriends,
+              onTabChange: _handleTabChange,
+              onShakeButtonPressed: _handleShakeButtonPressed,
+              trailingActions: tabTrailingActions[TabType.find]!,
+              buildRowForFriendFinding: _buildRow,
             ),
-            const SearchBarWidget(
-              content: Center(child: Text("Pending")),
+            FriendPendingTab(
+              friends: _listFriends,
+              onTabChange: _handleTabChange,
+              trailingActions: tabTrailingActions[TabType.pending]!,
+              buildRowForFriendPending: _buildRow,
             ),
           ],
         ),
@@ -83,7 +111,54 @@ class _FriendsPageState extends State<FriendsPage> {
     );
   }
 
-  Widget _buildRow(Friend friend) {
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: const Text("Friends"),
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pushReplacementNamed(context, '/map');
+        },
+      ),
+      bottom: TabBar(
+        controller: _tabController,
+        tabs: _buildTabsWithBadges(),
+      ),
+    );
+  }
+
+  List<Widget> _buildTabsWithBadges() {
+    return [
+      const Tab(text: "List"),
+      const Tab(text: "Find"),
+      Tab(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text("Pending"),
+            Container(
+              margin: const EdgeInsets.only(left: 4.0),
+              padding: const EdgeInsets.all(4.0),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red,
+              ),
+              child: Text(
+                _listFriends.length.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildRow(Friend friend, List<Widget> trailingActions) {
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.grey,
@@ -96,20 +171,7 @@ class _FriendsPageState extends State<FriendsPage> {
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
-        ],
+        children: trailingActions,
       ),
       onTap: () {
         setState(() {});
@@ -118,7 +180,6 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   _fetchFriendsList() async {
-    _isProgressBarShown = true;
     var url = 'https://jsonplaceholder.typicode.com/users';
     var httpClient = HttpClient();
     List<Friend> listFriends = [];
@@ -168,35 +229,128 @@ class _FriendsPageState extends State<FriendsPage> {
 
     setState(() {
       _listFriends = listFriends;
-      _isProgressBarShown = false;
     });
   }
 }
 
-class SearchBarWidget extends StatelessWidget {
-  final Widget content;
+class FriendListTab extends StatelessWidget {
+  final List<Friend> friends;
+  final void Function(int) onTabChange;
+  final List<Widget> trailingActions;
+  final Widget Function(Friend, List<Widget>) buildRowForFriendList;
 
-  const SearchBarWidget({super.key, required this.content});
+  const FriendListTab({
+    super.key,
+    required this.friends,
+    required this.onTabChange,
+    required this.buildRowForFriendList,
+    required this.trailingActions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SearchBarWidget(
+      content: ListView.builder(
+        itemCount: friends.length * 2,
+        itemBuilder: (context, i) {
+          if (i.isOdd) return const Divider();
+          final friendIndex = i ~/ 2;
+          return (friendIndex < friends.length)
+              ? buildRowForFriendList(friends[friendIndex], trailingActions)
+              : null;
+        },
+      ),
+    );
+  }
+}
+
+class FriendFindingTab extends StatelessWidget {
+  final List<Friend> friends;
+  final void Function(int) onTabChange;
+  final VoidCallback? onShakeButtonPressed;
+  final List<Widget> trailingActions;
+  final Widget Function(Friend, List<Widget>) buildRowForFriendFinding;
+
+  const FriendFindingTab({
+    Key? key,
+    required this.friends,
+    required this.onTabChange,
+    this.onShakeButtonPressed,
+    required this.buildRowForFriendFinding,
+    required this.trailingActions,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: "Search",
-              filled: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide.none,
-              ),
+        Expanded(
+          child: SearchBarWidget(
+            content: ListView.builder(
+              itemCount: friends.length * 2,
+              itemBuilder: (context, i) {
+                if (i.isOdd) return const Divider();
+                final friendIndex = i ~/ 2;
+                return (friendIndex < friends.length)
+                    ? buildRowForFriendFinding(
+                        friends[friendIndex], trailingActions)
+                    : null;
+              },
             ),
           ),
         ),
-        Expanded(child: content),
+        const SizedBox(
+          height: 90.0,
+          child: Center(
+            child: Text(
+              "OR",
+              style: TextStyle(fontSize: 24.0),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: double.infinity,
+          height: 80.0,
+          child: ElevatedButton(
+            onPressed: onShakeButtonPressed,
+            child: const Text(
+              "SHAKE IT",
+              style: TextStyle(fontSize: 42.0),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class FriendPendingTab extends StatelessWidget {
+  final List<Friend> friends;
+  final void Function(int) onTabChange;
+  final List<Widget> trailingActions;
+  final Widget Function(Friend, List<Widget>) buildRowForFriendPending;
+
+  const FriendPendingTab({
+    super.key,
+    required this.friends,
+    required this.onTabChange,
+    required this.buildRowForFriendPending,
+    required this.trailingActions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SearchBarWidget(
+      content: ListView.builder(
+        itemCount: friends.length * 2,
+        itemBuilder: (context, i) {
+          if (i.isOdd) return const Divider();
+          final friendIndex = i ~/ 2;
+          return (friendIndex < friends.length)
+              ? buildRowForFriendPending(friends[friendIndex], trailingActions)
+              : null;
+        },
+      ),
     );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
+
+import 'home.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -23,7 +26,8 @@ class _ProfilePageState extends State<ProfilePage> {
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                apiLogOut('1122');
+                authLogOut();
+                Get.off(() => const HomePage());
               },
             ),
           ],

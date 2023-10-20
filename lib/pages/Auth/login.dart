@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
@@ -5,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
+import 'package:project_jelly/service/auth_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -29,10 +31,10 @@ class _LogInPageState extends State<LogInPage> {
 
   void _submitForm() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      String? apiKey =
+      String? authKey =
           await apiLogIn(_emailController.text, _passwordController.text);
 
-      if (apiKey == null) {
+      if (authKey == null) {
         _submitBtnController.error();
         setState(() {
           _isEmailValid = false;
@@ -40,7 +42,7 @@ class _LogInPageState extends State<LogInPage> {
         });
       } else {
         _submitBtnController.success();
-        GetStorage().write('apiKey', apiKey);
+        GetStorage().write('AuthKey', authKey);
         Get.off(() => const HomePage());
       }
     } else {
@@ -219,9 +221,19 @@ class _LogInPageState extends State<LogInPage> {
                                     SizedBox(
                                       height: 50,
                                       width: 50,
-                                      child: Image.asset(
-                                        'assets/google.png',
-                                        fit: BoxFit.cover,
+                                      child: ClipOval(
+                                        child: Material(
+                                          child: InkWell(
+                                            onTap: () => Get.find<AuthService>().signInWithGoogle().then((credentials) => Get.off(() => const HomePage())
+                                      ),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Image.asset('assets/google.png')// <-- Text
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],

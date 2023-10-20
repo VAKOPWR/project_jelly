@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 Future<String?> apiLogIn(String email, String password) async {
+
   await Future.delayed(const Duration(seconds: 2));
   if (email == 'root@r.c') {
     if (password == 'root') {
@@ -42,7 +45,7 @@ Future<bool> apiSetProfileImage(String apiKey, FileImage profileImage) async {
   return true;
 }
 
-Future<bool> apiLogOut(String apiKey) async {
-  await Future.delayed(const Duration(seconds: 2));
+Future<bool> authLogOut() async {
+  FirebaseAuth.instance.signOut();
   return true;
 }
