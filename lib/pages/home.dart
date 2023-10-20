@@ -1,7 +1,8 @@
-
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/widgets/map.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,7 +23,9 @@ class _HomePageState extends State<HomePage> {
         Get.offNamed('/login');
       });
     }
-    FirebaseAuth.instance.currentUser!.getIdToken().then((value) => prints(value));
+    FirebaseAuth.instance.currentUser!
+        .getIdToken()
+        .then((value) => prints(value));
     return Scaffold(
       appBar: PreferredSize(
         preferredSize:

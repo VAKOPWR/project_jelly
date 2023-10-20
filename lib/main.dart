@@ -26,7 +26,6 @@ void main() async {
   await GlobalServices.init();
   runApp(ProjectJelly());
   Firebase.initializeApp();
-  GlobalControllers.init();
 }
 
 class ProjectJelly extends StatelessWidget {
