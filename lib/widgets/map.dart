@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:internet_checker_banner/internet_checker_banner.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/pages/loading.dart';
@@ -27,6 +28,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    InternetCheckerBanner().initialize(context, title: "No internet access");
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     loadMarkers();
@@ -105,6 +107,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
               icon: Icon(Icons.location_disabled_rounded,
                   color: Colors.white, size: 35),
               snackPosition: SnackPosition.TOP,
+              isDismissible: false,
               duration: Duration(days: 1),
               backgroundColor: Colors.red[400],
               margin: EdgeInsets.zero,
@@ -173,7 +176,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    InternetCheckerBanner().dispose();
     WidgetsBinding.instance.removeObserver(this);
+    Get.find<LocationService>().pausePositionStream();
     super.dispose();
   }
 }

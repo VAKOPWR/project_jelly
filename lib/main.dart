@@ -23,7 +23,7 @@ void main() async {
   await GetStorage.init();
   await GlobalServices.init();
   runApp(ProjectJelly());
-  GlobalControllers.init();
+  // GlobalControllers.init();
 }
 
 class ProjectJelly extends StatelessWidget {
@@ -32,7 +32,7 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/home',
+        initialRoute: '/login',
         theme: lightTheme,
         darkTheme: darkTheme,
         // themeMode: _themeManager.themeMode,

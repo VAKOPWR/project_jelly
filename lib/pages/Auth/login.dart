@@ -15,6 +15,8 @@ class LogInPage extends StatefulWidget {
 }
 
 class _LogInPageState extends State<LogInPage> {
+  String? apiKey = GetStorage().read('apiKey');
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -48,6 +50,12 @@ class _LogInPageState extends State<LogInPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (apiKey != null) {
+      Future.delayed(Duration.zero, () {
+        Get.offNamed('/home');
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Log In'),
