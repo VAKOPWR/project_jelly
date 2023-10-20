@@ -35,7 +35,7 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/home',
+        initialRoute: '/login',
         theme: lightTheme,
         darkTheme: darkTheme,
         // themeMode: _themeManager.themeMode,
