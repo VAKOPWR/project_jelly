@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -24,9 +25,12 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
   MockLocationService _locationService = MockLocationService();
-  late Timer _timer;
-  final markers = <MarkerId, Marker>{};
-  final avatars = <MarkerId, BitmapDescriptor>{};
+  BitmapDescriptor? _defaultAvatar;
+  late Timer _locatiobTimer;
+  late Timer _markersTimer;
+  late Timer _iconsTimer;
+  final _markers = <MarkerId, Marker>{};
+  final _avatars = <MarkerId, BitmapDescriptor>{};
   MapType mapType = MapType.normal;
   String _darkMapStyle = '';
   String _lightMapStyle = '';
@@ -34,7 +38,12 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   void initState() {
     InternetCheckerBanner().initialize(context, title: "No internet access");
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _loadDefaultAvatar();
+    _loadCustomAvatars();
+    _iconsTimer = Timer.periodic(Duration(minutes: 30), (timer) {
+      _loadCustomAvatars();
+    });
+    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       _updateMarkers();
     });
     super.initState();
@@ -43,22 +52,28 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     Get.find<LocationService>().startPositionStream();
   }
 
-  void loadCustomAvatars() {}
+  Future<void> _loadDefaultAvatar() async {
+    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
+  }
+
+  Future<void> _loadCustomAvatars() async {
+    Map<String, Uint8List> avatars = await _locationService.getFriendsIcons();
+    setState(() {
+      avatars.forEach((key, value) {
+        _avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
+      });
+    });
+  }
 
   Marker createMarker(Friend friend) {
-    // BitmapDescriptor.fromAssetImage(
-    //         const ImageConfiguration(size: Size(300, 300)), friend.avatar)
-    //     .then((icon) {
     return Marker(
-      markerId: MarkerId(friend.name),
-      position: friend.location,
-      infoWindow: InfoWindow(
-        title: friend.name,
-      ),
-    );
-    // icon: icon);
-    // });
-    // return null;
+        markerId: MarkerId(friend.name),
+        position: friend.location,
+        infoWindow: InfoWindow(
+          title: friend.name,
+        ),
+        icon: _avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
   }
 
   Future<void> _updateMarkers() async {
@@ -66,7 +81,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
     setState(() {
       for (Friend friend in friendList) {
-        markers[MarkerId(friend.id)] = createMarker(friend);
+        _markers[MarkerId(friend.id)] = createMarker(friend);
       }
     });
   }
@@ -140,8 +155,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
             ? BasicLoadingPage()
             : Stack(children: [
                 Animarker(
+                    useRotation: false,
                     shouldAnimateCamera: false,
-                    markers: markers.values.toSet(),
+                    markers: _markers.values.toSet(),
                     mapId: _controller.future.then<int>((value) => value.mapId),
                     child: GoogleMap(
                         initialCameraPosition: CameraPosition(
@@ -168,21 +184,46 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                         myLocationEnabled: true,
                         padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
                         mapType: mapType)),
-                Positioned(
-                  top: 50.0,
-                  right: 10.0,
-                  child: FloatingActionButton(
-                      onPressed: () {
-                        setState(() {
-                          mapType = getNextMap(mapType);
-                        });
-                      },
-                      child: Icon(
-                        Icons.map_rounded,
-                        color: Colors.grey[700],
-                      ),
-                      backgroundColor: Colors.grey[50]),
-                ),
+                Platform.isIOS
+                    ? Positioned(
+                        top: 50.0,
+                        right: 10.0,
+                        child: FloatingActionButton(
+                            onPressed: () {
+                              setState(() {
+                                mapType = getNextMap(mapType);
+                              });
+                            },
+                            child: Icon(
+                              Icons.map_rounded,
+                              color: Colors.grey[700],
+                            ),
+                            backgroundColor: Colors.grey[50]),
+                      )
+                    : Positioned(
+                        top: 100.0,
+                        right: 12.0,
+                        child: SizedBox(
+                          height: 38,
+                          width: 38,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              setState(() {
+                                mapType = getNextMap(mapType);
+                              });
+                            },
+                            child: Icon(
+                              Icons.map_rounded,
+                              color: Colors.grey[700],
+                            ),
+                            backgroundColor: Colors.grey[50],
+                            elevation: 2.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(0)),
+                            ),
+                          ),
+                        )),
                 NavButtons(),
               ]));
   }
@@ -192,7 +233,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     InternetCheckerBanner().dispose();
     WidgetsBinding.instance.removeObserver(this);
     Get.find<LocationService>().pausePositionStream();
-    _timer.cancel();
+    _markersTimer.cancel();
+    _iconsTimer.cancel();
     super.dispose();
   }
 }

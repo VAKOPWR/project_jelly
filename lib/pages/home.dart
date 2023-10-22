@@ -25,9 +25,9 @@ class _HomePageState extends State<HomePage> {
       // });
       return LogInPage();
     } else {
-      FirebaseAuth.instance.currentUser!
-          .getIdToken()
-          .then((value) => prints(value));
+      // FirebaseAuth.instance.currentUser!
+      //     .getIdToken()
+      //     .then((value) => prints(value));
       return Scaffold(
         appBar: PreferredSize(
           preferredSize:
