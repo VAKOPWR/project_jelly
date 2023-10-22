@@ -115,12 +115,6 @@ class _FriendsPageState extends State<FriendsPage>
     return AppBar(
       title: const Text("Friends"),
       centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pushReplacementNamed(context, '/map');
-        },
-      ),
       bottom: TabBar(
         controller: _tabController,
         tabs: _buildTabsWithBadges(),
@@ -192,6 +186,9 @@ class _FriendsPageState extends State<FriendsPage>
         List<dynamic> data = jsonDecode(json);
 
         for (var res in data) {
+          var objId = res['id'];
+          String id = objId.toString();
+
           var objName = res['name'];
           String name = objName.toString();
 
@@ -215,6 +212,7 @@ class _FriendsPageState extends State<FriendsPage>
               'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
 
           Friend friendModel = Friend(
+              id: id,
               name: name,
               avatar: avatar,
               location: LatLng(latitude, longitude));
