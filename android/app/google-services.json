@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "125315838279",
+    "project_id": "jelly-front-42163",
+    "storage_bucket": "jelly-front-42163.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125315838279:android:f95c0cf53dceba2e831c62",
+        "android_client_info": {
+          "package_name": "pwr.vako.project_jelly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdnWp7jR552_A9JRZTk4K1DMjkZ847HZo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

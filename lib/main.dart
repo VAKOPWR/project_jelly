@@ -22,8 +22,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await GlobalServices.init();
+  await Firebase.initializeApp();
   runApp(ProjectJelly());
-  Firebase.initializeApp();
 }
 
 class ProjectJelly extends StatelessWidget {
@@ -32,7 +32,7 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/login',
+        initialRoute: '/home',
         theme: lightTheme,
         darkTheme: darkTheme,
         // themeMode: _themeManager.themeMode,
