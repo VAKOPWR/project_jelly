@@ -34,7 +34,7 @@ class _MapWidgetState extends State<MapWidget> {
         .then((icon) {
       friendList.add(Person(
           name: 'Orest',
-          avatar: icon,
+          avatar: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
           location: LatLng(37.30952302005339, -122.03900959279422)));
       // orestAvatar = icon;
     });
@@ -42,14 +42,14 @@ class _MapWidgetState extends State<MapWidget> {
         .then((icon) {
       friendList.add(Person(
           name: 'Viktor',
-          avatar: icon,
+          avatar: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
           location: LatLng(37.329863949614406, -122.06115391055518)));
     });
     BitmapDescriptor.fromAssetImage(ImageConfiguration.empty, "assets/N03.png")
         .then((icon) {
       friendList.add(Person(
           name: 'Andrii',
-          avatar: icon,
+          avatar: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
           location: LatLng(37.352109801487344, -122.03506138110038)));
       setState(() {
         markers = friendList.map((friend) => createMarker(friend)).toSet();
@@ -106,6 +106,8 @@ class _MapWidgetState extends State<MapWidget> {
     // });
   }
 
+  final BitmapDescriptor customIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+
   Marker createMarker(Person friend) {
     return Marker(
         markerId: MarkerId(friend.name),
@@ -113,7 +115,7 @@ class _MapWidgetState extends State<MapWidget> {
         infoWindow: InfoWindow(
           title: friend.name,
         ),
-        icon: friend.avatar);
+        icon: customIcon);
   }
 
   @override
