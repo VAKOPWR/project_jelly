@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:project_jelly/controller/global_controllers.dart';
 import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/Auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/Auth/register_form_friends.dart';
@@ -21,7 +20,6 @@ import 'package:project_jelly/theme/theme_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await GetStorage.init();
   await GlobalServices.init();
   runApp(ProjectJelly());

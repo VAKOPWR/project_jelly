@@ -17,7 +17,7 @@ class LogInPage extends StatefulWidget {
 }
 
 class _LogInPageState extends State<LogInPage> {
-  String? apiKey = GetStorage().read('apiKey');
+  String? _authKey = GetStorage().read('AuthKey');
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
@@ -52,7 +52,7 @@ class _LogInPageState extends State<LogInPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (apiKey != null) {
+    if (_authKey != null) {
       Future.delayed(Duration.zero, () {
         Get.offNamed('/home');
       });
@@ -224,12 +224,16 @@ class _LogInPageState extends State<LogInPage> {
                                       child: ClipOval(
                                         child: Material(
                                           child: InkWell(
-                                            onTap: () => Get.find<AuthService>().signInWithGoogle().then((credentials) => Get.off(() => const HomePage())
-                                      ),
+                                            onTap: () => Get.find<AuthService>()
+                                                .signInWithGoogle()
+                                                .then((credentials) => Get.off(
+                                                    () => const HomePage())),
                                             child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: <Widget>[
-                                                Image.asset('assets/google.png')// <-- Text
+                                                Image.asset(
+                                                    'assets/google.png') // <-- Text
                                               ],
                                             ),
                                           ),
