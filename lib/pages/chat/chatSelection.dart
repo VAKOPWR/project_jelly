@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class ChatPage extends StatefulWidget{
-  const ChatPage ({Key? key}) : super(key: key);
+class ChatSelection extends StatefulWidget{
+  const ChatSelection ({Key? key}) : super(key: key);
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatSelection> createState() => _ChatSelectionState();
 }
 
-class _ChatPageState extends State<ChatPage>{
+class _ChatSelectionState extends State<ChatSelection>{
 
   @override
   Widget build(BuildContext context){
     return DefaultTabController(
-        length: 3,
+        length: 2,
         child: Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.green[600],
@@ -38,9 +38,6 @@ class _ChatPageState extends State<ChatPage>{
                       ),
                       Tab(
                         text: 'Groups',
-                      ),
-                      Tab(
-                        text: 'Proximity',
                       )
                     ],
                     labelColor: Colors.black,

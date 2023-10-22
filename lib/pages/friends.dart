@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/pages/shakeItScreen.dart';
 
 import '../classes/friend.dart';
+import '../misc/enum.dart';
 import '../widgets/SearchBarWidget.dart';
 
 const int _numberOfTabs = 3;
@@ -290,7 +293,7 @@ class FriendFindingTab extends StatelessWidget {
                 final friendIndex = i ~/ 2;
                 return (friendIndex < friends.length)
                     ? buildRowForFriendFinding(
-                    friends[friendIndex], trailingActions)
+                      friends[friendIndex], trailingActions)
                     : null;
               },
             ),
