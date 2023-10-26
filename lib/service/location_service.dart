@@ -19,10 +19,10 @@ class LocationService extends GetxService {
   @override
   void onInit() async {
     super.onInit();
-    Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
-    if (lastKnownLoc != null) {
-      _currentLocation = lastKnownLoc;
-    } else {
+    // Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
+    // if (lastKnownLoc != null) {
+    //   _currentLocation = lastKnownLoc;
+    // } else {
       Position(
           longitude: -122.0322,
           latitude: 37.3230,
@@ -32,7 +32,7 @@ class LocationService extends GetxService {
           heading: 0.0,
           speed: 0.0,
           speedAccuracy: 0.0);
-    }
+    // }
     // Location.onLocationChanged.listen(_updateCurrentLocation);
     // Location.
     // log(_currentLocation.onLocationChanged.isEmpty as String);
