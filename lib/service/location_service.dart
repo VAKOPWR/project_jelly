@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 // import 'package:location/location.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/misc/backend_url.dart';
 
 class LocationService extends GetxService {
   Position? _currentLocation;
@@ -80,7 +81,7 @@ class LocationService extends GetxService {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     return http.put(
       Uri.parse(
-          'http://172.20.10.10:8080/api/v1/user/location/update'),
+          '${getBackendUrl()}/api/v1/user/location/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': authToken!
@@ -96,7 +97,7 @@ class LocationService extends GetxService {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     log('friends received');
     final response = await http.get(Uri.parse(
-        'http://172.20.10.10:8080/api/v1/user'),
+        '${getBackendUrl()}/api/v1/user'),
       headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': authToken!
