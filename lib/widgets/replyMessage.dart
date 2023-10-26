@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ReplyCard extends StatelessWidget {
-  const ReplyCard({super.key, required this.message, required this.time});
+class ReplyMessage extends StatelessWidget {
+  const ReplyMessage({super.key, required this.message, required this.time});
   final String message;
   final String time;
 

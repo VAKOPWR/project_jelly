@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:project_jelly/pages/FriendSpecificGhostMode.dart';
+import 'package:project_jelly/pages/chat/messages/chatMessagesFriend.dart';
 import 'package:project_jelly/pages/friends.dart';
 import 'package:project_jelly/pages/ghostModeSettings/ghostModeScreen.dart';
 import 'package:project_jelly/pages/home.dart';
@@ -11,7 +12,7 @@ import 'package:project_jelly/pages/profile.dart';
 
 void main() {
   runApp(MaterialApp(
-    initialRoute: '/ghostMode',
+    initialRoute: '/messageTest',
     routes: {
       '/loading': (context) => const Loading(),
       '/login': (context) => const Login(),
@@ -19,7 +20,8 @@ void main() {
       '/friends': (context) => const FriendsPage(),
       '/messages': (context) => const MessagesPage(),
       '/profile': (context) => const ProfilePage(),
-      '/ghostMode' : (context) => const GhostMode()
+      '/ghostMode' : (context) => const GhostMode(),
+      '/messageTest' : (context) => ChatMessagesFriend()
     },
   ));
 }
