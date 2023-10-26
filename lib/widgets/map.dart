@@ -29,6 +29,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   late Timer _locatiobTimer;
   late Timer _markersTimer;
   late Timer _iconsTimer;
+  final _internetCheckerBanner = InternetCheckerBanner();
   final _markers = <MarkerId, Marker>{};
   final _avatars = <MarkerId, BitmapDescriptor>{};
   MapType mapType = MapType.normal;
@@ -37,7 +38,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    InternetCheckerBanner().initialize(context, title: "No internet access");
+    _internetCheckerBanner.initialize(context, title: "No internet access");
     _loadDefaultAvatar();
     _loadCustomAvatars();
     _iconsTimer = Timer.periodic(Duration(minutes: 30), (timer) {
@@ -78,7 +79,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   Future<void> _updateMarkers() async {
     List<Friend> friendList = await _locationService.getFriendsLocation();
-
     setState(() {
       for (Friend friend in friendList) {
         _markers[MarkerId(friend.id)] = createMarker(friend);
@@ -230,11 +230,11 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    InternetCheckerBanner().dispose();
-    WidgetsBinding.instance.removeObserver(this);
-    Get.find<LocationService>().pausePositionStream();
     _markersTimer.cancel();
     _iconsTimer.cancel();
+    _internetCheckerBanner.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    Get.find<LocationService>().pausePositionStream();
     super.dispose();
   }
 }

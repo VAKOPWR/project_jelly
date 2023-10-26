@@ -81,7 +81,7 @@ class LocationService extends GetxService {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     return http.put(
       Uri.parse(
-          '${getBackendUrl()}/api/v1/user/location/update'),
+          '${getBackendUrl()}/user/location/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': authToken!
@@ -97,7 +97,7 @@ class LocationService extends GetxService {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     log('friends received');
     final response = await http.get(Uri.parse(
-        '${getBackendUrl()}/api/v1/user'),
+        '${getBackendUrl()}/user'),
       headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': authToken!
