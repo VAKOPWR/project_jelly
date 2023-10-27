@@ -25,13 +25,11 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
   MockLocationService _locationService = MockLocationService();
-  BitmapDescriptor? _defaultAvatar;
   late Timer _locationTimer;
   late Timer _markersTimer;
   late Timer _iconsTimer;
   final _internetCheckerBanner = InternetCheckerBanner();
-  final _markers = <MarkerId, Marker>{};
-  final _avatars = <MarkerId, BitmapDescriptor>{};
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
   MapType _mapType = MapType.normal;
   String _darkMapStyle = '';
   String _lightMapStyle = '';
@@ -40,12 +38,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void initState() {
     _internetCheckerBanner.initialize(context, title: "No internet access");
     checkLocationAccess();
-    _loadDefaultAvatar();
-    _loadCustomAvatars();
-    _iconsTimer = Timer.periodic(Duration(minutes: 30), (timer) {
-      _loadCustomAvatars();
-    });
-    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    _updateMarkers();
+    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
+      await Get.find<LocationService>().updateMarkers();
       _updateMarkers();
     });
     super.initState();
@@ -54,36 +49,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     Get.find<LocationService>().startPositionStream();
   }
 
-  Future<void> _loadDefaultAvatar() async {
-    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
-  }
-
-  Future<void> _loadCustomAvatars() async {
-    Map<String, Uint8List> avatars = await _locationService.getFriendsIcons();
-    setState(() {
-      avatars.forEach((key, value) {
-        _avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
-      });
-    });
-  }
-
-  Marker createMarker(Friend friend) {
-    return Marker(
-        markerId: MarkerId(friend.id),
-        position: friend.location,
-        infoWindow: InfoWindow(
-          title: friend.name,
-        ),
-        icon: _avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
-  }
-
   Future<void> _updateMarkers() async {
-    List<Friend> friendList = await _locationService.getFriendsLocation();
     setState(() {
-      for (Friend friend in friendList) {
-        _markers[MarkerId(friend.id)] = createMarker(friend);
-      }
+      _markers = Get.find<LocationService>().markers;
     });
   }
 
@@ -110,7 +78,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   void didChangePlatformBrightness() {
     super.didChangePlatformBrightness();
-
     Brightness brightness =
         View.of(context).platformDispatcher.platformBrightness;
     if (brightness == Brightness.light) {

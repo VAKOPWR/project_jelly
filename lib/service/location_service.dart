@@ -2,19 +2,23 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/misc/backend_url.dart';
+import 'package:project_jelly/misc/location_mock.dart';
 
 class LocationService extends GetxService {
   Position? _currentLocation;
   Stream<Position> locationStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
-  StreamSubscription<Position>? locationStreamSubscription;
-  Position defaultPosition = Position(
+  StreamSubscription<Position>? _locationStreamSubscription;
+  Position _defaultPosition = Position(
       longitude: -122.0322,
       latitude: 37.3230,
       timestamp: DateTime.timestamp(),
@@ -23,43 +27,51 @@ class LocationService extends GetxService {
       heading: 0.0,
       speed: 0.0,
       speedAccuracy: 0.0);
+  BitmapDescriptor? _defaultAvatar;
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  Map<MarkerId, BitmapDescriptor> avatars = <MarkerId, BitmapDescriptor>{};
+  MockLocationService _locationService = MockLocationService();
 
   @override
   void onInit() async {
-    super.onInit();
     requestLocationPermission().then((locationGranted) async {
       if (locationGranted) {
         Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
         if (lastKnownLoc != null) {
           _currentLocation = lastKnownLoc;
         } else {
-          _currentLocation = defaultPosition;
+          _currentLocation = _defaultPosition;
         }
       } else {
-        _currentLocation = defaultPosition;
+        _currentLocation = _defaultPosition;
       }
     });
+    await loadCustomAvatars();
+    await loadDefaultAvatar();
+    await updateMarkers();
+    super.onInit();
   }
 
   void startPositionStream() async {
     bool locationPermission = await requestLocationPermission();
     if (locationPermission) {
-      locationStreamSubscription = locationStream.listen(updateCurrentLocation);
+      _locationStreamSubscription =
+          locationStream.listen(updateCurrentLocation);
     }
   }
 
   void pausePositionStream() async {
-    if (locationStreamSubscription != null) {
-      if (!locationStreamSubscription!.isPaused) {
-        locationStreamSubscription!.pause();
+    if (_locationStreamSubscription != null) {
+      if (!_locationStreamSubscription!.isPaused) {
+        _locationStreamSubscription!.pause();
       }
     }
   }
 
   void resumePositionStream() async {
-    if (locationStreamSubscription != null) {
-      if (locationStreamSubscription!.isPaused) {
-        locationStreamSubscription!.resume();
+    if (_locationStreamSubscription != null) {
+      if (_locationStreamSubscription!.isPaused) {
+        _locationStreamSubscription!.resume();
       }
     }
   }
@@ -77,6 +89,36 @@ class LocationService extends GetxService {
 
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
+  }
+
+  Future<void> loadDefaultAvatar() async {
+    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
+  }
+
+  Future<void> loadCustomAvatars() async {
+    Map<String, Uint8List> friendsAvatars =
+        await _locationService.getFriendsIcons();
+    friendsAvatars.forEach((key, value) {
+      avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
+    });
+  }
+
+  Marker _createMarker(Friend friend) {
+    return Marker(
+        markerId: MarkerId(friend.id),
+        position: friend.location,
+        infoWindow: InfoWindow(
+          title: friend.name,
+        ),
+        icon: avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
+  }
+
+  Future<void> updateMarkers() async {
+    List<Friend> friendsLocation = await _locationService.getFriendsLocation();
+    for (Friend friend in friendsLocation) {
+      markers[MarkerId(friend.id)] = _createMarker(friend);
+    }
   }
 
   Future<http.Response> sendLocation(Position locationData) async {
