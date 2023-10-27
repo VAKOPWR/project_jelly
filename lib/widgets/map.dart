@@ -4,12 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:internet_checker_banner/internet_checker_banner.dart';
-import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/logic/permissions.dart';
-import 'package:project_jelly/misc/location_mock.dart';
 import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
@@ -24,8 +20,7 @@ class MapWidget extends StatefulWidget {
 
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
-  MockLocationService _locationService = MockLocationService();
-  late Timer _locationTimer;
+  // late Timer _locationTimer;
   late Timer _markersTimer;
   late Timer _iconsTimer;
   final _internetCheckerBanner = InternetCheckerBanner();
@@ -90,7 +85,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      log('State resumed');
       checkLocationAccess();
     }
   }

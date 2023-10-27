@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,8 +32,9 @@ class LocationService extends GetxService {
   MockLocationService _locationService = MockLocationService();
 
   @override
-  void onInit() async {
-    requestLocationPermission().then((locationGranted) async {
+  Future<void> onInit() async {
+    super.onInit();
+    await requestLocationPermission().then((locationGranted) async {
       if (locationGranted) {
         Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
         if (lastKnownLoc != null) {
@@ -49,7 +49,6 @@ class LocationService extends GetxService {
     await loadCustomAvatars();
     await loadDefaultAvatar();
     await updateMarkers();
-    super.onInit();
   }
 
   void startPositionStream() async {
