@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
@@ -14,6 +15,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    var userName = FirebaseAuth.instance.currentUser!.displayName!;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(250),
@@ -26,8 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                authLogOut();
-                Get.off(() => const HomePage());
+                authLogOut().then((value) => Get.offAll(() => const HomePage()));
               },
             ),
           ],
@@ -50,14 +51,14 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      body: const Column(
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Nickname text
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Text(
-              "Johnny Joestar",
+              userName,
               style: TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
@@ -89,6 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
 }
 
 class CircularButton extends StatelessWidget {

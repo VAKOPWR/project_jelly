@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 // import 'package:location/location.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/misc/backend_url.dart';
 
 class LocationService extends GetxService {
   Position? _currentLocation;
@@ -18,10 +19,10 @@ class LocationService extends GetxService {
   @override
   void onInit() async {
     super.onInit();
-    Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
-    if (lastKnownLoc != null) {
-      _currentLocation = lastKnownLoc;
-    } else {
+    // Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
+    // if (lastKnownLoc != null) {
+    //   _currentLocation = lastKnownLoc;
+    // } else {
       Position(
           longitude: -122.0322,
           latitude: 37.3230,
@@ -31,7 +32,7 @@ class LocationService extends GetxService {
           heading: 0.0,
           speed: 0.0,
           speedAccuracy: 0.0);
-    }
+    // }
     // Location.onLocationChanged.listen(_updateCurrentLocation);
     // Location.
     // log(_currentLocation.onLocationChanged.isEmpty as String);
@@ -80,7 +81,7 @@ class LocationService extends GetxService {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     return http.put(
       Uri.parse(
-          'http://172.20.10.10:8080/api/v1/user/location/update'),
+          '${getBackendUrl()}/user/location/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': authToken!
@@ -96,7 +97,7 @@ class LocationService extends GetxService {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     log('friends received');
     final response = await http.get(Uri.parse(
-        'http://172.20.10.10:8080/api/v1/user'),
+        '${getBackendUrl()}/user'),
       headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': authToken!

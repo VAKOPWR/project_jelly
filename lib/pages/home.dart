@@ -14,20 +14,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? AuthKey = GetStorage().read('AuthKey');
-  // String? apiKey = null;
-
   @override
   Widget build(BuildContext context) {
-    if (AuthKey == null && FirebaseAuth.instance.currentUser == null) {
-      // Future.delayed(Duration.zero, () {
-      // Get.offNamed('/login');
-      // });
+    if (FirebaseAuth.instance.currentUser == null) {
+      Future.delayed(Duration.zero, () {
+      Get.offNamed('/login');
+      });
       return LogInPage();
     } else {
-      // FirebaseAuth.instance.currentUser!
-      //     .getIdToken()
-      //     .then((value) => prints(value));
       return Scaffold(
         appBar: PreferredSize(
           preferredSize:
@@ -44,10 +38,4 @@ class _HomePageState extends State<HomePage> {
       );
     }
   }
-}
-
-void prints(var s1) {
-  String s = s1.toString();
-  final pattern = RegExp('.{1,800}');
-  pattern.allMatches(s).forEach((match) => print(match.group(0)));
 }
