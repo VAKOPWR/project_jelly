@@ -26,7 +26,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
   MockLocationService _locationService = MockLocationService();
   BitmapDescriptor? _defaultAvatar;
-  late Timer _locatiobTimer;
+  late Timer _locationTimer;
   late Timer _markersTimer;
   late Timer _iconsTimer;
   final _internetCheckerBanner = InternetCheckerBanner();
