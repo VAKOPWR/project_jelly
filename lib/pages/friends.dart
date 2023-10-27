@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/pages/shakeItScreen.dart';
 
-import '../classes/Friend.dart';
+import '../classes/friend.dart';
 import '../misc/enum.dart';
 import '../widgets/SearchBar.dart';
 
@@ -14,6 +14,7 @@ const int _numberOfTabs = 3;
 String tutorialText = "You can add someone to your friend list if both of you "
     "are standing close and shaking your phone at the same time!";
 String tutorialTitle = "SHAKE IT TUTORIAL";
+
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -154,10 +155,9 @@ class _FriendsPageState extends State<FriendsPage>
 
   Widget _buildRow(Friend friend, List<Widget> trailingActions) {
     return ListTile(
-      leading: const CircleAvatar(
+      leading: CircleAvatar(
         backgroundColor: Colors.grey,
-        backgroundImage: NetworkImage(
-            'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50'),
+        backgroundImage: new NetworkImage(defaultFriendAvatar),
       ),
       title: Text(
         friend.name,
@@ -208,13 +208,10 @@ class _FriendsPageState extends State<FriendsPage>
             longitude = objLng ?? 0.0;
           }
 
-          String avatar =
-              'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
-
           Friend friendModel = Friend(
               id: id,
               name: name,
-              avatar: avatar,
+              avatar: defaultFriendAvatar,
               location: LatLng(latitude, longitude));
           listFriends.add(friendModel);
         }
