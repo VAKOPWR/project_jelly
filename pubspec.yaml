@@ -57,6 +57,7 @@ dependencies:
   firebase_auth: ^4.10.1
   firebase_core: ^2.17.0
   google_sign_in: ^6.1.5
+  custom_map_markers: ^0.0.2+1
 
 dev_dependencies:
   flutter_test:

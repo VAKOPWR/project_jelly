@@ -54,7 +54,6 @@ class _LogInPageState extends State<LogInPage> {
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
       Future.delayed(Duration.zero, () {
-        log('Going home');
         Get.offNamed('/home');
       });
     }

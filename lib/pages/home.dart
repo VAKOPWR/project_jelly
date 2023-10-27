@@ -19,7 +19,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser == null) {
       Future.delayed(Duration.zero, () {
-        log('Going login');
         Get.offNamed('/login');
       });
       return LogInPage();

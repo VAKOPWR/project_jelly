@@ -13,6 +13,7 @@ import 'package:project_jelly/misc/location_mock.dart';
 import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
+import 'package:project_jelly/widgets/snackbars.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -31,13 +32,14 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final _internetCheckerBanner = InternetCheckerBanner();
   final _markers = <MarkerId, Marker>{};
   final _avatars = <MarkerId, BitmapDescriptor>{};
-  MapType mapType = MapType.normal;
+  MapType _mapType = MapType.normal;
   String _darkMapStyle = '';
   String _lightMapStyle = '';
 
   @override
   void initState() {
     _internetCheckerBanner.initialize(context, title: "No internet access");
+    checkLocationAccess();
     _loadDefaultAvatar();
     _loadCustomAvatars();
     _iconsTimer = Timer.periodic(Duration(minutes: 30), (timer) {
@@ -122,28 +124,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       log('State resumed');
-      requestLocationPermission().then((locationGranted) {
-        if (!locationGranted) {
-          Get.find<LocationService>().pausePositionStream();
-          Get.snackbar('No Location Avaliable',
-              "Try modifying application permissions in the settings",
-              icon: Icon(Icons.location_disabled_rounded,
-                  color: Colors.white, size: 35),
-              snackPosition: SnackPosition.TOP,
-              isDismissible: false,
-              duration: Duration(days: 1),
-              backgroundColor: Colors.red[400],
-              margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED);
-        } else {
-          Get.find<LocationService>().resumePositionStream();
-          try {
-            Get.closeAllSnackbars();
-          } catch (LateInitializationError) {
-            log('Nothing to close');
-          }
-        }
-      });
+      checkLocationAccess();
     }
   }
 
@@ -176,7 +157,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                   myLocationButtonEnabled: true,
                   myLocationEnabled: true,
                   padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
-                  mapType: mapType,
+                  mapType: _mapType,
                   markers: _markers.values.toSet(),
                 ),
                 Platform.isIOS
@@ -186,7 +167,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                         child: FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                mapType = getNextMap(mapType);
+                                _mapType = getNextMap(_mapType);
                               });
                             },
                             child: Icon(
@@ -204,7 +185,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                           child: FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                mapType = getNextMap(mapType);
+                                _mapType = getNextMap(_mapType);
                               });
                             },
                             child: Icon(
