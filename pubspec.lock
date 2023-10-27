@@ -520,14 +520,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
-  google_map_marker_animation:
-    dependency: "direct main"
-    description:
-      name: google_map_marker_animation
-      sha256: f28d8c888c493e9c3115e228732d7440ddee4593c06244274a0824d679a88865
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1"
   google_maps:
     dependency: transitive
     description:

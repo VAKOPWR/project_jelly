@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser == null) {
       Future.delayed(Duration.zero, () {
-      Get.offNamed('/login');
+        log('Going login');
+        Get.offNamed('/login');
       });
       return LogInPage();
     } else {

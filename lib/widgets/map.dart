@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_map_marker_animation/widgets/animarker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:internet_checker_banner/internet_checker_banner.dart';
 import 'package:project_jelly/classes/friend.dart';
@@ -69,7 +68,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   Marker createMarker(Friend friend) {
     return Marker(
-        markerId: MarkerId(friend.name),
+        markerId: MarkerId(friend.id),
         position: friend.location,
         infoWindow: InfoWindow(
           title: friend.name,
@@ -154,36 +153,32 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
         body: Get.find<LocationService>().getCurrentLocation() == null
             ? BasicLoadingPage()
             : Stack(children: [
-                Animarker(
-                    useRotation: false,
-                    shouldAnimateCamera: false,
-                    markers: _markers.values.toSet(),
-                    mapId: _controller.future.then<int>((value) => value.mapId),
-                    child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: LatLng(
-                            Get.find<LocationService>()
-                                .getCurrentLocation()!
-                                .latitude,
-                            Get.find<LocationService>()
-                                .getCurrentLocation()!
-                                .longitude,
-                          ),
-                          zoom: 13,
-                        ),
-                        onMapCreated: (mapController) {
-                          if (Theme.of(context).brightness ==
-                              Brightness.light) {
-                            mapController.setMapStyle(_lightMapStyle);
-                          } else {
-                            mapController.setMapStyle(_darkMapStyle);
-                          }
-                          _controller.complete(mapController);
-                        },
-                        myLocationButtonEnabled: true,
-                        myLocationEnabled: true,
-                        padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
-                        mapType: mapType)),
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                      Get.find<LocationService>()
+                          .getCurrentLocation()!
+                          .latitude,
+                      Get.find<LocationService>()
+                          .getCurrentLocation()!
+                          .longitude,
+                    ),
+                    zoom: 13,
+                  ),
+                  onMapCreated: (mapController) {
+                    if (Theme.of(context).brightness == Brightness.light) {
+                      mapController.setMapStyle(_lightMapStyle);
+                    } else {
+                      mapController.setMapStyle(_darkMapStyle);
+                    }
+                    _controller.complete(mapController);
+                  },
+                  myLocationButtonEnabled: true,
+                  myLocationEnabled: true,
+                  padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
+                  mapType: mapType,
+                  markers: _markers.values.toSet(),
+                ),
                 Platform.isIOS
                     ? Positioned(
                         top: 50.0,

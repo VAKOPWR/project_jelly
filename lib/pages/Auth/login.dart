@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -17,8 +19,6 @@ class LogInPage extends StatefulWidget {
 }
 
 class _LogInPageState extends State<LogInPage> {
-  String? _authKey = GetStorage().read('AuthKey');
-
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -52,8 +52,9 @@ class _LogInPageState extends State<LogInPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_authKey != null) {
+    if (FirebaseAuth.instance.currentUser != null) {
       Future.delayed(Duration.zero, () {
+        log('Going home');
         Get.offNamed('/home');
       });
     }
