@@ -30,7 +30,9 @@ class LocationService extends GetxService {
           altitude: 0.0,
           heading: 0.0,
           speed: 0.0,
-          speedAccuracy: 0.0);
+          speedAccuracy: 0.0,
+          altitudeAccuracy: 0.0,
+          headingAccuracy: 0.0);
     }
     // Location.onLocationChanged.listen(_updateCurrentLocation);
     // Location.
@@ -78,9 +80,9 @@ class LocationService extends GetxService {
 
   Future<http.Response> sendLocation(Position locationData) async {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    return http.post(
+    return http.put(
       Uri.parse(
-          'https://jelly-backend.azurewebsites.net/api/v1/location/store'),
+          'http://172.20.10.10:8080/api/v1/user/location/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': authToken!
@@ -93,9 +95,14 @@ class LocationService extends GetxService {
   }
 
   Future<List<Friend>> getFriendsLocation() async {
+    final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     log('friends received');
     final response = await http.get(Uri.parse(
-        'https://jelly-backend.azurewebsites.net/api/v1/location/all'));
+        'http://172.20.10.10:8080/api/v1/user'),
+      headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': authToken!
+    },);
     if (response.statusCode == 200) {
       var people = (json.decode(response.body) as List)
           .map((i) => Friend.fromJson(i))
