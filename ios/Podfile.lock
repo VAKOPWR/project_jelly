@@ -114,6 +114,7 @@ SPEC REPOS:
     - FirebaseAuth
     - FirebaseCore
     - FirebaseCoreInternal
+    - GoogleMaps
     - GoogleSignIn
     - GoogleUtilities
     - GTMAppAuth
@@ -121,8 +122,6 @@ SPEC REPOS:
     - PromisesObjC
     - ReachabilitySwift
     - RecaptchaInterop
-  trunk:
-    - GoogleMaps
 
 EXTERNAL SOURCES:
   connectivity_plus:

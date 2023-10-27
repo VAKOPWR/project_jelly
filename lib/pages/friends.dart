@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/pages/shakeItScreen.dart';
+import 'package:project_jelly/pages/shake_it.dart';
 
 import '../classes/friend.dart';
 import '../misc/enum.dart';
-import '../widgets/SearchBar.dart';
+import '../widgets/search_bar.dart';
 
 const int _numberOfTabs = 3;
 String tutorialText = "You can add someone to your friend list if both of you "

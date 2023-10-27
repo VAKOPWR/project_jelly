@@ -1,64 +1,77 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-// import 'package:location/location.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/misc/backend_url.dart';
+import 'package:project_jelly/misc/location_mock.dart';
 
 class LocationService extends GetxService {
   Position? _currentLocation;
   Stream<Position> locationStream = Geolocator.getPositionStream(
-      locationSettings: LocationSettings(accuracy: LocationAccuracy.best));
-  late StreamSubscription<Position> locationStreamSubscription;
+      locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
+  StreamSubscription<Position>? _locationStreamSubscription;
+  Position _defaultPosition = Position(
+      longitude: -122.0322,
+      latitude: 37.3230,
+      timestamp: DateTime.timestamp(),
+      accuracy: 0.0,
+      altitude: 0.0,
+      heading: 0.0,
+      speed: 0.0,
+      speedAccuracy: 0.0);
+  BitmapDescriptor? _defaultAvatar;
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  Map<MarkerId, BitmapDescriptor> avatars = <MarkerId, BitmapDescriptor>{};
+  MockLocationService _locationService = MockLocationService();
 
   @override
-  void onInit() async {
+  Future<void> onInit() async {
     super.onInit();
-    Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
-    if (lastKnownLoc != null) {
-      _currentLocation = lastKnownLoc;
-    } else {
-      Position(
-          longitude: -122.0322,
-          latitude: 37.3230,
-          timestamp: DateTime.timestamp(),
-          accuracy: 0.0,
-          altitude: 0.0,
-          heading: 0.0,
-          speed: 0.0,
-          speedAccuracy: 0.0,
-          altitudeAccuracy: 0.0,
-          headingAccuracy: 0.0);
-    }
-    // Location.onLocationChanged.listen(_updateCurrentLocation);
-    // Location.
-    // log(_currentLocation.onLocationChanged.isEmpty as String);
+    await requestLocationPermission().then((locationGranted) async {
+      if (locationGranted) {
+        Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
+        if (lastKnownLoc != null) {
+          _currentLocation = lastKnownLoc;
+        } else {
+          _currentLocation = _defaultPosition;
+        }
+      } else {
+        _currentLocation = _defaultPosition;
+      }
+    });
+    await loadCustomAvatars();
+    await loadDefaultAvatar();
+    await updateMarkers();
   }
 
   void startPositionStream() async {
     bool locationPermission = await requestLocationPermission();
-    log('Stream is broadcast:');
-    log(locationStream.isBroadcast.toString());
     if (locationPermission) {
-      locationStreamSubscription = locationStream.listen(updateCurrentLocation);
+      _locationStreamSubscription =
+          locationStream.listen(updateCurrentLocation);
     }
   }
 
   void pausePositionStream() async {
-    log('Stopping stream subscription');
-    if (!locationStreamSubscription.isPaused) {
-      locationStreamSubscription.pause();
+    if (_locationStreamSubscription != null) {
+      if (!_locationStreamSubscription!.isPaused) {
+        _locationStreamSubscription!.pause();
+      }
     }
   }
 
   void resumePositionStream() async {
-    log('Resuming stream subscription');
-    if (locationStreamSubscription.isPaused) {
-      locationStreamSubscription.resume();
+    if (_locationStreamSubscription != null) {
+      if (_locationStreamSubscription!.isPaused) {
+        _locationStreamSubscription!.resume();
+      }
     }
   }
 
@@ -74,15 +87,43 @@ class LocationService extends GetxService {
   }
 
   void updateCurrentLocation(Position newLocation) async {
-    log('Updating location');
     _currentLocation = newLocation;
+  }
+
+  Future<void> loadDefaultAvatar() async {
+    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
+  }
+
+  Future<void> loadCustomAvatars() async {
+    Map<String, Uint8List> friendsAvatars =
+        await _locationService.getFriendsIcons();
+    friendsAvatars.forEach((key, value) {
+      avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
+    });
+  }
+
+  Marker _createMarker(Friend friend) {
+    return Marker(
+        markerId: MarkerId(friend.id),
+        position: friend.location,
+        infoWindow: InfoWindow(
+          title: friend.name,
+        ),
+        icon: avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
+  }
+
+  Future<void> updateMarkers() async {
+    List<Friend> friendsLocation = await _locationService.getFriendsLocation();
+    for (Friend friend in friendsLocation) {
+      markers[MarkerId(friend.id)] = _createMarker(friend);
+    }
   }
 
   Future<http.Response> sendLocation(Position locationData) async {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
     return http.put(
-      Uri.parse(
-          'http://172.20.10.10:8080/api/v1/user/location/update'),
+      Uri.parse('${getBackendUrl()}/user/location/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': authToken!
@@ -96,13 +137,13 @@ class LocationService extends GetxService {
 
   Future<List<Friend>> getFriendsLocation() async {
     final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    log('friends received');
-    final response = await http.get(Uri.parse(
-        'http://172.20.10.10:8080/api/v1/user'),
+    final response = await http.get(
+      Uri.parse('${getBackendUrl()}/user'),
       headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': authToken!
-    },);
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': authToken!
+      },
+    );
     if (response.statusCode == 200) {
       var people = (json.decode(response.body) as List)
           .map((i) => Friend.fromJson(i))
@@ -110,6 +151,5 @@ class LocationService extends GetxService {
       return people;
     }
     return List.empty();
-    // throw Exception('Failed to load album');
   }
 }

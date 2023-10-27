@@ -241,6 +241,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  custom_map_markers:
+    dependency: "direct main"
+    description:
+      name: custom_map_markers
+      sha256: b101e87305d46adbf207c08cde2fdee575423a20888cd21184b4d606fcd2ca28
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2+1"
   dart_style:
     dependency: transitive
     description:
@@ -519,15 +527,7 @@ packages:
       sha256: "000b7a31e1fa17ee04b6c0553a2b2ea18f9f9352e4dcc0c9fcc785cf10f2484e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.2"
-  google_map_marker_animation:
-    dependency: "direct main"
-    description:
-      name: google_map_marker_animation
-      sha256: f28d8c888c493e9c3115e228732d7440ddee4593c06244274a0824d679a88865
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1"
+    version: "0.2.1+1"
   google_maps:
     dependency: transitive
     description:
@@ -1149,6 +1149,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "5fcbd27688af6082f5abd611af56ee575342c30e87541d0245f7ff99faa02c60"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   term_glyph:
     dependency: transitive
     description:

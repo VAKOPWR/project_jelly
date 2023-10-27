@@ -4,16 +4,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:google_map_marker_animation/widgets/animarker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:internet_checker_banner/internet_checker_banner.dart';
-import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/logic/permissions.dart';
-import 'package:project_jelly/misc/location_mock.dart';
 import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
+import 'package:project_jelly/widgets/snackbars.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -24,26 +20,22 @@ class MapWidget extends StatefulWidget {
 
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller = Completer();
-  MockLocationService _locationService = MockLocationService();
-  BitmapDescriptor? _defaultAvatar;
-  late Timer _locatiobTimer;
+  // late Timer _locationTimer;
   late Timer _markersTimer;
   late Timer _iconsTimer;
-  final _markers = <MarkerId, Marker>{};
-  final _avatars = <MarkerId, BitmapDescriptor>{};
-  MapType mapType = MapType.normal;
+  final _internetCheckerBanner = InternetCheckerBanner();
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  MapType _mapType = MapType.normal;
   String _darkMapStyle = '';
   String _lightMapStyle = '';
 
   @override
   void initState() {
-    InternetCheckerBanner().initialize(context, title: "No internet access");
-    _loadDefaultAvatar();
-    _loadCustomAvatars();
-    _iconsTimer = Timer.periodic(Duration(minutes: 30), (timer) {
-      _loadCustomAvatars();
-    });
-    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    _internetCheckerBanner.initialize(context, title: "No internet access");
+    checkLocationAccess();
+    _updateMarkers();
+    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
+      await Get.find<LocationService>().updateMarkers();
       _updateMarkers();
     });
     super.initState();
@@ -52,37 +44,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     Get.find<LocationService>().startPositionStream();
   }
 
-  Future<void> _loadDefaultAvatar() async {
-    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
-  }
-
-  Future<void> _loadCustomAvatars() async {
-    Map<String, Uint8List> avatars = await _locationService.getFriendsIcons();
-    setState(() {
-      avatars.forEach((key, value) {
-        _avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
-      });
-    });
-  }
-
-  Marker createMarker(Friend friend) {
-    return Marker(
-        markerId: MarkerId(friend.name),
-        position: friend.location,
-        infoWindow: InfoWindow(
-          title: friend.name,
-        ),
-        icon: _avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
-  }
-
   Future<void> _updateMarkers() async {
-    List<Friend> friendList = await _locationService.getFriendsLocation();
-
     setState(() {
-      for (Friend friend in friendList) {
-        _markers[MarkerId(friend.id)] = createMarker(friend);
-      }
+      _markers = Get.find<LocationService>().markers;
     });
   }
 
@@ -109,7 +73,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   void didChangePlatformBrightness() {
     super.didChangePlatformBrightness();
-
     Brightness brightness =
         View.of(context).platformDispatcher.platformBrightness;
     if (brightness == Brightness.light) {
@@ -122,29 +85,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      log('State resumed');
-      requestLocationPermission().then((locationGranted) {
-        if (!locationGranted) {
-          Get.find<LocationService>().pausePositionStream();
-          Get.snackbar('No Location Avaliable',
-              "Try modifying application permissions in the settings",
-              icon: Icon(Icons.location_disabled_rounded,
-                  color: Colors.white, size: 35),
-              snackPosition: SnackPosition.TOP,
-              isDismissible: false,
-              duration: Duration(days: 1),
-              backgroundColor: Colors.red[400],
-              margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED);
-        } else {
-          Get.find<LocationService>().resumePositionStream();
-          try {
-            Get.closeAllSnackbars();
-          } catch (LateInitializationError) {
-            log('Nothing to close');
-          }
-        }
-      });
+      checkLocationAccess();
     }
   }
 
@@ -154,36 +95,32 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
         body: Get.find<LocationService>().getCurrentLocation() == null
             ? BasicLoadingPage()
             : Stack(children: [
-                Animarker(
-                    useRotation: false,
-                    shouldAnimateCamera: false,
-                    markers: _markers.values.toSet(),
-                    mapId: _controller.future.then<int>((value) => value.mapId),
-                    child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: LatLng(
-                            Get.find<LocationService>()
-                                .getCurrentLocation()!
-                                .latitude,
-                            Get.find<LocationService>()
-                                .getCurrentLocation()!
-                                .longitude,
-                          ),
-                          zoom: 13,
-                        ),
-                        onMapCreated: (mapController) {
-                          if (Theme.of(context).brightness ==
-                              Brightness.light) {
-                            mapController.setMapStyle(_lightMapStyle);
-                          } else {
-                            mapController.setMapStyle(_darkMapStyle);
-                          }
-                          _controller.complete(mapController);
-                        },
-                        myLocationButtonEnabled: true,
-                        myLocationEnabled: true,
-                        padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
-                        mapType: mapType)),
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                      Get.find<LocationService>()
+                          .getCurrentLocation()!
+                          .latitude,
+                      Get.find<LocationService>()
+                          .getCurrentLocation()!
+                          .longitude,
+                    ),
+                    zoom: 13,
+                  ),
+                  onMapCreated: (mapController) {
+                    if (Theme.of(context).brightness == Brightness.light) {
+                      mapController.setMapStyle(_lightMapStyle);
+                    } else {
+                      mapController.setMapStyle(_darkMapStyle);
+                    }
+                    _controller.complete(mapController);
+                  },
+                  myLocationButtonEnabled: true,
+                  myLocationEnabled: true,
+                  padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
+                  mapType: _mapType,
+                  markers: _markers.values.toSet(),
+                ),
                 Platform.isIOS
                     ? Positioned(
                         top: 50.0,
@@ -191,7 +128,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                         child: FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                mapType = getNextMap(mapType);
+                                _mapType = getNextMap(_mapType);
                               });
                             },
                             child: Icon(
@@ -209,7 +146,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                           child: FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                mapType = getNextMap(mapType);
+                                _mapType = getNextMap(_mapType);
                               });
                             },
                             child: Icon(
@@ -230,11 +167,11 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    InternetCheckerBanner().dispose();
-    WidgetsBinding.instance.removeObserver(this);
-    Get.find<LocationService>().pausePositionStream();
     _markersTimer.cancel();
     _iconsTimer.cancel();
+    _internetCheckerBanner.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    Get.find<LocationService>().pausePositionStream();
     super.dispose();
   }
 }

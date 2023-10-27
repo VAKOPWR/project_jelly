@@ -7,22 +7,18 @@ import 'package:project_jelly/pages/Auth/register_form_friends.dart';
 import 'package:project_jelly/pages/Auth/reset_password.dart';
 import 'package:project_jelly/pages/friends.dart';
 import 'package:project_jelly/pages/home.dart';
-// import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/pages/Auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
-// import 'package:project_jelly/theme/theme_manager.dart';
-
-// ThemeManager _themeManager = ThemeManager();
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await GlobalServices.init();
   await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(ProjectJelly());
 }
 
@@ -35,7 +31,6 @@ class ProjectJelly extends StatelessWidget {
         initialRoute: '/home',
         theme: lightTheme,
         darkTheme: darkTheme,
-        // themeMode: _themeManager.themeMode,
         getPages: [
           GetPage(
               name: '/login',
