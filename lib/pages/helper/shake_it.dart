@@ -2,10 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/friend.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:project_jelly/service/map_service.dart';
 
-class ShakeItScreen extends StatelessWidget {
+
+class ShakeItScreen extends StatefulWidget {
   ShakeItScreen({Key? key}) : super(key: key);
+
+  @override
+  _ShakeItScreenState createState() => _ShakeItScreenState();
+}
+
+class _ShakeItScreenState extends State<ShakeItScreen> {
+  List<Friend> friends = [];
+  bool isShaking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    friends = _generateFakeShakingFriends();
+    _startListeningShake();
+  }
 
   List<Friend> _generateFakeShakingFriends() {
     return List<Friend>.generate(
@@ -21,10 +38,39 @@ class ShakeItScreen extends StatelessWidget {
             offlineStatus: ''));
   }
 
+  void _startListeningShake() {
+    double shakeThresholdGravity = 2.7;
+    var lastShakeTimestamp = DateTime.now();
+
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      var now = DateTime.now();
+      var acceleration = event.x * event.x + event.y * event.y + event.z * event.z;
+      acceleration = acceleration / (9.81 * 9.81);
+      if (
+          acceleration > shakeThresholdGravity
+          && now.difference(lastShakeTimestamp) > Duration(seconds: 2)
+      ) {
+        lastShakeTimestamp = now;
+        if (!isShaking) {
+          setState(() {
+            isShaking = true;
+            friends = _generateFakeShakingFriends();
+          });
+
+          Future.delayed(const Duration(seconds: 5), () {
+            if (mounted) {
+              setState(() {
+                isShaking = false;
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Friend> friends = _generateFakeShakingFriends();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -51,7 +97,9 @@ class ShakeItScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        "Also shaking near you",
+                        isShaking
+                            ? "Shaking! Who else is?"
+                            : "Also shaking near you",
                         style: TextStyle(
                           fontSize: 24.0,
                           fontWeight: FontWeight.bold,
