@@ -1,7 +1,6 @@
 class Message{
   String text;
-  DateTime time;
-  String sender;
+  String time;
 
-  Message({required this.text, required this.time, required this.sender});
+  Message({required this.text, required this.time});
 }
