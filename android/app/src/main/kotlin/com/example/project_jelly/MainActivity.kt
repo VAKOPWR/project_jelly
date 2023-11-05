@@ -13,25 +13,53 @@ import java.io.RandomAccessFile
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.example.project_jelly/resourceUsage"
 
+    private val PHONE_STATE_PERMISSION_REQUEST_CODE = 1
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_PHONE_STATE),
+                    PHONE_STATE_PERMISSION_REQUEST_CODE)
+            }
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "getResourceUsage" -> {
-                    val batteryUsage = getBatteryUsage()
-                    val memoryUsage = getMemoryUsage()
-                    val cpuUsage = getCpuUsage()
-                    val usageStats = mapOf(
-                            "batteryUsage" to batteryUsage,
-                            "memoryUsage" to memoryUsage,
-                            "cpuUsage" to cpuUsage
-                    )
-                    result.success(usageStats)
+            if (call.method == "getResourceUsage") {
+                if (hasPhoneStatePermission()) {
+                    getResourceUsage(result)
+                } else {
+                    result.error("PERMISSION_DENIED", "Read phone state permission denied", null)
                 }
-                else -> {
-                    result.notImplemented()
-                }
+            } else {
+                result.notImplemented()
             }
+        }
+    }
+
+    private fun hasPhoneStatePermission(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun getResourceUsage(result: MethodChannel.Result) {
+        if (hasPhoneStatePermission()) {
+            val batteryUsage = getBatteryUsage()
+            val memoryUsage = getMemoryUsage()
+            val cpuUsage = getCpuUsage()
+            val usageStats = mapOf(
+                    "batteryUsage" to batteryUsage,
+                    "memoryUsage" to memoryUsage,
+                    "cpuUsage" to cpuUsage
+            )
+            result.success(usageStats)
+        } else {
+            result.error("PERMISSION_DENIED", "Read phone state permission not granted", null)
         }
     }
 
