@@ -2,8 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
-
-import 'home.dart';
+import 'package:project_jelly/pages/Auth/login.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -28,7 +27,8 @@ class _ProfilePageState extends State<ProfilePage> {
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                authLogOut().then((value) => Get.offAll(() => const HomePage()));
+                authLogOut().then((value) => Get.offAll(() => const LogInPage(),
+                    transition: Transition.rightToLeft));
               },
             ),
           ],
@@ -90,7 +90,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
 }
 
 class CircularButton extends StatelessWidget {

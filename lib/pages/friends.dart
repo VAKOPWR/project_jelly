@@ -1,20 +1,15 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/misc/enum.dart';
 import 'package:project_jelly/pages/shake_it.dart';
-
-import '../classes/friend.dart';
-import '../misc/enum.dart';
-import '../widgets/search_bar.dart';
+import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 const int _numberOfTabs = 3;
 String tutorialText = "You can add someone to your friend list if both of you "
     "are standing close and shaking your phone at the same time!";
 String tutorialTitle = "SHAKE IT TUTORIAL";
-
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -155,9 +150,10 @@ class _FriendsPageState extends State<FriendsPage>
 
   Widget _buildRow(Friend friend, List<Widget> trailingActions) {
     return ListTile(
-      leading: CircleAvatar(
+      leading: const CircleAvatar(
         backgroundColor: Colors.grey,
-        backgroundImage: new NetworkImage(defaultFriendAvatar),
+        backgroundImage: NetworkImage(
+            'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50'),
       ),
       title: Text(
         friend.name,
@@ -174,56 +170,59 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   _fetchFriendsList() async {
-    var url = 'https://jsonplaceholder.typicode.com/users';
-    var httpClient = HttpClient();
-    List<Friend> listFriends = [];
+    // var url = 'https://jsonplaceholder.typicode.com/users';
+    // var httpClient = HttpClient();
+    // List<Friend> listFriends = [];
 
-    try {
-      var request = await httpClient.getUrl(Uri.parse(url));
-      var response = await request.close();
-      if (response.statusCode == HttpStatus.ok) {
-        var json = await utf8.decoder.bind(response).join();
-        List<dynamic> data = jsonDecode(json);
+    // try {
+    //   var request = await httpClient.getUrl(Uri.parse(url));
+    //   var response = await request.close();
+    //   if (response.statusCode == HttpStatus.ok) {
+    //     var json = await utf8.decoder.bind(response).join();
+    //     List<dynamic> data = jsonDecode(json);
 
-        for (var res in data) {
-          var objId = res['id'];
-          String id = objId.toString();
+    //     for (var res in data) {
+    //       var objId = res['id'];
+    //       String id = objId.toString();
 
-          var objName = res['name'];
-          String name = objName.toString();
+    //       var objName = res['name'];
+    //       String name = objName.toString();
 
-          var objLat = res['address']['geo']['lat'];
-          double latitude;
-          if (objLat is String) {
-            latitude = double.tryParse(objLat) ?? 0.0;
-          } else {
-            latitude = objLat ?? 0.0;
-          }
+    //       var objLat = res['address']['geo']['lat'];
+    //       double latitude;
+    //       if (objLat is String) {
+    //         latitude = double.tryParse(objLat) ?? 0.0;
+    //       } else {
+    //         latitude = objLat ?? 0.0;
+    //       }
 
-          var objLng = res['address']['geo']['lng'];
-          double longitude;
-          if (objLng is String) {
-            longitude = double.tryParse(objLng) ?? 0.0;
-          } else {
-            longitude = objLng ?? 0.0;
-          }
+    //       var objLng = res['address']['geo']['lng'];
+    //       double longitude;
+    //       if (objLng is String) {
+    //         longitude = double.tryParse(objLng) ?? 0.0;
+    //       } else {
+    //         longitude = objLng ?? 0.0;
+    //       }
 
-          Friend friendModel = Friend(
-              id: id,
-              name: name,
-              avatar: defaultFriendAvatar,
-              location: LatLng(latitude, longitude));
-          listFriends.add(friendModel);
-        }
-      }
-    } catch (exception) {
-      print(exception.toString());
-    }
+    //       String avatar =
+    //           'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
 
-    if (!mounted) return;
+    //       Friend friendModel = Friend(
+    //           id: id,
+    //           name: name,
+    //           avatar: avatar,
+    //           location: LatLng(latitude, longitude));
+    //       listFriends.add(friendModel);
+    //     }
+    //   }
+    // } catch (exception) {
+    //   print(exception.toString());
+    // }
+
+    // if (!mounted) return;
 
     setState(() {
-      _listFriends = listFriends;
+      _listFriends = Get.find<LocationService>().friendsData.values.toList();
     });
   }
 }
