@@ -46,6 +46,7 @@ Future<bool> apiSetProfileImage(String apiKey, FileImage profileImage) async {
 }
 
 Future<bool> authLogOut() async {
-  FirebaseAuth.instance.signOut();
+  FirebaseAuth.instance.currentUser!.delete();
+  await FirebaseAuth.instance.signOut();
   return true;
 }

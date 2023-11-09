@@ -27,8 +27,9 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: () {
-                authLogOut().then((value) => Get.offAll(() => const HomePage()));
+              onPressed: () async {
+                await authLogOut();
+                Get.offAll(() => const HomePage());
               },
             ),
           ],
