@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+// ignore: unused_import
+import 'dart:developer';
+import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +13,11 @@ import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/misc/backend_url.dart';
+import 'package:project_jelly/misc/image_modifier.dart';
 import 'package:project_jelly/misc/location_mock.dart';
+import 'package:project_jelly/misc/uint8list_image.dart';
 
+// TODO: Add optimization logic
 class LocationService extends GetxService {
   Position? _currentLocation;
   Stream<Position> locationStream = Geolocator.getPositionStream(
@@ -26,14 +32,19 @@ class LocationService extends GetxService {
       heading: 0.0,
       speed: 0.0,
       speedAccuracy: 0.0);
-  BitmapDescriptor? _defaultAvatar;
+  Uint8List? defaultAvatar;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<MarkerId, BitmapDescriptor> avatars = <MarkerId, BitmapDescriptor>{};
+  Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};
+  Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
+  Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   MockLocationService _locationService = MockLocationService();
 
   @override
   Future<void> onInit() async {
     super.onInit();
+  }
+
+  Future<void> prepareService() async {
     await requestLocationPermission().then((locationGranted) async {
       if (locationGranted) {
         Position? lastKnownLoc = await Geolocator.getLastKnownPosition();
@@ -46,9 +57,19 @@ class LocationService extends GetxService {
         _currentLocation = _defaultPosition;
       }
     });
-    await loadCustomAvatars();
     await loadDefaultAvatar();
-    await updateMarkers();
+    if (FirebaseAuth.instance.currentUser != null) {
+      await fetchFriendsData();
+      await loadCustomAvatars();
+      await loadImageProviders();
+      await updateMarkers();
+    }
+    Timer.periodic(Duration(minutes: 30), (timer) async {
+      if (FirebaseAuth.instance.currentUser != null) {
+        await loadCustomAvatars();
+        await loadImageProviders();
+      }
+    });
   }
 
   void startPositionStream() async {
@@ -91,16 +112,47 @@ class LocationService extends GetxService {
   }
 
   Future<void> loadDefaultAvatar() async {
-    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
+    defaultAvatar = await getBytesFromAsset('assets/no_avatar.png', 150);
   }
 
   Future<void> loadCustomAvatars() async {
-    Map<String, Uint8List> friendsAvatars =
+    Map<String, Uint8List?> friendsAvatars =
         await _locationService.getFriendsIcons();
-    friendsAvatars.forEach((key, value) {
-      avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
-    });
+    for (var avatar in friendsAvatars.entries) {
+      String key = avatar.key;
+      Uint8List? value = avatar.value;
+      if (value != null) {
+        avatars[MarkerId(key)] = await modifyImage(
+            value,
+            Colors.red,
+            friendsData[MarkerId(key)]!.isOnline,
+            friendsData[MarkerId(key)]!.offlineStatus);
+      } else {
+        avatars[MarkerId(key)] = await modifyImage(
+            defaultAvatar!,
+            Colors.red,
+            friendsData[MarkerId(key)]!.isOnline,
+            friendsData[MarkerId(key)]!.offlineStatus);
+      }
+    }
+  }
+
+  Future<void> loadImageProviders() async {
+    for (var avatar in avatars.entries) {
+      MarkerId key = avatar.key;
+      Uint8List? value = avatar.value;
+      imageProviders[key] = await Uint8ListImageProvider(value);
+    }
+    for (MarkerId friendId in friendsData.keys) {
+      if (!imageProviders.containsKey(friendId)) {
+        imageProviders[friendId] = await Uint8ListImageProvider(
+            await modifyImage(
+                defaultAvatar!,
+                Colors.red,
+                friendsData[friendId]!.isOnline,
+                friendsData[friendId]!.offlineStatus));
+      }
+    }
   }
 
   Marker _createMarker(Friend friend) {
@@ -110,13 +162,25 @@ class LocationService extends GetxService {
         infoWindow: InfoWindow(
           title: friend.name,
         ),
-        icon: avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
+        icon: avatars[MarkerId(friend.id)] != null
+            ? BitmapDescriptor.fromBytes(avatars[MarkerId(friend.id)]!)
+            : BitmapDescriptor.fromBytes(defaultAvatar!));
+  }
+
+  Future<void> fetchFriendsData() async {
+    List<Friend> friendsLocations = await _locationService.getFriendsLocation();
+    for (Friend friend in friendsLocations) {
+      friendsData[MarkerId(friend.id)] = friend;
+    }
   }
 
   Future<void> updateMarkers() async {
-    List<Friend> friendsLocation = await _locationService.getFriendsLocation();
-    for (Friend friend in friendsLocation) {
-      markers[MarkerId(friend.id)] = _createMarker(friend);
+    List<MarkerId> friendIDs = avatars.keys.toList();
+    for (var friend in friendsData.entries) {
+      if (!friendIDs.contains(friend.key)) {
+        await loadCustomAvatars();
+      }
+      markers[friend.key] = _createMarker(friend.value);
     }
   }
 
@@ -151,5 +215,15 @@ class LocationService extends GetxService {
       return people;
     }
     return List.empty();
+  }
+
+  static Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
   }
 }
