@@ -31,7 +31,9 @@ class LocationService extends GetxService {
       altitude: 0.0,
       heading: 0.0,
       speed: 0.0,
-      speedAccuracy: 0.0);
+      speedAccuracy: 0.0,
+      altitudeAccuracy: 0.0,
+      headingAccuracy: 0.0);
   Uint8List? defaultAvatar;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};

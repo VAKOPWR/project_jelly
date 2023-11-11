@@ -1,21 +1,19 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-
-import '../classes/person.dart';
+import 'package:project_jelly/classes/friend.dart';
 
 class FriendSpecificGhostMode extends StatefulWidget {
-  final Person person;
+  final Friend person;
 
-  const FriendSpecificGhostMode({Key? key, required this.person}) : super(key: key);
+  const FriendSpecificGhostMode({Key? key, required this.person})
+      : super(key: key);
 
   @override
-  State<FriendSpecificGhostMode> createState() => _FriendSpecificGhostModeState();
+  State<FriendSpecificGhostMode> createState() =>
+      _FriendSpecificGhostModeState();
 }
 
-
 class _FriendSpecificGhostModeState extends State<FriendSpecificGhostMode> {
-
-
   int locationPrecisionOption = 0;
   int otherOption = 0;
 
@@ -26,12 +24,8 @@ class _FriendSpecificGhostModeState extends State<FriendSpecificGhostMode> {
         preferredSize: const Size.fromHeight(250),
         child: AppBar(
           backgroundColor: Colors.green[600],
-          title: AutoSizeText(
-              widget.person.name,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold
-              )
-          ),
+          title: AutoSizeText(widget.person.name,
+              style: TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
           actions: [
             IconButton(
@@ -41,13 +35,6 @@ class _FriendSpecificGhostModeState extends State<FriendSpecificGhostMode> {
               },
             ),
           ],
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: (){
-              // Navigator.of(context).pop();
-              Navigator.pop(context);
-            },
-          ),
           flexibleSpace: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -69,7 +56,8 @@ class _FriendSpecificGhostModeState extends State<FriendSpecificGhostMode> {
       ),
       body: Container(
         color: Colors.white,
-        child: SingleChildScrollView( // Make the list scrollable
+        child: SingleChildScrollView(
+          // Make the list scrollable
           child: Column(
             children: [
               Divider(

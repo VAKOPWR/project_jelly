@@ -31,7 +31,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   auto_size_text: ^3.0.0
   google_maps_flutter: ^2.4.0
   location: ^5.0.3

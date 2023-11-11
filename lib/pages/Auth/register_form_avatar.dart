@@ -6,8 +6,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/logic/permissions.dart';
+import 'package:project_jelly/pages/helper/loading.dart';
 import 'package:project_jelly/pages/home.dart';
-import 'package:project_jelly/pages/loading.dart';
 import 'package:project_jelly/widgets/dialogs.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 

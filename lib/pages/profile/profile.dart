@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
-import 'package:project_jelly/pages/Auth/login.dart';
+import 'package:project_jelly/pages/auth/login.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -69,7 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Text(
-              "Лорем ипсум или как там",
+              "Lorem ipsum dolor sit amet",
               style: TextStyle(
                 fontSize: 20,
               ),
@@ -81,9 +81,11 @@ class _ProfilePageState extends State<ProfilePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CircularButton(icon: Icons.edit),
-              CircularButton(icon: Icons.settings),
-              CircularButton(icon: Icons.remove_red_eye_outlined),
+              CircularButton(icon: Icons.edit, destinationPath: ''),
+              CircularButton(icon: Icons.settings, destinationPath: ''),
+              CircularButton(
+                  icon: Icons.remove_red_eye_outlined,
+                  destinationPath: '/ghost_mode'),
             ],
           ),
         ],
@@ -94,23 +96,30 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class CircularButton extends StatelessWidget {
   final IconData icon;
+  final String destinationPath;
 
-  const CircularButton({required this.icon});
+  CircularButton({required this.icon, required this.destinationPath});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-      child: Center(
-        child: Icon(
-          icon,
-          size: 40,
-          color: Theme.of(context).colorScheme.onPrimary,
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, destinationPath);
+      },
+      child: Container(
+        width: 80.0, // Adjust the size as needed
+        height: 80.0, // Adjust the size as needed
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Theme.of(context)
+              .colorScheme
+              .primary, // Change the color as needed
+        ),
+        child: Center(
+          child: Icon(icon, // Use the passed icon
+              color: Theme.of(context).colorScheme.onPrimary,
+              size: 42.0 // Change the icon color as needed
+              ),
         ),
       ),
     );

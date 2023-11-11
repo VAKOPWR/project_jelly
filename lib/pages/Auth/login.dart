@@ -4,7 +4,7 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/logic/auth.dart';
-import 'package:project_jelly/pages/Auth/register_form.dart';
+import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/service/auth_service.dart';
 import 'package:project_jelly/service/location_service.dart';
