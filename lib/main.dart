@@ -8,7 +8,11 @@ import 'package:project_jelly/pages/Auth/register_form.dart';
 import 'package:project_jelly/pages/Auth/register_form_avatar.dart';
 // import 'package:project_jelly/pages/Auth/register_form_friends.dart';
 import 'package:project_jelly/pages/Auth/reset_password.dart';
+import 'package:flutter/material.dart';
+import 'package:project_jelly/pages/FriendSpecificGhostMode.dart';
+import 'package:project_jelly/pages/chat/messages/chatMessagesFriend.dart';
 import 'package:project_jelly/pages/friends.dart';
+import 'package:project_jelly/pages/ghostModeSettings/ghostModeScreen.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/pages/Auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
@@ -78,4 +82,3 @@ class ProjectJelly extends StatelessWidget {
               transitionDuration: const Duration(seconds: 2)),
         ]);
   }
-}
