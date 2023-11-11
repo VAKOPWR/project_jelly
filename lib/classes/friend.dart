@@ -6,8 +6,10 @@ class Friend {
   String avatar;
   LatLng location;
   String description;
-  String batteryPercentage;
-  String movementSpeed;
+  int batteryPercentage;
+  int movementSpeed;
+  bool isOnline;
+  String offlineStatus;
 
   Friend(
       {required this.id,
@@ -16,7 +18,9 @@ class Friend {
       required this.location,
       required this.description,
       required this.batteryPercentage,
-      required this.movementSpeed});
+      required this.movementSpeed,
+      required this.isOnline,
+      required this.offlineStatus});
 
   factory Friend.fromJson(Map<String, dynamic> json) {
     return Friend(
@@ -27,6 +31,8 @@ class Friend {
         location: LatLng(json['latitude'], json['longitude']),
         description: json['description'],
         batteryPercentage: json['batteryPercentage'],
-        movementSpeed: json['movementSpeed']);
+        movementSpeed: json['movementSpeed'],
+        isOnline: json['isOnline'],
+        offlineStatus: json['offlineStatus']);
   }
 }

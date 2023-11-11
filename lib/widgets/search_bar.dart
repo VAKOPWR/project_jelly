@@ -13,9 +13,10 @@ class SearchBarWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             decoration: InputDecoration(
+              hintStyle: TextStyle(color: Theme.of(context).hintColor),
               hintText: "Search",
               filled: true,
-              fillColor: Colors.grey[200],
+              fillColor: Theme.of(context).dialogBackgroundColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide.none,
