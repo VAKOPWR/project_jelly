@@ -5,6 +5,8 @@ class GhostModeTabGroups extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Placeholder();
+    return Container(
+      color: Theme.of(context).canvasColor,
+    );
   }
 }

@@ -20,6 +20,7 @@ class _MessagesPageState extends State<MessagesPage> {
             appBar: AppBar(
                 title: Text('Messages'), centerTitle: true, elevation: 0.0),
             body: Container(
+              color: Theme.of(context).colorScheme.background,
               child: const Column(
                 children: [
                   TabBar(

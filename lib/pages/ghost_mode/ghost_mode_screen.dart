@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_everyone.dart';
+import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_global.dart';
 import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_friends.dart';
 import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_groups.dart';
 
@@ -21,12 +21,13 @@ class _GhostModeState extends State<GhostMode> {
               elevation: 0.0,
             ),
             body: Container(
+              color: Theme.of(context).colorScheme.background,
               child: const Column(
                 children: [
                   TabBar(
                     tabs: [
                       Tab(
-                        text: 'Everyone',
+                        text: 'Global',
                       ),
                       Tab(
                         text: 'Groups',
@@ -39,7 +40,7 @@ class _GhostModeState extends State<GhostMode> {
                   Expanded(
                       child: TabBarView(
                     children: [
-                      GhostModeTabEveryone(),
+                      GhostModeTabGlobal(),
                       GhostModeTabGroups(),
                       GhostModeTabFriends()
                     ],

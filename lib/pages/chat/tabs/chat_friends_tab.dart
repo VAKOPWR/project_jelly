@@ -10,6 +10,8 @@ class ChatFriendsTab extends StatefulWidget {
 class _ChatFriendsTabState extends State<ChatFriendsTab> {
   @override
   Widget build(BuildContext context) {
-    return Placeholder();
+    return Container(
+      color: Theme.of(context).canvasColor,
+    );
   }
 }

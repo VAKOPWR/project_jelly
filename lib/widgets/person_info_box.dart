@@ -27,7 +27,7 @@ class _PersonInfoBoxState extends State<PersonInfoBox> {
             physics: NeverScrollableScrollPhysics(),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).primaryColor.withOpacity(0.9),
                 borderRadius: BorderRadius.all(
                   Radius.circular(10.0),
                 ),
@@ -125,9 +125,6 @@ class _PersonInfoBoxState extends State<PersonInfoBox> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(90.0),
                           ),
-                          // backgroundColor: Theme.of(context)
-                          //     .colorScheme
-                          //     .primary, // Set the background color
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
