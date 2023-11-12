@@ -211,7 +211,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                               Icons.map_rounded,
                               color: Colors.grey[700],
                             ),
-                            backgroundColor: Colors.grey[50]!.withOpacity(0.9),
+                            backgroundColor: Colors.white.withOpacity(0.95),
                             elevation: 2.0,
                             shape: RoundedRectangleBorder(
                               borderRadius:
