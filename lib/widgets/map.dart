@@ -1,18 +1,17 @@
 import 'dart:async';
+// ignore: unused_import
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:internet_checker_banner/internet_checker_banner.dart';
-import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/logic/permissions.dart';
-import 'package:project_jelly/misc/location_mock.dart';
-import 'package:project_jelly/pages/loading.dart';
+import 'package:project_jelly/misc/geocoding.dart';
+import 'package:project_jelly/pages/helper/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/snackbar_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
+import 'package:project_jelly/widgets/person_info_box.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -22,65 +21,43 @@ class MapWidget extends StatefulWidget {
 }
 
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
-  final Completer<GoogleMapController> _controller = Completer();
-  MockLocationService _locationService = MockLocationService();
-  BitmapDescriptor? _defaultAvatar;
-  late Timer _locationTimer;
+  final Completer<GoogleMapController> _mapController = Completer();
   late Timer _markersTimer;
-  late Timer _iconsTimer;
-  final _internetCheckerBanner = InternetCheckerBanner();
-  final _markers = <MarkerId, Marker>{};
-  final _avatars = <MarkerId, BitmapDescriptor>{};
-  MapType mapType = MapType.normal;
-  String _darkMapStyle = '';
-  String _lightMapStyle = '';
+  bool _isBottomSheetVisible = false;
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  MapType _mapType = MapType.normal;
+  MarkerId? _highlightedMarker = null;
+  String _locationName = "The Earth";
+  late Timer _debounce;
 
   @override
   void initState() {
-    _internetCheckerBanner.initialize(context, title: "No internet access");
-    _loadDefaultAvatar();
-    _loadCustomAvatars();
-    _iconsTimer = Timer.periodic(Duration(minutes: 30), (timer) {
-      _loadCustomAvatars();
-    });
-    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    Get.find<SnackbarService>().checkLocationAccess();
+    _updateMarkers();
+    _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
+      await Get.find<LocationService>().fetchFriendsData();
+      await Get.find<LocationService>().updateMarkers();
       _updateMarkers();
     });
+    _debounce = Timer(Duration(seconds: 1), () {});
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    loadMapStyles();
     Get.find<LocationService>().startPositionStream();
   }
 
-  Future<void> _loadDefaultAvatar() async {
-    _defaultAvatar = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(50, 50)), 'assets/N01.png');
-  }
-
-  Future<void> _loadCustomAvatars() async {
-    Map<String, Uint8List> avatars = await _locationService.getFriendsIcons();
-    setState(() {
-      avatars.forEach((key, value) {
-        _avatars[MarkerId(key)] = BitmapDescriptor.fromBytes(value);
-      });
-    });
-  }
-
-  Marker createMarker(Friend friend) {
-    return Marker(
-        markerId: MarkerId(friend.id),
-        position: friend.location,
-        infoWindow: InfoWindow(
-          title: friend.name,
-        ),
-        icon: _avatars[MarkerId(friend.id)] ?? _defaultAvatar!);
-  }
-
   Future<void> _updateMarkers() async {
-    List<Friend> friendList = await _locationService.getFriendsLocation();
     setState(() {
-      for (Friend friend in friendList) {
-        _markers[MarkerId(friend.id)] = createMarker(friend);
+      for (var markerEntry in Get.find<LocationService>().markers.entries) {
+        _markers[markerEntry.key] = Marker(
+            markerId: markerEntry.value.markerId,
+            position: markerEntry.value.position,
+            icon: markerEntry.value.icon,
+            onTap: () {
+              setState(() {
+                _isBottomSheetVisible = true;
+                _highlightedMarker = markerEntry.value.markerId;
+              });
+            });
       }
     });
   }
@@ -100,51 +77,57 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     }
   }
 
-  Future loadMapStyles() async {
-    _darkMapStyle = await rootBundle.loadString('assets/map/dark_map.json');
-    _lightMapStyle = await rootBundle.loadString('assets/map/light_map.json');
-  }
-
   @override
   void didChangePlatformBrightness() {
     super.didChangePlatformBrightness();
-
     Brightness brightness =
         View.of(context).platformDispatcher.platformBrightness;
     if (brightness == Brightness.light) {
-      _controller.future.then((value) => value.setMapStyle(_lightMapStyle));
+      _mapController.future.then(
+          (value) => value.setMapStyle(GetStorage().read('lightMapStyle')));
     } else {
-      _controller.future.then((value) => value.setMapStyle(_darkMapStyle));
+      _mapController.future.then(
+          (value) => value.setMapStyle(GetStorage().read('darkMapStyle')));
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      log('State resumed');
-      requestLocationPermission().then((locationGranted) {
-        if (!locationGranted) {
-          Get.find<LocationService>().pausePositionStream();
-          Get.snackbar('No Location Avaliable',
-              "Try modifying application permissions in the settings",
-              icon: Icon(Icons.location_disabled_rounded,
-                  color: Colors.white, size: 35),
-              snackPosition: SnackPosition.TOP,
-              isDismissible: false,
-              duration: Duration(days: 1),
-              backgroundColor: Colors.red[400],
-              margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED);
-        } else {
-          Get.find<LocationService>().resumePositionStream();
-          try {
-            Get.closeAllSnackbars();
-          } catch (LateInitializationError) {
-            log('Nothing to close');
-          }
-        }
-      });
+      Get.find<SnackbarService>().checkLocationAccess();
+      Get.find<LocationService>().updateMarkers();
+      Get.find<LocationService>().loadImageProviders();
+      _updateMarkers();
     }
+  }
+
+  void hideBottomSheet(CameraPosition) {
+    setState(() {
+      if (_isBottomSheetVisible == true) {
+        _isBottomSheetVisible = false;
+      }
+    });
+  }
+
+  void _onCameraMove(CameraPosition position) {
+    if (_debounce.isActive) {
+      _debounce.cancel();
+    }
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      GoogleMapController controller = await _mapController.future;
+      double zoomLevel = await controller.getZoomLevel();
+      if (zoomLevel <= 6) {
+        setState(() {
+          _locationName = "The Earth";
+        });
+      } else {
+        String newCityName =
+            await getCityNameFromCoordinates(position.target, zoomLevel);
+        setState(() {
+          _locationName = newCityName;
+        });
+      }
+    });
   }
 
   @override
@@ -154,31 +137,48 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
             ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(
-                      Get.find<LocationService>()
-                          .getCurrentLocation()!
-                          .latitude,
-                      Get.find<LocationService>()
-                          .getCurrentLocation()!
-                          .longitude,
+                    compassEnabled: false,
+                    rotateGesturesEnabled: false,
+                    tiltGesturesEnabled: false,
+                    onTap: hideBottomSheet,
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .latitude,
+                        Get.find<LocationService>()
+                            .getCurrentLocation()!
+                            .longitude,
+                      ),
+                      zoom: 13,
                     ),
-                    zoom: 13,
-                  ),
-                  onMapCreated: (mapController) {
-                    if (Theme.of(context).brightness == Brightness.light) {
-                      mapController.setMapStyle(_lightMapStyle);
-                    } else {
-                      mapController.setMapStyle(_darkMapStyle);
-                    }
-                    _controller.complete(mapController);
-                  },
-                  myLocationButtonEnabled: true,
-                  myLocationEnabled: true,
-                  padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
-                  mapType: mapType,
-                  markers: _markers.values.toSet(),
-                ),
+                    onMapCreated: (mapController) {
+                      if (Theme.of(context).brightness == Brightness.light) {
+                        mapController
+                            .setMapStyle(GetStorage().read('lightMapStyle'));
+                      } else {
+                        mapController
+                            .setMapStyle(GetStorage().read('darkMapStyle'));
+                      }
+                      _mapController.complete(mapController);
+                    },
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
+                    padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
+                    mapType: _mapType,
+                    markers: _markers.values.toSet(),
+                    onCameraMove: _onCameraMove),
+                AnimatedContainer(
+                    duration: Duration(milliseconds: 300), // Animation duration
+                    height: _isBottomSheetVisible
+                        ? MediaQuery.of(context).size.height * 0.78
+                        : 0,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    margin: EdgeInsets.fromLTRB(
+                        MediaQuery.of(context).size.width * 0.05, 0, 0, 0),
+                    child: _highlightedMarker != null
+                        ? PersonInfoBox(id: _highlightedMarker!)
+                        : null),
                 Platform.isIOS
                     ? Positioned(
                         top: 50.0,
@@ -186,7 +186,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                         child: FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                mapType = getNextMap(mapType);
+                                _mapType = getNextMap(_mapType);
                               });
                             },
                             child: Icon(
@@ -204,7 +204,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                           child: FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                mapType = getNextMap(mapType);
+                                _mapType = getNextMap(_mapType);
                               });
                             },
                             child: Icon(
@@ -220,16 +220,32 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                           ),
                         )),
                 NavButtons(),
+                Positioned(
+                  top: 60.0,
+                  left: 25.0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        _locationName,
+                        style: TextStyle(
+                          fontSize: 32.0,
+                          fontWeight: FontWeight.normal,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               ]));
   }
 
   @override
   void dispose() {
+    _debounce.cancel();
     _markersTimer.cancel();
-    _iconsTimer.cancel();
-    _internetCheckerBanner.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     Get.find<LocationService>().pausePositionStream();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

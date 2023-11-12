@@ -94,29 +94,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                     BorderRadius.all(Radius.circular(9.0)))),
                       ),
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: TextFormField(
-                    //     validator: MultiValidator([
-                    //       RequiredValidator(errorText: 'Enter last name'),
-                    //       MinLengthValidator(3,
-                    //           errorText:
-                    //               'Last name should be atleast 3 charater'),
-                    //     ]),
-                    //     decoration: const InputDecoration(
-                    //         hintText: 'Last Name',
-                    //         labelText: 'Last Name',
-                    //         prefixIcon: Icon(
-                    //           Icons.person,
-                    //           color: Colors.grey,
-                    //         ),
-                    //         errorStyle: TextStyle(fontSize: 14.0),
-                    //         border: OutlineInputBorder(
-                    //             borderSide: BorderSide(color: Colors.red),
-                    //             borderRadius:
-                    //                 BorderRadius.all(Radius.circular(9.0)))),
-                    //   ),
-                    // ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextFormField(

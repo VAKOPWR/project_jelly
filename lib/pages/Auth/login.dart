@@ -1,14 +1,13 @@
-import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/logic/auth.dart';
-import 'package:project_jelly/pages/Auth/register_form.dart';
+import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/service/auth_service.dart';
+import 'package:project_jelly/service/location_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -28,25 +27,31 @@ class _LogInPageState extends State<LogInPage> {
   bool _obscurePassword = true;
   bool _isEmailValid = true;
   bool _isPasswordValid = true;
+  bool _isGoogleAuth = false;
 
   void _submitForm() async {
-    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      String? authKey =
-          await apiLogIn(_emailController.text, _passwordController.text);
-
-      if (authKey == null) {
-        _submitBtnController.error();
-        setState(() {
-          _isEmailValid = false;
-          _isPasswordValid = false;
-        });
-      } else {
-        _submitBtnController.success();
-        GetStorage().write('AuthKey', authKey);
-        Get.off(() => const HomePage());
-      }
+    if (_isGoogleAuth) {
+      _submitBtnController.start();
     } else {
-      _submitBtnController.error();
+      if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+        String? authKey =
+            await apiLogIn(_emailController.text, _passwordController.text);
+        if (authKey == null) {
+          _submitBtnController.error();
+          setState(() {
+            _isEmailValid = false;
+            _isPasswordValid = false;
+          });
+        } else {
+          _submitBtnController.success();
+          GetStorage().write('AuthKey', authKey);
+          Get.off(() => const HomePage(),
+              transition: Transition.circularReveal,
+              duration: const Duration(seconds: 2));
+        }
+      } else {
+        _submitBtnController.error();
+      }
     }
   }
 
@@ -54,8 +59,9 @@ class _LogInPageState extends State<LogInPage> {
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
       Future.delayed(Duration.zero, () {
-        log('Going home');
-        Get.offNamed('/home');
+        Get.off(() => const HomePage(),
+            transition: Transition.circularReveal,
+            duration: const Duration(seconds: 2));
       });
     }
 
@@ -225,16 +231,37 @@ class _LogInPageState extends State<LogInPage> {
                                       child: ClipOval(
                                         child: Material(
                                           child: InkWell(
-                                            onTap: () => Get.find<AuthService>()
-                                                .signInWithGoogle()
-                                                .then((credentials) => Get.off(
-                                                    () => const HomePage())),
+                                            onTap: () async {
+                                              setState(() {
+                                                _isGoogleAuth = true;
+                                              });
+                                              _submitBtnController.start();
+                                              UserCredential? userCredentials =
+                                                  await Get.find<AuthService>()
+                                                      .signInWithGoogle();
+                                              if (userCredentials != null) {
+                                                await Get.find<
+                                                        LocationService>()
+                                                    .prepareService();
+                                                _submitBtnController.success();
+                                                Get.off(() => const HomePage(),
+                                                    transition: Transition
+                                                        .circularReveal,
+                                                    duration: const Duration(
+                                                        seconds: 2));
+                                              } else {
+                                                _isGoogleAuth = false;
+                                                Get.snackbar('Error',
+                                                    'Authentication failed. Please try again.');
+                                                _submitBtnController.error();
+                                              }
+                                            },
                                             child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: <Widget>[
                                                 Image.asset(
-                                                    'assets/google.png') // <-- Text
+                                                    'assets/google.png'), // Google Icon// Loading indicator
                                               ],
                                             ),
                                           ),

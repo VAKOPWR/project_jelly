@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:developer' as dev;
-import 'dart:typed_data';
+// import 'dart:developer' as dev;
 import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,23 +13,34 @@ class MockLocationService {
   MockLocationService() {
     _random = Random();
 
-    // Initial locations for three friends in Wroclaw
     _friends = [
       Friend(
           id: '1',
-          name: 'Viktor',
-          avatar: 'assets/N01.png',
-          location: LatLng(51.1079, 17.0385)),
+          name: 'Kseniia',
+          avatar: 'assets/1.jpg',
+          location: LatLng(51.1079, 17.0385),
+          batteryPercentage: 81,
+          movementSpeed: 3,
+          isOnline: true,
+          offlineStatus: ''),
       Friend(
           id: '2',
           name: 'Andrii',
-          avatar: 'assets/N02.png',
-          location: LatLng(51.1102, 17.0301)),
+          avatar: 'assets/andrii.jpeg',
+          location: LatLng(51.1102, 17.0301),
+          batteryPercentage: 54,
+          movementSpeed: 29,
+          isOnline: false,
+          offlineStatus: '3h'),
       Friend(
           id: '3',
           name: 'Orest',
-          avatar: 'assets/N03.png',
-          location: LatLng(51.1045, 17.0458)),
+          avatar: 'null',
+          location: LatLng(51.1045, 17.0458),
+          batteryPercentage: 18,
+          movementSpeed: 3,
+          isOnline: false,
+          offlineStatus: '21h'),
     ];
   }
 
@@ -41,6 +51,8 @@ class MockLocationService {
       double longitude =
           friend.location.longitude + (_random.nextDouble() - 0.5) * 0.001;
       friend.location = LatLng(latitude, longitude);
+      friend.batteryPercentage = _random.nextInt(100);
+      friend.movementSpeed = _random.nextInt(50);
     });
     return _friends;
   }
@@ -55,10 +67,14 @@ class MockLocationService {
         .asUint8List();
   }
 
-  Future<Map<String, Uint8List>> getFriendsIcons() async {
-    Map<String, Uint8List> icons = {};
+  Future<Map<String, Uint8List?>> getFriendsIcons() async {
+    Map<String, Uint8List?> icons = {};
     for (var friend in _friends) {
-      icons[friend.id] = await getBytesFromAsset(friend.avatar, 100);
+      if (friend.avatar == 'null') {
+        icons[friend.id] = null;
+      } else {
+        icons[friend.id] = await getBytesFromAsset(friend.avatar, 150);
+      }
     }
     return icons;
   }
