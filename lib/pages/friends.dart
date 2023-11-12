@@ -178,38 +178,59 @@ class _FriendsPageState extends State<FriendsPage>
   }
 }
 
-class FriendListTab extends StatelessWidget {
+class FriendListTab extends StatefulWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final List<Widget> trailingActions;
   final Widget Function(Friend, List<Widget>) buildRowForFriendList;
 
   const FriendListTab({
-    super.key,
+    Key? key,
     required this.friends,
     required this.onTabChange,
     required this.buildRowForFriendList,
     required this.trailingActions,
-  });
+  }) : super(key: key);
+
+  @override
+  _FriendListTabState createState() => _FriendListTabState();
+}
+
+class _FriendListTabState extends State<FriendListTab> {
+  List<Friend> filteredFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredFriends = widget.friends;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      filteredFriends = widget.friends
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
-      content: ListView.builder(
-        itemCount: friends.length * 2,
-        itemBuilder: (context, i) {
-          if (i.isOdd) return const Divider();
-          final friendIndex = i ~/ 2;
-          return (friendIndex < friends.length)
-              ? buildRowForFriendList(friends[friendIndex], trailingActions)
-              : null;
+      onSearchChanged: _onSearchChanged,
+      content: ListView.separated(
+        itemCount: filteredFriends.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          return widget.buildRowForFriendList(
+              filteredFriends[index], widget.trailingActions);
         },
       ),
     );
   }
 }
 
-class FriendFindingTab extends StatelessWidget {
+class FriendFindingTab extends StatefulWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final VoidCallback? onShakeButtonPressed;
@@ -226,20 +247,40 @@ class FriendFindingTab extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _FriendFindingTabState createState() => _FriendFindingTabState();
+}
+
+class _FriendFindingTabState extends State<FriendFindingTab> {
+  List<Friend> filteredFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredFriends = widget.friends;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      filteredFriends = widget.friends
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          child: SearchBarWidget(
-            content: ListView.builder(
-              itemCount: friends.length * 2,
-              itemBuilder: (context, i) {
-                if (i.isOdd) return const Divider();
-                final friendIndex = i ~/ 2;
-                return (friendIndex < friends.length)
-                    ? buildRowForFriendFinding(
-                        friends[friendIndex], trailingActions)
-                    : null;
+        SearchBarWidget(
+          onSearchChanged: _onSearchChanged,
+          content: Expanded(
+            child: ListView.separated(
+              itemCount: filteredFriends.length,
+              separatorBuilder: (context, index) => const Divider(),
+              itemBuilder: (context, index) {
+                return widget.buildRowForFriendFinding(
+                    filteredFriends[index], widget.trailingActions);
               },
             ),
           ),
@@ -257,7 +298,7 @@ class FriendFindingTab extends StatelessWidget {
           width: double.infinity,
           height: 80.0,
           child: ElevatedButton(
-            onPressed: onShakeButtonPressed,
+            onPressed: widget.onShakeButtonPressed,
             child: const Text(
               "SHAKE IT",
               style: TextStyle(fontSize: 42.0),
@@ -269,31 +310,52 @@ class FriendFindingTab extends StatelessWidget {
   }
 }
 
-class FriendPendingTab extends StatelessWidget {
+class FriendPendingTab extends StatefulWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final List<Widget> trailingActions;
   final Widget Function(Friend, List<Widget>) buildRowForFriendPending;
 
   const FriendPendingTab({
-    super.key,
+    Key? key,
     required this.friends,
     required this.onTabChange,
     required this.buildRowForFriendPending,
     required this.trailingActions,
-  });
+  }) : super(key: key);
+
+  @override
+  _FriendPendingTabState createState() => _FriendPendingTabState();
+}
+
+class _FriendPendingTabState extends State<FriendPendingTab> {
+  List<Friend> filteredFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredFriends = widget.friends;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      filteredFriends = widget.friends
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
-      content: ListView.builder(
-        itemCount: friends.length * 2,
-        itemBuilder: (context, i) {
-          if (i.isOdd) return const Divider();
-          final friendIndex = i ~/ 2;
-          return (friendIndex < friends.length)
-              ? buildRowForFriendPending(friends[friendIndex], trailingActions)
-              : null;
+      onSearchChanged: _onSearchChanged,
+      content: ListView.separated(
+        itemCount: filteredFriends.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          return widget.buildRowForFriendPending(
+              filteredFriends[index], widget.trailingActions);
         },
       ),
     );
