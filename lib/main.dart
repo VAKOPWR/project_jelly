@@ -11,6 +11,7 @@ import 'package:project_jelly/pages/Auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/profile.dart';
 import 'package:get/get.dart';
+import 'package:project_jelly/pages/resource_usage.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
 
@@ -28,21 +29,10 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/home',
+        initialRoute: '/metrics',
         theme: lightTheme,
         darkTheme: darkTheme,
         getPages: [
-          GetPage(
-              name: '/login',
-              page: () => const LogInPage(),
-              transition: Transition.circularReveal),
-          GetPage(name: '/register', page: () => const RegisterPage()),
-          GetPage(
-              name: '/register_avatar',
-              page: () => const AvatarSelectionPage()),
-          GetPage(
-              name: '/register_friends', page: () => const AddFriendsPage()),
-          GetPage(name: '/forgotPass', page: () => ForgotPasswordPage()),
           GetPage(
               name: '/home',
               page: () => const HomePage(),
@@ -59,6 +49,10 @@ class ProjectJelly extends StatelessWidget {
           GetPage(
               name: '/profile',
               page: () => const ProfilePage(),
+              transition: Transition.rightToLeft),
+          GetPage(
+              name: '/metrics',
+              page: () => const ResourceUsageScreen(),
               transition: Transition.rightToLeft),
         ]);
   }
