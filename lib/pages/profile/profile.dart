@@ -92,6 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
 }
 
 class CircularButton extends StatelessWidget {
