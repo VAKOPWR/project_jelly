@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/pages/Auth/login.dart';
+import 'package:project_jelly/pages/auth/login.dart';
 import 'package:project_jelly/widgets/map.dart';
 
 class HomePage extends StatefulWidget {

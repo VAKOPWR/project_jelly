@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/misc/geocoding.dart';
-import 'package:project_jelly/pages/loading.dart';
+import 'package:project_jelly/pages/helper/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
@@ -211,7 +211,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                               Icons.map_rounded,
                               color: Colors.grey[700],
                             ),
-                            backgroundColor: Colors.grey[50],
+                            backgroundColor: Colors.white.withOpacity(0.95),
                             elevation: 2.0,
                             shape: RoundedRectangleBorder(
                               borderRadius:

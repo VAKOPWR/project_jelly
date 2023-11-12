@@ -4,10 +4,9 @@ class GhostModeTabGroups extends StatelessWidget {
   const GhostModeTabGroups({super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Container(
-      color: Colors.green,
-      child: Text('Test3'),
+      color: Theme.of(context).canvasColor,
     );
   }
 }

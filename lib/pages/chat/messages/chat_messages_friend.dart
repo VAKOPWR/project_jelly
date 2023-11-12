@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:project_jelly/widgets/ownMessage.dart';
-import 'package:project_jelly/widgets/replyMessage.dart';
+import 'package:project_jelly/classes/message.dart';
+import 'package:project_jelly/widgets/own_message.dart';
+import 'package:project_jelly/widgets/reply_message.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
-import '../../../classes/message.dart';
-
-
-class ChatMessagesFriend extends StatefulWidget{
-  const ChatMessagesFriend ({Key? key}) : super(key: key);
+class ChatMessagesFriend extends StatefulWidget {
+  const ChatMessagesFriend({Key? key}) : super(key: key);
 
   @override
   State<ChatMessagesFriend> createState() => _ChatMessagesFriendState();
@@ -23,16 +21,17 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   List<Message> messages = [];
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     focusNode.addListener(() {
-      if (focusNode.hasFocus){
+      if (focusNode.hasFocus) {
         setState(() {
           emojiShowing = false;
         });
       }
     });
   }
+
   _onBackspacePressed() {
     _controller
       ..text = _controller.text.characters.toString()
@@ -41,10 +40,11 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Row(mainAxisAlignment: MainAxisAlignment.center,
+        leading: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.arrow_back),
             // SizedBox(width: 10),
@@ -73,25 +73,25 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                   );
                 },
               ),
-                // child: ListView(
-                //   children: [
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31"),
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31"),
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31"),
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31"),
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31"),
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31"),
-                //     OwnMessage(message: "message", time: "12:50"),
-                //     ReplyMessage(message: "reply", time: "12:31")
-                //   ],
-                // )
-              ),
+              // child: ListView(
+              //   children: [
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31"),
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31"),
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31"),
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31"),
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31"),
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31"),
+              //     OwnMessage(message: "message", time: "12:50"),
+              //     ReplyMessage(message: "reply", time: "12:31")
+              //   ],
+              // )
+            ),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -106,26 +106,30 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                           child: Container(
                             width: MediaQuery.of(context).size.width - 65,
                             child: Card(
-                              margin: EdgeInsets.only(left: 3, right: 3, bottom: 8),
+                              margin:
+                                  EdgeInsets.only(left: 3, right: 3, bottom: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
                               ),
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8), // Adjust as needed
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8), // Adjust as needed
                                   child: TextField(
                                     focusNode: focusNode,
                                     controller: _controller,
                                     keyboardType: TextInputType.multiline,
                                     maxLines: 3,
                                     minLines: 1,
-                                    textAlignVertical: TextAlignVertical.center, // Center text vertically
+                                    textAlignVertical: TextAlignVertical
+                                        .center, // Center text vertically
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "Type a message",
                                       hintStyle: TextStyle(color: Colors.grey),
-                                      alignLabelWithHint: true, // Align the label (hint) to the bottom
+                                      alignLabelWithHint:
+                                          true, // Align the label (hint) to the bottom
                                       prefixIcon: IconButton(
                                         icon: Icon(
                                           emojiShowing
@@ -133,25 +137,20 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                               : Icons.emoji_emotions_outlined,
                                         ),
                                         onPressed: () {
-                                          if (!emojiShowing){
+                                          if (!emojiShowing) {
                                             focusNode.unfocus();
                                             focusNode.canRequestFocus = false;
                                             setState(() {
                                               emojiShowing = !emojiShowing;
                                             });
-                                          }
-                                          else {
+                                          } else {
                                             focusNode.requestFocus();
                                           }
                                         },
                                       ),
                                       suffixIcon: IconButton(
-                                        icon: Icon(
-                                            Icons.attach_file_outlined
-                                        ),
-                                        onPressed: () {
-
-                                        },
+                                        icon: Icon(Icons.attach_file_outlined),
+                                        onPressed: () {},
                                       ),
                                       contentPadding: EdgeInsets.zero,
                                     ),
@@ -161,7 +160,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                             ),
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.only(
                             bottom: 8,
@@ -178,19 +176,19 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                               ),
                               onPressed: () {
                                 _scrollController.animateTo(
-                                    _scrollController
-                                        .position.maxScrollExtent,
-                                    duration:
-                                    Duration(milliseconds: 300),
-                                    curve: Curves.easeOut);
-                                    String messageText = _controller.text;
-                                    String currentTime = DateFormat.jm().format(DateTime.now().toLocal());
-                                    messages.add(Message(text: messageText, time: currentTime));
-                                    _controller.clear();
-                                    _scrollController.animateTo(
                                     _scrollController.position.maxScrollExtent,
                                     duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
+                                    curve: Curves.easeOut);
+                                String messageText = _controller.text;
+                                String currentTime = DateFormat.jm()
+                                    .format(DateTime.now().toLocal());
+                                messages.add(Message(
+                                    text: messageText, time: currentTime));
+                                _controller.clear();
+                                _scrollController.animateTo(
+                                  _scrollController.position.maxScrollExtent,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
                                 );
                                 setState(() {});
                               },

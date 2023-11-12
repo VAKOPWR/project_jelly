@@ -4,26 +4,23 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:project_jelly/pages/Auth/register_form.dart';
-import 'package:project_jelly/pages/Auth/register_form_avatar.dart';
+import 'package:project_jelly/pages/auth/register_form.dart';
+import 'package:project_jelly/pages/auth/register_form_avatar.dart';
 // import 'package:project_jelly/pages/Auth/register_form_friends.dart';
-import 'package:project_jelly/pages/Auth/reset_password.dart';
-import 'package:flutter/material.dart';
-import 'package:project_jelly/pages/FriendSpecificGhostMode.dart';
-import 'package:project_jelly/pages/chat/messages/chatMessagesFriend.dart';
+import 'package:project_jelly/pages/auth/reset_password.dart';
 import 'package:project_jelly/pages/friends.dart';
-import 'package:project_jelly/pages/ghostModeSettings/ghostModeScreen.dart';
+import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
 import 'package:project_jelly/pages/home.dart';
-import 'package:project_jelly/pages/Auth/login.dart';
+import 'package:project_jelly/pages/auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
-import 'package:project_jelly/pages/profile.dart';
+import 'package:project_jelly/pages/profile/profile.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/pages/splash_screen.dart';
+import 'package:project_jelly/pages/helper/splash_screen.dart';
 import 'package:project_jelly/service/global_services.dart';
+import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
-import 'package:internet_checker_banner/internet_checker_banner.dart';
 
 void main() async {
   await GetStorage.init();
@@ -80,5 +77,11 @@ class ProjectJelly extends StatelessWidget {
               page: () => SplashScreen(),
               transition: Transition.circularReveal,
               transitionDuration: const Duration(seconds: 2)),
+          GetPage(
+            name: '/ghost_mode',
+            page: () => GhostMode(),
+            transition: Transition.zoom,
+          ),
         ]);
   }
+}

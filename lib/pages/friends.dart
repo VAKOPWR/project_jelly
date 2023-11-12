@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/misc/enum.dart';
-import 'package:project_jelly/pages/shake_it.dart';
+import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
@@ -150,10 +151,11 @@ class _FriendsPageState extends State<FriendsPage>
 
   Widget _buildRow(Friend friend, List<Widget> trailingActions) {
     return ListTile(
-      leading: const CircleAvatar(
-        backgroundColor: Colors.grey,
-        backgroundImage: NetworkImage(
-            'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50'),
+      leading: CircleAvatar(
+        backgroundImage:
+            Get.find<LocationService>().imageProviders[MarkerId(friend.id)],
+        radius: 29,
+        backgroundColor: Theme.of(context).canvasColor,
       ),
       title: Text(
         friend.name,
@@ -170,95 +172,65 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   _fetchFriendsList() async {
-    // var url = 'https://jsonplaceholder.typicode.com/users';
-    // var httpClient = HttpClient();
-    // List<Friend> listFriends = [];
-
-    // try {
-    //   var request = await httpClient.getUrl(Uri.parse(url));
-    //   var response = await request.close();
-    //   if (response.statusCode == HttpStatus.ok) {
-    //     var json = await utf8.decoder.bind(response).join();
-    //     List<dynamic> data = jsonDecode(json);
-
-    //     for (var res in data) {
-    //       var objId = res['id'];
-    //       String id = objId.toString();
-
-    //       var objName = res['name'];
-    //       String name = objName.toString();
-
-    //       var objLat = res['address']['geo']['lat'];
-    //       double latitude;
-    //       if (objLat is String) {
-    //         latitude = double.tryParse(objLat) ?? 0.0;
-    //       } else {
-    //         latitude = objLat ?? 0.0;
-    //       }
-
-    //       var objLng = res['address']['geo']['lng'];
-    //       double longitude;
-    //       if (objLng is String) {
-    //         longitude = double.tryParse(objLng) ?? 0.0;
-    //       } else {
-    //         longitude = objLng ?? 0.0;
-    //       }
-
-    //       String avatar =
-    //           'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
-
-    //       Friend friendModel = Friend(
-    //           id: id,
-    //           name: name,
-    //           avatar: avatar,
-    //           location: LatLng(latitude, longitude));
-    //       listFriends.add(friendModel);
-    //     }
-    //   }
-    // } catch (exception) {
-    //   print(exception.toString());
-    // }
-
-    // if (!mounted) return;
-
     setState(() {
       _listFriends = Get.find<LocationService>().friendsData.values.toList();
     });
   }
 }
 
-class FriendListTab extends StatelessWidget {
+class FriendListTab extends StatefulWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final List<Widget> trailingActions;
   final Widget Function(Friend, List<Widget>) buildRowForFriendList;
 
   const FriendListTab({
-    super.key,
+    Key? key,
     required this.friends,
     required this.onTabChange,
     required this.buildRowForFriendList,
     required this.trailingActions,
-  });
+  }) : super(key: key);
+
+  @override
+  _FriendListTabState createState() => _FriendListTabState();
+}
+
+class _FriendListTabState extends State<FriendListTab> {
+  List<Friend> filteredFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredFriends = widget.friends;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      filteredFriends = widget.friends
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
-      content: ListView.builder(
-        itemCount: friends.length * 2,
-        itemBuilder: (context, i) {
-          if (i.isOdd) return const Divider();
-          final friendIndex = i ~/ 2;
-          return (friendIndex < friends.length)
-              ? buildRowForFriendList(friends[friendIndex], trailingActions)
-              : null;
+      onSearchChanged: _onSearchChanged,
+      content: ListView.separated(
+        itemCount: filteredFriends.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          return widget.buildRowForFriendList(
+              filteredFriends[index], widget.trailingActions);
         },
       ),
     );
   }
 }
 
-class FriendFindingTab extends StatelessWidget {
+class FriendFindingTab extends StatefulWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final VoidCallback? onShakeButtonPressed;
@@ -275,20 +247,41 @@ class FriendFindingTab extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _FriendFindingTabState createState() => _FriendFindingTabState();
+}
+
+class _FriendFindingTabState extends State<FriendFindingTab> {
+  List<Friend> filteredFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredFriends = widget.friends;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      filteredFriends = widget.friends
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
+        Flexible(
+          // Use Flexible or Expanded here
           child: SearchBarWidget(
-            content: ListView.builder(
-              itemCount: friends.length * 2,
-              itemBuilder: (context, i) {
-                if (i.isOdd) return const Divider();
-                final friendIndex = i ~/ 2;
-                return (friendIndex < friends.length)
-                    ? buildRowForFriendFinding(
-                        friends[friendIndex], trailingActions)
-                    : null;
+            onSearchChanged: _onSearchChanged,
+            content: ListView.separated(
+              itemCount: filteredFriends.length,
+              separatorBuilder: (context, index) => const Divider(),
+              itemBuilder: (context, index) {
+                return widget.buildRowForFriendFinding(
+                    filteredFriends[index], widget.trailingActions);
               },
             ),
           ),
@@ -306,7 +299,7 @@ class FriendFindingTab extends StatelessWidget {
           width: double.infinity,
           height: 80.0,
           child: ElevatedButton(
-            onPressed: onShakeButtonPressed,
+            onPressed: widget.onShakeButtonPressed,
             child: const Text(
               "SHAKE IT",
               style: TextStyle(fontSize: 42.0),
@@ -318,31 +311,52 @@ class FriendFindingTab extends StatelessWidget {
   }
 }
 
-class FriendPendingTab extends StatelessWidget {
+class FriendPendingTab extends StatefulWidget {
   final List<Friend> friends;
   final void Function(int) onTabChange;
   final List<Widget> trailingActions;
   final Widget Function(Friend, List<Widget>) buildRowForFriendPending;
 
   const FriendPendingTab({
-    super.key,
+    Key? key,
     required this.friends,
     required this.onTabChange,
     required this.buildRowForFriendPending,
     required this.trailingActions,
-  });
+  }) : super(key: key);
+
+  @override
+  _FriendPendingTabState createState() => _FriendPendingTabState();
+}
+
+class _FriendPendingTabState extends State<FriendPendingTab> {
+  List<Friend> filteredFriends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredFriends = widget.friends;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      filteredFriends = widget.friends
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
-      content: ListView.builder(
-        itemCount: friends.length * 2,
-        itemBuilder: (context, i) {
-          if (i.isOdd) return const Divider();
-          final friendIndex = i ~/ 2;
-          return (friendIndex < friends.length)
-              ? buildRowForFriendPending(friends[friendIndex], trailingActions)
-              : null;
+      onSearchChanged: _onSearchChanged,
+      content: ListView.separated(
+        itemCount: filteredFriends.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          return widget.buildRowForFriendPending(
+              filteredFriends[index], widget.trailingActions);
         },
       ),
     );
