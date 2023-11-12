@@ -12,7 +12,44 @@
           "package_name": "pwr.vako.project_jelly"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "125315838279-29er6j68jt02ra4s0dgff805lvvcchs6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pwr.vako.project_jelly",
+            "certificate_hash": "0349ede809c8f5a3e91f05573188c898a0942f54"
+          }
+        },
+        {
+          "client_id": "125315838279-39ufgh2aeopb2gg9m524am688b6e8igu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pwr.vako.project_jelly",
+            "certificate_hash": "4c838832570974afcab0a27f801629c303ed376b"
+          }
+        },
+        {
+          "client_id": "125315838279-ncc4kurtqg8orahf60iimun7ntsen33k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pwr.vako.project_jelly",
+            "certificate_hash": "b46699491782e768676b9210e5a93ca763ca51c7"
+          }
+        },
+        {
+          "client_id": "125315838279-srtpj3idvaklhf14ultl5pfd3eocrf7f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pwr.vako.project_jelly",
+            "certificate_hash": "abadf108ddafdb761d832b31bd4c174faae8d834"
+          }
+        },
+        {
+          "client_id": "125315838279-1s2r6ms8borhlr7fc5acll5jngjhno8v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDdnWp7jR552_A9JRZTk4K1DMjkZ847HZo"
@@ -20,7 +57,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "125315838279-1s2r6ms8borhlr7fc5acll5jngjhno8v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "125315838279-hlno5r6eico08can7padhpg5b3oovjmc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "pwr.vako.projectJelly"
+              }
+            }
+          ]
         }
       }
     }
