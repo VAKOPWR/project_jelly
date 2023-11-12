@@ -17,10 +17,10 @@ import 'package:project_jelly/pages/profile/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';
 import 'package:project_jelly/service/global_services.dart';
+import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
-import 'package:internet_checker_banner/internet_checker_banner.dart';
 
 void main() async {
   await GetStorage.init();
@@ -28,7 +28,7 @@ void main() async {
   await GlobalServices.init();
   await Get.find<StyleService>().loadMapStyles();
   await Get.find<LocationService>().prepareService();
-  // await InternetCheckerBanner().initialize(title: "Whoops");
+  await InternetCheckerBanner().initialize(title: "Whoops");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProjectJelly());
 }
@@ -39,10 +39,22 @@ class ProjectJelly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        initialRoute: '/home',
+        initialRoute: '/splash',
         theme: lightTheme,
         darkTheme: darkTheme,
         getPages: [
+          GetPage(
+              name: '/login',
+              page: () => const LogInPage(),
+              transition: Transition.circularReveal,
+              transitionDuration: const Duration(seconds: 2)),
+          GetPage(name: '/register', page: () => const RegisterPage()),
+          GetPage(
+              name: '/register_avatar',
+              page: () => const AvatarSelectionPage()),
+          // GetPage(
+          //     name: '/register_friends', page: () => const AddFriendsPage()),
+          GetPage(name: '/forgotPass', page: () => ForgotPasswordPage()),
           GetPage(
               name: '/home',
               page: () => const HomePage(),
