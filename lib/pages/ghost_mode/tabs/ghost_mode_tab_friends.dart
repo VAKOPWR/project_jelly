@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/pages/ghost_mode/friend_specific_ghost_mode.dart';
 import 'package:project_jelly/service/location_service.dart';
-import 'package:project_jelly/widgets/search_bar_widget.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 class GhostModeTabFriends extends StatefulWidget {
   const GhostModeTabFriends({super.key});
@@ -29,9 +29,9 @@ class _GhostModeTabFriends extends State<GhostModeTabFriends> {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      child: SearchBarWidget(
-        content: _buildContent(),
-      ),
+      // child: SearchBarWidget(
+      //   content: _buildContent(),
+      // ),
     );
   }
 
