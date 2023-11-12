@@ -17,10 +17,10 @@ import 'package:project_jelly/pages/profile/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';
 import 'package:project_jelly/service/global_services.dart';
+import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/theme/theme_constants.dart';
-import 'package:internet_checker_banner/internet_checker_banner.dart';
 
 void main() async {
   await GetStorage.init();
