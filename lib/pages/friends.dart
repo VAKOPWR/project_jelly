@@ -272,10 +272,11 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SearchBarWidget(
-          onSearchChanged: _onSearchChanged,
-          content: Expanded(
-            child: ListView.separated(
+        Flexible(
+          // Use Flexible or Expanded here
+          child: SearchBarWidget(
+            onSearchChanged: _onSearchChanged,
+            content: ListView.separated(
               itemCount: filteredFriends.length,
               separatorBuilder: (context, index) => const Divider(),
               itemBuilder: (context, index) {

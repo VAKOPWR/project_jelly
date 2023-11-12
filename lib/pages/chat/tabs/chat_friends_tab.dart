@@ -39,53 +39,54 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
-      onSearchChanged: updateSearchQuery,
-      content: ListView.separated(
-        itemCount: filteredChats.length,
-        separatorBuilder: (context, index) => const Divider(),
-        itemBuilder: (context, index) {
-          final chat = filteredChats[index];
-          return ListTile(
-            leading: Stack(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(chat.friend.avatar),
-                ),
-                if (chat.friend.isOnline)
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Theme.of(context).canvasColor,
-                          width: 2,
+        onSearchChanged: updateSearchQuery,
+        content: Container(
+          child: ListView.separated(
+            itemCount: filteredChats.length,
+            separatorBuilder: (context, index) => const Divider(),
+            itemBuilder: (context, index) {
+              final chat = filteredChats[index];
+              return ListTile(
+                leading: Stack(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(chat.friend.avatar),
+                    ),
+                    if (chat.friend.isOnline)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Theme.of(context).canvasColor,
+                              width: 2,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-              ],
-            ),
-            title: Text(chat.friend.name),
-            subtitle: Text(chat.lastMessage),
-            trailing: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                buildReadStatusIcon(chat.hasRead),
-                Text(
-                  formatLastSentTime(chat.lastSentTime),
-                  style: Theme.of(context).textTheme.bodySmall,
+                  ],
                 ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+                title: Text(chat.friend.name),
+                subtitle: Text(chat.lastMessage),
+                trailing: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    buildReadStatusIcon(chat.hasRead),
+                    Text(
+                      formatLastSentTime(chat.lastSentTime),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ));
   }
 
   List<FriendChat> filterChats(String query, List<FriendChat> chatList) {

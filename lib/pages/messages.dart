@@ -21,7 +21,7 @@ class _MessagesPageState extends State<MessagesPage> {
                 title: Text('Messages'), centerTitle: true, elevation: 0.0),
             body: Container(
               color: Theme.of(context).colorScheme.background,
-              child: const Column(
+              child: Column(
                 children: [
                   TabBar(
                     tabs: [
@@ -34,9 +34,11 @@ class _MessagesPageState extends State<MessagesPage> {
                     ],
                   ),
                   Expanded(
-                      child: TabBarView(
-                    children: [ChatFriendsTab(), ChatGroupsTab()],
-                  ))
+                      child: Container(
+                          color: Theme.of(context).canvasColor,
+                          child: TabBarView(
+                            children: [ChatFriendsTab(), ChatGroupsTab()],
+                          )))
                 ],
               ),
             )));
