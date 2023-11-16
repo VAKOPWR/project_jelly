@@ -7,7 +7,7 @@ import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/service/auth_service.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -240,8 +240,7 @@ class _LogInPageState extends State<LogInPage> {
                                                   await Get.find<AuthService>()
                                                       .signInWithGoogle();
                                               if (userCredentials != null) {
-                                                await Get.find<
-                                                        LocationService>()
+                                                await Get.find<MapService>()
                                                     .prepareService();
                                                 _submitBtnController.success();
                                                 Get.off(() => const HomePage(),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/service/permissions_service.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 
 class SnackbarService extends GetxService {
   bool isLocationSnackbarOpen = false;
@@ -11,7 +11,7 @@ class SnackbarService extends GetxService {
   void checkLocationAccess() {
     requestLocationPermission().then((locationGranted) {
       if (!locationGranted) {
-        Get.find<LocationService>().pausePositionStream();
+        Get.find<MapService>().pausePositionStream();
         Get.find<PermissionsService>().locationAccessChanged(false);
         if (isLocationSnackbarOpen == false &&
             Get.find<PermissionsService>().isInternetConnected) {
@@ -29,7 +29,7 @@ class SnackbarService extends GetxService {
           isLocationSnackbarOpen = true;
         }
       } else {
-        Get.find<LocationService>().resumePositionStream();
+        Get.find<MapService>().resumePositionStream();
         Get.find<PermissionsService>().locationAccessChanged(true);
         if (Get.find<PermissionsService>().isInternetConnected) {
           try {

@@ -4,7 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/misc/enum.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 const int _numberOfTabs = 3;
@@ -153,7 +153,7 @@ class _FriendsPageState extends State<FriendsPage>
     return ListTile(
       leading: CircleAvatar(
         backgroundImage:
-            Get.find<LocationService>().imageProviders[MarkerId(friend.id)],
+            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
         radius: 29,
         backgroundColor: Theme.of(context).canvasColor,
       ),
@@ -173,7 +173,7 @@ class _FriendsPageState extends State<FriendsPage>
 
   _fetchFriendsList() async {
     setState(() {
-      _listFriends = Get.find<LocationService>().friendsData.values.toList();
+      _listFriends = Get.find<MapService>().friendsData.values.toList();
     });
   }
 }

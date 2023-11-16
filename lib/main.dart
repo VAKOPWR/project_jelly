@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/auth/register_form_avatar.dart';
-// import 'package:project_jelly/pages/Auth/register_form_friends.dart';
 import 'package:project_jelly/pages/auth/reset_password.dart';
 import 'package:project_jelly/pages/friends.dart';
 import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
@@ -18,16 +17,16 @@ import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/service/internet_service.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/style_service.dart';
-import 'package:project_jelly/theme/theme_constants.dart';
+import 'package:project_jelly/themes/theme_constants.dart';
 
 void main() async {
   await GetStorage.init();
   await Firebase.initializeApp();
   await GlobalServices.init();
   await Get.find<StyleService>().loadMapStyles();
-  await Get.find<LocationService>().prepareService();
+  await Get.find<MapService>().prepareService();
   await InternetCheckerBanner().initialize(title: "Whoops");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProjectJelly());
@@ -52,8 +51,6 @@ class ProjectJelly extends StatelessWidget {
           GetPage(
               name: '/register_avatar',
               page: () => const AvatarSelectionPage()),
-          // GetPage(
-          //     name: '/register_friends', page: () => const AddFriendsPage()),
           GetPage(name: '/forgotPass', page: () => ForgotPasswordPage()),
           GetPage(
               name: '/home',
