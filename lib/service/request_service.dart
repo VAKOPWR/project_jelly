@@ -97,4 +97,79 @@ class RequestService extends getx.GetxService {
       return icons;
     }
   }
+
+  Future<List<Friend>> getFriendsBasedOnEndpoint(String endpoint) async {
+    try {
+      Response response = await dio.get('${getBackendUrl}${endpoint}');
+      if (response.statusCode == 200) {
+        var data = json.decode(response.data);
+        return (data as List).map((item) => Friend.fromJson(item)).toList();
+      } else {
+        log('Failed to load friends from $endpoint');
+        return List.empty();
+      }
+    } catch (error) {
+      log('Error fetching friends from $endpoint: $error');
+      return List.empty();
+    }
+  }
+
+  Future<bool> acceptFriendRequest(String friendId) async {
+    try {
+      String url = '/friend/accept/$friendId';
+
+      Response response = await dio.put('${getBackendUrl}${url}');
+
+      if (response.statusCode == 200) {
+        print('Friend request accepted');
+        return true;
+      } else {
+        log(
+            'Failed to accept friend request. Status code: ${response.statusCode}'
+        );
+        return false;
+      }
+    } catch (error) {
+      log('Error accepting friend request: $error');
+      return false;
+    }
+  }
+
+  Future<bool> declineFriendRequest(String friendId) async {
+    return false; // Waiting for a decline end point from backend
+    // try {
+    //   String url = '/friend/decline/$friendId';
+    //
+    //   Response response = await dio.put('${getBackendUrl}${url}');
+    //
+    //   if (response.statusCode == 200) {
+    //     print('Friend request accepted');
+    //     return true;
+    //   } else {
+    //     print('Failed to accept friend request. Status code: ${response.statusCode}');
+    //     return false;
+    //   }
+    // } catch (error) {
+    //   print('Error accepting friend request: $error');
+    //   return false;
+    // }
+  }
+
+  Future<bool> sendFriendRequest(String identifier) async {
+    try {
+      String url = '/friend/invite/$identifier';
+      Response response = await dio.post('${getBackendUrl}${url}');
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        log('Failed to send friend request. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      log('Error sending friend request: $error');
+      return false;
+    }
+  }
+
 }
