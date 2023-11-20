@@ -36,7 +36,11 @@ class LocationService extends GetxService {
       headingAccuracy: 0.0);
   Uint8List? defaultAvatar;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  Map<MarkerId, BitmapDescriptor> staticMarkers =
+      <MarkerId, BitmapDescriptor>{};
+  Map<MarkerId, Uint8List> staticImages = <MarkerId, Uint8List>{};
   Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};
+  Map<String, Set<String>> staticMarkerTypeName = <String, Set<String>>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   MockLocationService _locationService = MockLocationService();
@@ -59,7 +63,9 @@ class LocationService extends GetxService {
         _currentLocation = _defaultPosition;
       }
     });
+    await loadStaticImages();
     await loadDefaultAvatar();
+    await loadStaticMarkers();
     if (FirebaseAuth.instance.currentUser != null) {
       await fetchFriendsData();
       await loadCustomAvatars();
@@ -111,6 +117,32 @@ class LocationService extends GetxService {
 
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
+  }
+
+  Future<void> loadStaticImages() async {
+    staticImages[MarkerId('Home')] =
+        await getBytesFromAsset("assets/markers/home.png", 150);
+    staticImages[MarkerId('Work')] =
+        await getBytesFromAsset("assets/markers/work.png", 150);
+    staticImages[MarkerId('School')] =
+        await getBytesFromAsset("assets/markers/education.png", 150);
+    staticImages[MarkerId('Shop')] =
+        await getBytesFromAsset("assets/markers/shop.png", 150);
+    staticImages[MarkerId('Gym')] =
+        await getBytesFromAsset("assets/markers/gym.png", 150);
+  }
+
+  Future<void> loadStaticMarkers() async {
+    staticMarkers[MarkerId('Home')] =
+        BitmapDescriptor.fromBytes(staticImages[MarkerId('Home')]!);
+    staticMarkers[MarkerId('Work')] =
+        BitmapDescriptor.fromBytes(staticImages[MarkerId('Work')]!);
+    staticMarkers[MarkerId('School')] =
+        BitmapDescriptor.fromBytes(staticImages[MarkerId('School')]!);
+    staticMarkers[MarkerId('Shop')] =
+        BitmapDescriptor.fromBytes(staticImages[MarkerId('Shop')]!);
+    staticMarkers[MarkerId('Gym')] =
+        BitmapDescriptor.fromBytes(staticImages[MarkerId('Gym')]!);
   }
 
   Future<void> loadDefaultAvatar() async {
