@@ -7,7 +7,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
       Future.delayed(Duration.zero, () {
-        Get.offNamed('/home');
+        Get.offNamed('/profile');
       });
     } else {
       Future.delayed(Duration.zero, () {

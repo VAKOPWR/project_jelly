@@ -39,13 +39,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 160,
                 height: 160,
                 margin: const EdgeInsets.only(bottom: 20),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: AssetImage('assets/profile_image.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
               ),
             ],
           ),
@@ -92,7 +85,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
 }
 
 class CircularButton extends StatelessWidget {

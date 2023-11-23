@@ -5,9 +5,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
-import 'package:project_jelly/pages/home.dart';
+import 'package:project_jelly/pages/profile/profile.dart';
 import 'package:project_jelly/service/auth_service.dart';
-import 'package:project_jelly/service/location_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -45,7 +44,7 @@ class _LogInPageState extends State<LogInPage> {
         } else {
           _submitBtnController.success();
           GetStorage().write('AuthKey', authKey);
-          Get.off(() => const HomePage(),
+          Get.off(() => const ProfilePage(),
               transition: Transition.circularReveal,
               duration: const Duration(seconds: 2));
         }
@@ -59,7 +58,7 @@ class _LogInPageState extends State<LogInPage> {
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
       Future.delayed(Duration.zero, () {
-        Get.off(() => const HomePage(),
+        Get.off(() => const ProfilePage(),
             transition: Transition.circularReveal,
             duration: const Duration(seconds: 2));
       });
@@ -240,11 +239,14 @@ class _LogInPageState extends State<LogInPage> {
                                                   await Get.find<AuthService>()
                                                       .signInWithGoogle();
                                               if (userCredentials != null) {
-                                                await Get.find<
-                                                        LocationService>()
-                                                    .prepareService();
-                                                _submitBtnController.success();
-                                                Get.off(() => const HomePage(),
+                                                String? idToken =
+                                                    await FirebaseAuth
+                                                        .instance.currentUser!
+                                                        .getIdToken(true);
+                                                print(idToken!.length);
+                                                print(idToken);
+                                                Get.off(
+                                                    () => const ProfilePage(),
                                                     transition: Transition
                                                         .circularReveal,
                                                     duration: const Duration(
