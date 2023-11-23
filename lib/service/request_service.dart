@@ -11,24 +11,36 @@ import 'package:http/http.dart' as http;
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
-  String ApiPath = "/api/v1";
+  String ApiPath = "http://10.90.50.101/api/v1";
+  // String ApiPath = "http://api.weatherstack.com/current";
 
-  String getBackendUrl() {
-    return "http://jelly-backend.azurewebsites.net${ApiPath}";
-  }
-
-  void setupInterceptors() {
+  void setupInterceptor(String? idToken) {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest:
             (RequestOptions options, RequestInterceptorHandler handler) async {
-          options.headers['Authorization'] =
-              await FirebaseAuth.instance.currentUser!.getIdToken();
-          options.headers['Content-Type'] = 'application/json; charset=UTF-8';
+          options.headers['Authorization'] = idToken;
+          options.headers['Content-Type'] = 'application/json';
           return handler.next(options);
         },
       ),
     );
+  }
+
+  Future<dynamic> createUser() async {
+    try {
+      print("${ApiPath}/user/create");
+      Response response = await dio.post(
+        "${ApiPath}/user/create",
+        options: Options(
+          receiveTimeout: Duration(seconds: 5),
+        ),
+      );
+      print(response.statusCode);
+      return response.statusCode;
+    } catch (error) {
+      print(error.toString());
+    }
   }
 
   Future<Uint8List> getUint8ListFromImageUrl(String imageUrl) async {
@@ -44,26 +56,27 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<dynamic> postUserLocation(Position locationData) async {
+  Future<dynamic> putUserUpdate(Position locationData) async {
     try {
-      Map<String, dynamic> requestBody = {
+      String requestBody = json.encode({
         "latitude": locationData.latitude,
-        "longitude": locationData.longitude
-      };
-      Response response = await dio.post(
-        '${getBackendUrl}/post-endpoint',
+        "longitude": locationData.longitude,
+        "speed": locationData.speed.toInt()
+      });
+      Response response = await dio.put(
+        "${ApiPath}/user/status/update",
         data: requestBody,
       );
       return response.statusCode;
     } catch (error) {
-      log(error as String);
+      print(error.toString());
     }
   }
 
   Future<List<Friend>> getFriendsLocation() async {
     try {
       Response response = await dio.get(
-        '${getBackendUrl}/get-endpoint',
+        "${ApiPath}/get-endpoint",
       );
       if (response.statusCode == 200) {
         var people = (json.decode(response.data) as List)
@@ -73,7 +86,7 @@ class RequestService extends getx.GetxService {
       }
       return List.empty();
     } catch (error) {
-      log(error as String);
+      print(error.toString());
       return List.empty();
     }
   }
@@ -81,8 +94,9 @@ class RequestService extends getx.GetxService {
   Future<Map<String, Uint8List?>> getFriendsIcons() async {
     Map<String, Uint8List?> icons = {};
     try {
+      print('User avatars');
       Response response = await dio.get(
-        '${getBackendUrl}/get-endpoint',
+        "${ApiPath}/get-endpoint",
       );
       if (response.statusCode == 200) {
         var data = json.decode(response.data) as List;
@@ -93,23 +107,43 @@ class RequestService extends getx.GetxService {
       }
       return icons;
     } catch (error) {
-      log(error as String);
+      print(error.toString());
+      return icons;
+    }
+  }
+
+  Future<Map<String, Uint8List?>> findFriend(String nickname) async {
+    Map<String, Uint8List?> icons = {};
+    try {
+      Response response = await dio.get(
+        "${ApiPath}/user/search/${nickname}",
+      );
+      if (response.statusCode == 200) {
+        var data = json.decode(response.data) as List;
+        for (var icon in data) {
+          icons[icon['id']] = await getUint8ListFromImageUrl(icon['icon']);
+        }
+        return icons;
+      }
+      return icons;
+    } catch (error) {
+      print(error.toString());
       return icons;
     }
   }
 
   Future<List<Friend>> getFriendsBasedOnEndpoint(String endpoint) async {
     try {
-      Response response = await dio.get('${getBackendUrl}${endpoint}');
+      Response response = await dio.get("${ApiPath}${endpoint}");
       if (response.statusCode == 200) {
         var data = json.decode(response.data);
         return (data as List).map((item) => Friend.fromJson(item)).toList();
       } else {
-        log('Failed to load friends from $endpoint');
+        print('Failed to load friends from $endpoint');
         return List.empty();
       }
     } catch (error) {
-      log('Error fetching friends from $endpoint: $error');
+      print('Error fetching friends from $endpoint: ${error.toString()}');
       return List.empty();
     }
   }
@@ -118,58 +152,57 @@ class RequestService extends getx.GetxService {
     try {
       String url = '/friend/accept/$friendId';
 
-      Response response = await dio.put('${getBackendUrl}${url}');
+      Response response = await dio.put("${ApiPath}${url}");
 
       if (response.statusCode == 200) {
         print('Friend request accepted');
         return true;
       } else {
-        log(
-            'Failed to accept friend request. Status code: ${response.statusCode}'
-        );
+        print(
+            'Failed to accept friend request. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      log('Error accepting friend request: $error');
+      print('Error accepting friend request: ${error.toString()}');
       return false;
     }
   }
 
   Future<bool> declineFriendRequest(String friendId) async {
-    return false; // Waiting for a decline end point from backend
-    // try {
-    //   String url = '/friend/decline/$friendId';
-    //
-    //   Response response = await dio.put('${getBackendUrl}${url}');
-    //
-    //   if (response.statusCode == 200) {
-    //     print('Friend request accepted');
-    //     return true;
-    //   } else {
-    //     print('Failed to accept friend request. Status code: ${response.statusCode}');
-    //     return false;
-    //   }
-    // } catch (error) {
-    //   print('Error accepting friend request: $error');
-    //   return false;
-    // }
+    try {
+      String url = '/friend/decline/$friendId';
+
+      Response response = await dio.put("${ApiPath}${url}");
+
+      if (response.statusCode == 200) {
+        print('Friend request accepted');
+        return true;
+      } else {
+        print(
+            'Failed to accept friend request. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error accepting friend request: ${error.toString()}');
+      return false;
+    }
   }
 
   Future<bool> sendFriendRequest(String identifier) async {
     try {
       String url = '/friend/invite/$identifier';
-      Response response = await dio.post('${getBackendUrl}${url}');
+      Response response = await dio.post("${ApiPath}${url}");
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        log('Failed to send friend request. Status code: ${response.statusCode}');
+        print(
+            'Failed to send friend request. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      log('Error sending friend request: $error');
+      print('Error sending friend request: ${error.toString()}');
       return false;
     }
   }
-
 }

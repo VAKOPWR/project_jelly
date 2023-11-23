@@ -107,6 +107,7 @@ class MapService extends GetxService {
 
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
+    Get.find<RequestService>().putUserUpdate(newLocation);
   }
 
   Future<void> loadDefaultAvatar() async {
@@ -166,8 +167,9 @@ class MapService extends GetxService {
   }
 
   Future<void> fetchFriendsData() async {
-    List<Friend> friendsLocations =
-        await Get.find<RequestService>().getFriendsLocation();
+    // List<Friend> friendsLocations =
+    //     await Get.find<RequestService>().getFriendsLocation();
+    List<Friend> friendsLocations = [];
     for (Friend friend in friendsLocations) {
       friendsData[MarkerId(friend.id)] = friend;
     }
