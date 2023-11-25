@@ -16,8 +16,10 @@ import 'package:project_jelly/misc/backend_url.dart';
 import 'package:project_jelly/misc/image_modifier.dart';
 import 'package:project_jelly/misc/location_mock.dart';
 import 'package:project_jelly/misc/uint8list_image.dart';
+import 'package:project_jelly/service/visibility_service.dart';
 
 // TODO: Add optimization logic
+// TODO: Leave markers in memory
 class LocationService extends GetxService {
   Position? _currentLocation;
   Stream<Position> locationStream = Geolocator.getPositionStream(
@@ -36,11 +38,12 @@ class LocationService extends GetxService {
       headingAccuracy: 0.0);
   Uint8List? defaultAvatar;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<MarkerId, BitmapDescriptor> staticMarkers =
+  Map<MarkerId, Marker> staticMarkers = <MarkerId, Marker>{};
+  Map<MarkerId, BitmapDescriptor> staticMarkerIcons =
       <MarkerId, BitmapDescriptor>{};
   Map<MarkerId, Uint8List> staticImages = <MarkerId, Uint8List>{};
   Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};
-  Map<String, Set<String>> staticMarkerTypeName = <String, Set<String>>{};
+  Map<String, Set<String>> staticMarkerTypeId = <String, Set<String>>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   MockLocationService _locationService = MockLocationService();
@@ -130,19 +133,39 @@ class LocationService extends GetxService {
         await getBytesFromAsset("assets/markers/shop.png", 150);
     staticImages[MarkerId('Gym')] =
         await getBytesFromAsset("assets/markers/gym.png", 150);
+    staticImages[MarkerId('Favorite')] =
+        await getBytesFromAsset("assets/markers/favorite.png", 150);
   }
 
   Future<void> loadStaticMarkers() async {
-    staticMarkers[MarkerId('Home')] =
+    staticMarkerIcons[MarkerId('Home')] =
         BitmapDescriptor.fromBytes(staticImages[MarkerId('Home')]!);
-    staticMarkers[MarkerId('Work')] =
+    staticMarkerIcons[MarkerId('Work')] =
         BitmapDescriptor.fromBytes(staticImages[MarkerId('Work')]!);
-    staticMarkers[MarkerId('School')] =
+    staticMarkerIcons[MarkerId('School')] =
         BitmapDescriptor.fromBytes(staticImages[MarkerId('School')]!);
-    staticMarkers[MarkerId('Shop')] =
+    staticMarkerIcons[MarkerId('Shop')] =
         BitmapDescriptor.fromBytes(staticImages[MarkerId('Shop')]!);
-    staticMarkers[MarkerId('Gym')] =
+    staticMarkerIcons[MarkerId('Gym')] =
         BitmapDescriptor.fromBytes(staticImages[MarkerId('Gym')]!);
+    staticMarkerIcons[MarkerId('Favorite')] =
+        BitmapDescriptor.fromBytes(staticImages[MarkerId('Favorite')]!);
+  }
+
+  void addStaticMarker(Marker marker) {
+    staticMarkers[marker.markerId] = marker;
+  }
+
+  void deleteStaticMarker(String markerType, MarkerId markerId) {
+    if (staticMarkers.containsKey(markerId)) {
+      Marker markerToDelete = staticMarkers[markerId]!;
+      staticMarkers.remove(markerId);
+      Get.find<VisibilitySevice>().isInfoSheetVisible = false;
+      updateMarkers();
+      if (staticMarkerTypeId.containsKey(markerType)) {
+        staticMarkerTypeId[markerType]!.remove(markerToDelete.markerId.value);
+      }
+    }
   }
 
   Future<void> loadDefaultAvatar() async {
@@ -193,12 +216,17 @@ class LocationService extends GetxService {
     return Marker(
         markerId: MarkerId(friend.id),
         position: friend.location,
-        infoWindow: InfoWindow(
-          title: friend.name,
-        ),
         icon: avatars[MarkerId(friend.id)] != null
             ? BitmapDescriptor.fromBytes(avatars[MarkerId(friend.id)]!)
-            : BitmapDescriptor.fromBytes(defaultAvatar!));
+            : BitmapDescriptor.fromBytes(defaultAvatar!),
+        onTap: () {
+          Get.find<VisibilitySevice>().isInfoSheetVisible = true;
+          if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
+            Get.find<VisibilitySevice>().isInfoSheetVisible = false;
+          }
+          Get.find<VisibilitySevice>().highlightedMarker = MarkerId(friend.id);
+          Get.find<VisibilitySevice>().highlightedMarkerType = null;
+        });
   }
 
   Future<void> fetchFriendsData() async {
@@ -209,6 +237,7 @@ class LocationService extends GetxService {
   }
 
   Future<void> updateMarkers() async {
+    markers.clear();
     List<MarkerId> friendIDs = avatars.keys.toList();
     for (var friend in friendsData.entries) {
       if (!friendIDs.contains(friend.key)) {
@@ -216,6 +245,7 @@ class LocationService extends GetxService {
       }
       markers[friend.key] = _createMarker(friend.value);
     }
+    markers.addEntries(Get.find<LocationService>().staticMarkers.entries);
   }
 
   Future<http.Response> sendLocation(Position locationData) async {

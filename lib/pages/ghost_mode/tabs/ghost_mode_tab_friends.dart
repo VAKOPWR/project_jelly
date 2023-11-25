@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/pages/ghost_mode/friend_specific_ghost_mode.dart';
 import 'package:project_jelly/service/location_service.dart';
+// ignore: unused_import
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class GhostModeTabFriends extends StatefulWidget {

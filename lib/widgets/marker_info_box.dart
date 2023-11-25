@@ -200,7 +200,8 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                         children: [
                           TextButton(
                             onPressed: () {
-                              // TODO: Remove icon
+                              Get.find<LocationService>().deleteStaticMarker(
+                                  widget.markerType!, widget.id);
                             },
                             style: TextButton.styleFrom(
                               backgroundColor: Color.fromRGBO(248, 70, 85, 1),

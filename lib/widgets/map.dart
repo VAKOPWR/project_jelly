@@ -2,14 +2,17 @@ import 'dart:async';
 // ignore: unused_import
 import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/misc/geocoding.dart';
 import 'package:project_jelly/pages/helper/loading.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
+import 'package:project_jelly/service/visibility_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
 import 'package:project_jelly/widgets/marker_info_box.dart';
 
@@ -23,51 +26,26 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _mapController = Completer();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late Timer _stateTimer;
   late Timer _markersTimer;
   late Timer _debounce;
-  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
-  MarkerId? _highlightedMarker = null;
-  String? _highlightedMarkerType = null;
   MapType _mapType = MapType.normal;
   String _locationName = "The Earth";
-  bool _isInfoSheetVisible = false;
-  bool _isBottomSheetOpen = false;
 
   @override
   void initState() {
     Get.find<SnackbarService>().checkLocationAccess();
-    _updateMarkers();
     _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await Get.find<LocationService>().fetchFriendsData();
       await Get.find<LocationService>().updateMarkers();
-      _updateMarkers();
+    });
+    _stateTimer = Timer.periodic(Duration(milliseconds: 1), (timer) async {
+      setState(() {});
     });
     _debounce = Timer(Duration(seconds: 1), () {});
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Get.find<LocationService>().startPositionStream();
-  }
-
-  Future<void> _updateMarkers() async {
-    setState(() {
-      for (var markerEntry in Get.find<LocationService>().markers.entries) {
-        _markers[markerEntry.key] = Marker(
-            markerId: markerEntry.value.markerId,
-            position: markerEntry.value.position,
-            icon: markerEntry.value.icon,
-            onTap: () {
-              setState(() {
-                _isInfoSheetVisible = true;
-                if (_isBottomSheetOpen) {
-                  Navigator.of(context).pop();
-                  _isBottomSheetOpen = false;
-                }
-                _highlightedMarker = markerEntry.value.markerId;
-                _highlightedMarkerType = null;
-              });
-            });
-      }
-    });
   }
 
   MapType getNextMap(MapType currentMapType) {
@@ -105,18 +83,18 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       Get.find<SnackbarService>().checkLocationAccess();
       Get.find<LocationService>().updateMarkers();
       Get.find<LocationService>().loadImageProviders();
-      _updateMarkers();
+      setState(() {});
     }
   }
 
   void hideBottomSheet(CameraPosition) {
     setState(() {
-      if (_isInfoSheetVisible) {
-        _isInfoSheetVisible = false;
+      if (Get.find<VisibilitySevice>().isInfoSheetVisible) {
+        Get.find<VisibilitySevice>().isInfoSheetVisible = false;
       }
-      if (_isBottomSheetOpen) {
+      if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
         Navigator.of(context).pop();
-        _isBottomSheetOpen = false;
+        Get.find<VisibilitySevice>().isBottomSheetOpen = false;
       }
     });
   }
@@ -179,21 +157,25 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     myLocationEnabled: true,
                     padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
                     mapType: _mapType,
-                    markers: _markers.values.toSet(),
+                    markers: Get.find<LocationService>().markers.values.toSet(),
                     onCameraMove: _onCameraMove),
                 AnimatedContainer(
                     duration: Duration(milliseconds: 300), // Animation duration
-                    height: _isInfoSheetVisible
+                    height: Get.find<VisibilitySevice>().isInfoSheetVisible
                         ? MediaQuery.of(context).size.height * 0.78
                         : 0,
                     width: MediaQuery.of(context).size.width * 0.9,
                     margin: EdgeInsets.fromLTRB(
                         MediaQuery.of(context).size.width * 0.05, 0, 0, 0),
-                    child: _highlightedMarker != null
+                    child: Get.find<VisibilitySevice>().highlightedMarker !=
+                            null
                         ? MarkerInfoBox(
-                            isStaticMarker: _highlightedMarkerType != null,
-                            id: _highlightedMarker!,
-                            markerType: _highlightedMarkerType,
+                            isStaticMarker: Get.find<VisibilitySevice>()
+                                    .highlightedMarkerType !=
+                                null,
+                            id: Get.find<VisibilitySevice>().highlightedMarker!,
+                            markerType: Get.find<VisibilitySevice>()
+                                .highlightedMarkerType,
                           )
                         : null),
                 Platform.isIOS
@@ -273,49 +255,94 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   }
 
   void _showMarkerListBottomSheet() {
-    if (!_isBottomSheetOpen) {
-      _isInfoSheetVisible = false;
-      _isBottomSheetOpen = true;
+    if (!Get.find<VisibilitySevice>().isBottomSheetOpen) {
+      Get.find<VisibilitySevice>().isInfoSheetVisible = false;
+      Get.find<VisibilitySevice>().isBottomSheetOpen = true;
       _scaffoldKey.currentState?.showBottomSheet(
         (BuildContext context) {
-          return Container(
-            height: 500.0,
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Marker List"),
-                SizedBox(height: 16.0),
-                _buildMarkerListItem("Home"),
-                _buildMarkerListItem("Work"),
-                _buildMarkerListItem("School"),
-                _buildMarkerListItem("Shop"),
-                _buildMarkerListItem("Gym"),
-                SizedBox(height: 16.0),
-                ElevatedButton(
+          return Stack(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 330.0,
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Mark your places",
+                      style: GoogleFonts.roboto(
+                          color: Theme.of(context).colorScheme.onBackground,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 16.0),
+                    Wrap(
+                      spacing: 16.0,
+                      runSpacing: 16.0,
+                      children: [
+                        _buildMarkerOption(
+                            "Home",
+                            Get.find<LocationService>()
+                                .staticImages[MarkerId("Home")]!),
+                        _buildMarkerOption(
+                            "Work",
+                            Get.find<LocationService>()
+                                .staticImages[MarkerId("Work")]!),
+                        _buildMarkerOption(
+                            "School",
+                            Get.find<LocationService>()
+                                .staticImages[MarkerId("School")]!),
+                        _buildMarkerOption(
+                            "Shop",
+                            Get.find<LocationService>()
+                                .staticImages[MarkerId("Shop")]!),
+                        _buildMarkerOption(
+                            "Gym",
+                            Get.find<LocationService>()
+                                .staticImages[MarkerId("Gym")]!),
+                        _buildMarkerOption(
+                            "Favorite",
+                            Get.find<LocationService>()
+                                .staticImages[MarkerId("Favorite")]!),
+                      ],
+                    ),
+                    SizedBox(height: 16.0),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 8.0,
+                right: 8.0,
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _isBottomSheetOpen = false;
+                    Get.find<VisibilitySevice>().isBottomSheetOpen = false;
                   },
-                  child: Text('Close'),
+                  style: ElevatedButton.styleFrom(
+                    shape: CircleBorder(),
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       );
     }
   }
 
-  Widget _buildMarkerListItem(String markerName) {
-    return ListTile(
-      title: Text(markerName),
+  Widget _buildMarkerOption(String markerName, Uint8List iconData) {
+    return GestureDetector(
       onTap: () {
         if (Get.find<LocationService>()
-                .staticMarkerTypeName
+                .staticMarkerTypeId
                 .containsKey(markerName) &&
             Get.find<LocationService>()
-                    .staticMarkerTypeName[markerName]!
+                    .staticMarkerTypeId[markerName]!
                     .length >=
                 5) {
           Get.dialog(
@@ -335,9 +362,34 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
         } else {
           _addStaticMarker(markerName);
           Navigator.of(context).pop();
-          _isBottomSheetOpen = false;
+          Get.find<VisibilitySevice>().isBottomSheetOpen = false;
         }
       },
+      child: Container(
+        width: 100.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 70.0,
+              height: 70.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey[700]!,
+              ),
+              child: Center(
+                child: Image.memory(
+                  iconData,
+                  width: 65.0,
+                  height: 65.0,
+                ),
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Text(markerName),
+          ],
+        ),
+      ),
     );
   }
 
@@ -352,12 +404,13 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
     int i = 1;
     if (Get.find<LocationService>()
-        .staticMarkerTypeName
+        .staticMarkerTypeId
         .containsKey(markerType)) {
       while (Get.find<LocationService>()
-          .staticMarkerTypeName[markerType]!
+          .staticMarkerTypeId[markerType]!
           .contains(newMarkerName)) {
-        newMarkerName = "${newMarkerName} ${i.toString()}";
+        newMarkerName = "${markerType} ${i.toString()}";
+        i++;
       }
     }
     markerId = MarkerId(newMarkerName);
@@ -365,16 +418,17 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       markerId: markerId,
       position: center,
       draggable: true,
-      icon: Get.find<LocationService>().staticMarkers[MarkerId(markerType)]!,
+      icon:
+          Get.find<LocationService>().staticMarkerIcons[MarkerId(markerType)]!,
       onTap: () {
         setState(() {
-          _isInfoSheetVisible = true;
-          if (_isBottomSheetOpen) {
+          Get.find<VisibilitySevice>().isInfoSheetVisible = true;
+          if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
             Navigator.of(context).pop();
-            _isBottomSheetOpen = false;
+            Get.find<VisibilitySevice>().isBottomSheetOpen = false;
           }
-          _highlightedMarker = markerId;
-          _highlightedMarkerType = markerType;
+          Get.find<VisibilitySevice>().highlightedMarker = markerId;
+          Get.find<VisibilitySevice>().highlightedMarkerType = markerType;
         });
       },
       onDragEnd: (LatLng newPosition) {
@@ -382,15 +436,16 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       },
     );
     setState(() {
-      _markers[marker.markerId] = marker;
+      Get.find<LocationService>().addStaticMarker(marker);
+      Get.find<LocationService>().updateMarkers();
       if (Get.find<LocationService>()
-          .staticMarkerTypeName
+          .staticMarkerTypeId
           .containsKey(markerType)) {
         Get.find<LocationService>()
-            .staticMarkerTypeName[markerType]!
+            .staticMarkerTypeId[markerType]!
             .add(newMarkerName);
       } else {
-        Get.find<LocationService>().staticMarkerTypeName[markerType] = {
+        Get.find<LocationService>().staticMarkerTypeId[markerType] = {
           newMarkerName
         };
       }
@@ -401,6 +456,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void dispose() {
     _debounce.cancel();
     _markersTimer.cancel();
+    _stateTimer.cancel();
     Get.find<LocationService>().pausePositionStream();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

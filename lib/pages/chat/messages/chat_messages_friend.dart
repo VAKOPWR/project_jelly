@@ -3,7 +3,9 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/widgets/own_message.dart';
+// ignore: unused_import
 import 'package:project_jelly/widgets/reply_message.dart';
+// ignore: unused_import
 import 'package:flutter/foundation.dart' as foundation;
 
 class ChatMessagesFriend extends StatefulWidget {

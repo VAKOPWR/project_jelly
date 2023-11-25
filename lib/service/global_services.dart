@@ -7,6 +7,7 @@ import 'package:project_jelly/service/permissions_service.dart';
 import 'package:project_jelly/service/location_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
 import 'package:project_jelly/service/style_service.dart';
+import 'package:project_jelly/service/visibility_service.dart';
 
 class GlobalServices {
   static Future<void> init() async {
@@ -15,5 +16,6 @@ class GlobalServices {
     await Get.putAsync(() async => await StyleService());
     await Get.putAsync(() async => await PermissionsService());
     await Get.putAsync(() async => await SnackbarService());
+    await Get.put(VisibilitySevice());
   }
 }
