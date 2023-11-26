@@ -150,7 +150,7 @@ class RequestService extends getx.GetxService {
     try {
       Response response = await dio.get("${ApiPath}${endpoint}");
       if (response.statusCode == 200) {
-        var data = json.decode(response.data);
+        var data = response.data;
         return (data as List).map((item) => Friend.fromJson(item)).toList();
       } else {
         print('Failed to load friends from $endpoint');
