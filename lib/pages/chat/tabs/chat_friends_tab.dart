@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/classes/friend_chat.dart';
+import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/map_service.dart';
-
-import '../../../classes/friend_chat.dart';
-import '../../../classes/friend.dart';
-import '../../../widgets/search_bar.dart';
-import '../messages/common.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 class ChatFriendsTab extends StatefulWidget {
   const ChatFriendsTab({Key? key}) : super(key: key);

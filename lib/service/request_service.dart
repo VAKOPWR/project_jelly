@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
 
@@ -158,6 +159,22 @@ class RequestService extends getx.GetxService {
       }
     } catch (error) {
       print('Error fetching friends from $endpoint: ${error.toString()}');
+      return List.empty();
+    }
+  }
+
+  Future<List<BasicUser>> searchFriends(String query) async {
+    try {
+      Response response = await dio.get("${ApiPath}/friend/search/$query");
+      if (response.statusCode == 200) {
+        var data = response.data;
+        return (data as List).map((item) => BasicUser.fromJson(item)).toList();
+      } else {
+        print('Failed to search friends with query $query');
+        return List.empty();
+      }
+    } catch (error) {
+      print('Error searching friends with query $query: ${error.toString()}');
       return List.empty();
     }
   }
