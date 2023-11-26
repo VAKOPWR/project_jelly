@@ -9,6 +9,7 @@ import 'package:project_jelly/pages/auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/auth/reset_password.dart';
 import 'package:project_jelly/pages/friends/friends.dart';
 import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
+import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/pages/auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
@@ -78,6 +79,11 @@ class ProjectJelly extends StatelessWidget {
             name: '/ghost_mode',
             page: () => GhostMode(),
             transition: Transition.zoom,
+          ),
+          GetPage(
+            name: '/shake',
+            page: () => ShakeItScreen(),
+            transition: Transition.rightToLeft,
           ),
         ]);
   }
