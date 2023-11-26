@@ -50,7 +50,7 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
         itemCount: filteredFriends.length,
         separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) {
-          return _buildRow(widget.friends[index]);
+          return _buildRow(filteredFriends[index]);
         },
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
@@ -69,7 +70,31 @@ class _FriendListTabState extends State<FriendListTab> {
           ),
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: () {},
+            onPressed: () async {
+              bool success = false;
+              int? friendId = int.tryParse(friend.id);
+              if (friendId != null) {
+                success = await Get.find<RequestService>().deleteFriend(friendId);
+              } else {
+              }
+
+              if (success) {
+                setState(() {
+                  filteredFriends.removeWhere((BasicUser f) => f.id == friend.id);
+                });
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content:
+                      Text('Friend was deleted with a nickname ${friend.name}'),
+                  duration: Duration(seconds: 2),
+                ));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      'Failed to delete friend with a nickname ${friend.name}'),
+                  duration: Duration(seconds: 2),
+                ));
+              }
+            },
           ),
           IconButton(
             icon: Icon(Icons.more_vert),

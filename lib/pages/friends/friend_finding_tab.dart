@@ -86,6 +86,10 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
           bool success =
               await Get.find<RequestService>().sendFriendRequest(basicUser.id);
           if (success) {
+            // setState(() {
+            //   allFriends.removeWhere((Friend f) => f.id == friend.id);
+            // });
+
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Friend request sent to ${basicUser.name}'),
               duration: Duration(seconds: 2),
