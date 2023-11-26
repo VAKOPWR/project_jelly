@@ -192,11 +192,12 @@ class _FriendsPageState extends State<FriendsPage>
           listFriends.add(acceptedFriend);
         }
         _fetchActiveFriends();
+        _fetchPendingFriends();
       });
     } else {
       // Handle the error, such as displaying a message
     }
-    _fetchPendingFriends();
+
   }
 
   Future<void> _declineFriendRequest(String friendId) async {
@@ -209,11 +210,11 @@ class _FriendsPageState extends State<FriendsPage>
         );
 
         pendingFriends.removeWhere((friend) => friend.id == friendId);
-
+        _fetchPendingFriends();
       });
     } else {
       // Handle the error, such as displaying a message
     }
-    _fetchPendingFriends();
+
   }
 }
