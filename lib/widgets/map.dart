@@ -8,7 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/misc/geocoding.dart';
 import 'package:project_jelly/pages/helper/loading.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
 import 'package:project_jelly/widgets/person_info_box.dart';
@@ -35,19 +35,19 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     Get.find<SnackbarService>().checkLocationAccess();
     _updateMarkers();
     _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
-      await Get.find<LocationService>().fetchFriendsData();
-      await Get.find<LocationService>().updateMarkers();
+      await Get.find<MapService>().fetchFriendsData();
+      await Get.find<MapService>().updateMarkers();
       _updateMarkers();
     });
     _debounce = Timer(Duration(seconds: 1), () {});
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    Get.find<LocationService>().startPositionStream();
+    Get.find<MapService>().startPositionStream();
   }
 
   Future<void> _updateMarkers() async {
     setState(() {
-      for (var markerEntry in Get.find<LocationService>().markers.entries) {
+      for (var markerEntry in Get.find<MapService>().markers.entries) {
         _markers[markerEntry.key] = Marker(
             markerId: markerEntry.value.markerId,
             position: markerEntry.value.position,
@@ -95,8 +95,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       Get.find<SnackbarService>().checkLocationAccess();
-      Get.find<LocationService>().updateMarkers();
-      Get.find<LocationService>().loadImageProviders();
+      Get.find<MapService>().updateMarkers();
+      Get.find<MapService>().loadImageProviders();
       _updateMarkers();
     }
   }
@@ -133,7 +133,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Get.find<LocationService>().getCurrentLocation() == null
+        body: Get.find<MapService>().getCurrentLocation() == null
             ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
@@ -143,12 +143,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     onTap: hideBottomSheet,
                     initialCameraPosition: CameraPosition(
                       target: LatLng(
-                        Get.find<LocationService>()
-                            .getCurrentLocation()!
-                            .latitude,
-                        Get.find<LocationService>()
-                            .getCurrentLocation()!
-                            .longitude,
+                        Get.find<MapService>().getCurrentLocation()!.latitude,
+                        Get.find<MapService>().getCurrentLocation()!.longitude,
                       ),
                       zoom: 13,
                     ),
@@ -244,7 +240,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void dispose() {
     _debounce.cancel();
     _markersTimer.cancel();
-    Get.find<LocationService>().pausePositionStream();
+    Get.find<MapService>().pausePositionStream();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

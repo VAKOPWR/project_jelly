@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 
 class PersonInfoBox extends StatefulWidget {
   final MarkerId id;
@@ -51,7 +51,7 @@ class _PersonInfoBoxState extends State<PersonInfoBox> {
                           CircleAvatar(
                             backgroundColor: Theme.of(context).primaryColor,
                             radius: 50,
-                            backgroundImage: Get.find<LocationService>()
+                            backgroundImage: Get.find<MapService>()
                                 .imageProviders[widget.id],
                           ),
                         ],
@@ -59,7 +59,7 @@ class _PersonInfoBoxState extends State<PersonInfoBox> {
                       Column(
                         children: [
                           Text(
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                     .friendsData[widget.id]
                                     ?.name ??
                                 '',
@@ -78,7 +78,7 @@ class _PersonInfoBoxState extends State<PersonInfoBox> {
                             children: [
                               Icon(Icons.speed, color: Colors.orange),
                               Text(
-                                  (Get.find<LocationService>()
+                                  (Get.find<MapService>()
                                                   .friendsData[widget.id]
                                                   ?.movementSpeed
                                                   .toString() ??
@@ -95,12 +95,12 @@ class _PersonInfoBoxState extends State<PersonInfoBox> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              calculateBatteryIcon(Get.find<LocationService>()
+                              calculateBatteryIcon(Get.find<MapService>()
                                       .friendsData[widget.id]
                                       ?.batteryPercentage ??
                                   50),
                               Text(
-                                  (Get.find<LocationService>()
+                                  (Get.find<MapService>()
                                                   .friendsData[widget.id]
                                                   ?.batteryPercentage
                                                   .toString() ??

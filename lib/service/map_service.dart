@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 // ignore: unused_import
 import 'dart:developer';
 import 'dart:ui' as ui;
@@ -9,17 +8,16 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
-import 'package:project_jelly/misc/backend_url.dart';
 import 'package:project_jelly/misc/image_modifier.dart';
-import 'package:project_jelly/misc/location_mock.dart';
 import 'package:project_jelly/misc/uint8list_image.dart';
+import 'package:project_jelly/service/request_service.dart';
 
 // TODO: Add optimization logic
-class LocationService extends GetxService {
+class MapService extends GetxService {
   Position? _currentLocation;
+  DateTime? lastUpdate;
   Stream<Position> locationStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
   StreamSubscription<Position>? _locationStreamSubscription;
@@ -39,7 +37,8 @@ class LocationService extends GetxService {
   Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
-  MockLocationService _locationService = MockLocationService();
+  bool requestSent = false;
+  int locationPerception = 2;
 
   @override
   Future<void> onInit() async {
@@ -111,6 +110,12 @@ class LocationService extends GetxService {
 
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
+    DateTime now = DateTime.now();
+    if (lastUpdate == null ||
+        now.difference(lastUpdate!) > Duration(seconds: locationPerception)) {
+      Get.find<RequestService>().putUserUpdate(newLocation);
+      lastUpdate = now;
+    }
   }
 
   Future<void> loadDefaultAvatar() async {
@@ -119,7 +124,7 @@ class LocationService extends GetxService {
 
   Future<void> loadCustomAvatars() async {
     Map<String, Uint8List?> friendsAvatars =
-        await _locationService.getFriendsIcons();
+        await Get.find<RequestService>().getFriendsIcons();
     for (var avatar in friendsAvatars.entries) {
       String key = avatar.key;
       Uint8List? value = avatar.value;
@@ -127,14 +132,14 @@ class LocationService extends GetxService {
         avatars[MarkerId(key)] = await modifyImage(
             value,
             Colors.red,
-            friendsData[MarkerId(key)]!.isOnline,
-            friendsData[MarkerId(key)]!.offlineStatus);
+            friendsData[MarkerId(key)]!.isOnline ?? false,
+            friendsData[MarkerId(key)]!.offlineStatus ?? '**');
       } else {
         avatars[MarkerId(key)] = await modifyImage(
             defaultAvatar!,
             Colors.red,
-            friendsData[MarkerId(key)]!.isOnline,
-            friendsData[MarkerId(key)]!.offlineStatus);
+            friendsData[MarkerId(key)]!.isOnline ?? false,
+            friendsData[MarkerId(key)]!.offlineStatus ?? '**');
       }
     }
   }
@@ -151,8 +156,8 @@ class LocationService extends GetxService {
             await modifyImage(
                 defaultAvatar!,
                 Colors.red,
-                friendsData[friendId]!.isOnline,
-                friendsData[friendId]!.offlineStatus));
+                friendsData[friendId]!.isOnline ?? false,
+                friendsData[friendId]!.offlineStatus ?? '**'));
       }
     }
   }
@@ -170,7 +175,9 @@ class LocationService extends GetxService {
   }
 
   Future<void> fetchFriendsData() async {
-    List<Friend> friendsLocations = await _locationService.getFriendsLocation();
+    // List<Friend> friendsLocations =
+    //     await Get.find<RequestService>().getFriendsLocation();
+    List<Friend> friendsLocations = [];
     for (Friend friend in friendsLocations) {
       friendsData[MarkerId(friend.id)] = friend;
     }
@@ -184,39 +191,6 @@ class LocationService extends GetxService {
       }
       markers[friend.key] = _createMarker(friend.value);
     }
-  }
-
-  Future<http.Response> sendLocation(Position locationData) async {
-    final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    return http.put(
-      Uri.parse('${getBackendUrl()}/user/location/update'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': authToken!
-      },
-      body: jsonEncode(<String, Object>{
-        "latitude": locationData.latitude,
-        "longitude": locationData.longitude
-      }),
-    );
-  }
-
-  Future<List<Friend>> getFriendsLocation() async {
-    final authToken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    final response = await http.get(
-      Uri.parse('${getBackendUrl()}/user'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': authToken!
-      },
-    );
-    if (response.statusCode == 200) {
-      var people = (json.decode(response.body) as List)
-          .map((i) => Friend.fromJson(i))
-          .toList();
-      return people;
-    }
-    return List.empty();
   }
 
   static Future<Uint8List> getBytesFromAsset(String path, int width) async {

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
@@ -45,7 +47,12 @@ Future<bool> apiSetProfileImage(String apiKey, FileImage profileImage) async {
 }
 
 Future<bool> authLogOut() async {
-  FirebaseAuth.instance.currentUser!.delete();
-  await FirebaseAuth.instance.signOut();
-  return true;
+  try {
+    FirebaseAuth.instance.currentUser!.delete();
+    await FirebaseAuth.instance.signOut();
+    return true;
+  } catch (error) {
+    log('No user to log out');
+    return true;
+  }
 }
