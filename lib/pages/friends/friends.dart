@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/service/request_service.dart';
@@ -22,8 +23,8 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage>
     with SingleTickerProviderStateMixin {
-  List<Friend> listFriends = [];
-  List<Friend> pendingFriends = [];
+  List<BasicUser> listFriends = [];
+  List<BasicUser> pendingFriends = [];
   late TabController _tabController;
 
   @override
@@ -147,7 +148,7 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   Future<void> _fetchActiveFriends() async {
-    List<Friend> _listFriends = await Get.find<RequestService>()
+    List<BasicUser> _listFriends = await Get.find<RequestService>()
         .getFriendsBasedOnEndpoint('/friend/active');
 
     setState(() {
@@ -156,7 +157,7 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   Future<void> _fetchPendingFriends() async {
-    List<Friend> _pendingFriends = await Get.find<RequestService>()
+    List<BasicUser> _pendingFriends = await Get.find<RequestService>()
         .getFriendsBasedOnEndpoint('/friend/pending');
 
     setState(() {
@@ -169,7 +170,7 @@ class _FriendsPageState extends State<FriendsPage>
         await Get.find<RequestService>().acceptFriendRequest(friendId);
     if (success) {
       setState(() {
-        Friend? acceptedFriend = pendingFriends.firstWhereOrNull(
+        BasicUser? acceptedFriend = pendingFriends.firstWhereOrNull(
           (friend) => friend.id == friendId,
         );
 

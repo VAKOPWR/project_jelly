@@ -147,12 +147,12 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<List<Friend>> getFriendsBasedOnEndpoint(String endpoint) async {
+  Future<List<BasicUser>> getFriendsBasedOnEndpoint(String endpoint) async {
     try {
       Response response = await dio.get("${ApiPath}${endpoint}");
       if (response.statusCode == 200) {
         var data = response.data;
-        return (data as List).map((item) => Friend.fromJson(item)).toList();
+        return (data as List).map((item) => BasicUser.fromJson(item)).toList();
       } else {
         print('Failed to load friends from $endpoint');
         return List.empty();
