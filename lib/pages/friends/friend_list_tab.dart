@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
-  final List<Friend> friends;
+  final List<BasicUser> friends;
   final void Function(int) onTabChange;
 
   const FriendListTab({
@@ -19,7 +19,7 @@ class FriendListTab extends StatefulWidget {
 }
 
 class _FriendListTabState extends State<FriendListTab> {
-  List<Friend> filteredFriends = [];
+  List<BasicUser> filteredFriends = [];
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _FriendListTabState extends State<FriendListTab> {
     );
   }
 
-  Widget _buildRow(Friend friend) {
+  Widget _buildRow(BasicUser friend) {
     return ListTile(
       leading: CircleAvatar(
         backgroundImage: Get.find<MapService>().imageProviders[friend.id],
