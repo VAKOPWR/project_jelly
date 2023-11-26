@@ -186,6 +186,19 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   Future<void> _declineFriendRequest(String friendId) async {
-    return; // Currently waiting for endpoint from backend
+    bool success =
+    await Get.find<RequestService>().declineFriendRequest(friendId);
+    if (success) {
+      setState(() {
+        BasicUser? declinedFriend = pendingFriends.firstWhereOrNull(
+              (friend) => friend.id == friendId,
+        );
+
+        pendingFriends.removeWhere((friend) => friend.id == friendId);
+
+      });
+    } else {
+      // Handle the error, such as displaying a message
+    }
   }
 }
