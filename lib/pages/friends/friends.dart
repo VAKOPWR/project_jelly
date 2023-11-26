@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
+import 'package:project_jelly/service/request_service.dart';
 
-import '../../service/request_service.dart';
 import 'friend_finding_tab.dart';
 import 'friend_list_tab.dart';
 import 'friend_pending_tab.dart';
@@ -24,7 +24,6 @@ class _FriendsPageState extends State<FriendsPage>
     with SingleTickerProviderStateMixin {
   List<Friend> listFriends = [];
   List<Friend> pendingFriends = [];
-  List<Friend> usersToFind = [];
   late TabController _tabController;
 
   @override
@@ -36,7 +35,6 @@ class _FriendsPageState extends State<FriendsPage>
     });
     _fetchActiveFriends();
     _fetchPendingFriends();
-    _fetchUsersToFind();
   }
 
   @override
@@ -92,7 +90,6 @@ class _FriendsPageState extends State<FriendsPage>
               onTabChange: _handleTabChange,
             ),
             FriendFindingTab(
-              friends: usersToFind,
               onTabChange: _handleTabChange,
               onShakeButtonPressed: _handleShakeButtonPressed,
             ),
@@ -167,22 +164,13 @@ class _FriendsPageState extends State<FriendsPage>
     });
   }
 
-  Future<void> _fetchUsersToFind() async {
-    List<Friend> _usersToFind =
-        await Get.find<RequestService>().getFriendsBasedOnEndpoint('/user');
-
-    setState(() {
-      usersToFind = _usersToFind;
-    });
-  }
-
   Future<void> _acceptFriendRequest(String friendId) async {
     bool success =
         await Get.find<RequestService>().acceptFriendRequest(friendId);
     if (success) {
       setState(() {
         Friend? acceptedFriend = pendingFriends.firstWhereOrNull(
-              (friend) => friend.id == friendId,
+          (friend) => friend.id == friendId,
         );
 
         pendingFriends.removeWhere((friend) => friend.id == friendId);

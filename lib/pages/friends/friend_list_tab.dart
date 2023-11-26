@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/map_service.dart';
-
-import '../../widgets/search_bar.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
   final List<Friend> friends;

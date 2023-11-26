@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import '../../../classes/friend.dart';
-import '../../../classes/group_chat.dart';
-import '../../../widgets/search_bar.dart';
-import '../messages/common.dart';
+import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/classes/group_chat.dart';
+import 'package:project_jelly/pages/chat/messages/common.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 class ChatGroupsTab extends StatefulWidget {
   const ChatGroupsTab({Key? key}) : super(key: key);
@@ -55,7 +54,6 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
       ),
     );
   }
-
 
   void updateSearchQuery(String newQuery) {
     filterAndSortChats(newQuery);
