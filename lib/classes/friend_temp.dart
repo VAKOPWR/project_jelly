@@ -1,6 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-String defaultAvatarUrl = 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
+String defaultAvatarUrl =
+    'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50';
 
 class Friend {
   String id;

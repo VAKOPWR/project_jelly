@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/service/map_service.dart';
 
 import '../../widgets/search_bar.dart';
 
@@ -29,7 +31,8 @@ class _FriendListTabState extends State<FriendListTab> {
   void _onSearchChanged(String value) {
     setState(() {
       filteredFriends = widget.friends
-          .where((friend) => friend.name.toLowerCase().contains(value.toLowerCase()))
+          .where((friend) =>
+              friend.name.toLowerCase().contains(value.toLowerCase()))
           .toList();
     });
   }
@@ -51,7 +54,7 @@ class _FriendListTabState extends State<FriendListTab> {
   Widget _buildRow(Friend friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage: NetworkImage(friend.avatar),
+        backgroundImage: Get.find<MapService>().imageProviders[friend.id],
         radius: 29,
       ),
       title: Text(
@@ -63,18 +66,15 @@ class _FriendListTabState extends State<FriendListTab> {
         children: [
           IconButton(
             icon: Icon(Icons.edit),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: Icon(Icons.more_vert),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
         ],
       ),

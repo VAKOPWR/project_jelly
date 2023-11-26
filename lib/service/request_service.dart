@@ -12,19 +12,32 @@ import 'package:http/http.dart' as http;
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
   String ApiPath = "http://10.90.50.101/api/v1";
-  // String ApiPath = "http://api.weatherstack.com/current";
 
   void setupInterceptor(String? idToken) {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest:
             (RequestOptions options, RequestInterceptorHandler handler) async {
-          options.headers['Authorization'] = idToken;
+          print('Request');
+          if (isTokenExpired()) {
+            idToken = await refreshToken();
+            print('checking token');
+          }
+          options.headers['Authorization'] = idToken ?? '';
           options.headers['Content-Type'] = 'application/json';
           return handler.next(options);
         },
       ),
     );
+  }
+
+  bool isTokenExpired() {
+    return true;
+  }
+
+  Future<String?> refreshToken() async {
+    String? idToken = await FirebaseAuth.instance.currentUser!.getIdToken(true);
+    return idToken;
   }
 
   Future<dynamic> createUser() async {
@@ -47,7 +60,6 @@ class RequestService extends getx.GetxService {
     final http.Response response = await http.get(Uri.parse(imageUrl));
 
     if (response.statusCode == 200) {
-      // Decode the image bytes
       final Uint8List uint8List = response.bodyBytes;
 
       return uint8List;
@@ -63,10 +75,12 @@ class RequestService extends getx.GetxService {
         "longitude": locationData.longitude,
         "speed": locationData.speed.toInt()
       });
+      print(requestBody);
       Response response = await dio.put(
         "${ApiPath}/user/status/update",
         data: requestBody,
       );
+      print(response.statusCode);
       return response.statusCode;
     } catch (error) {
       print(error.toString());
@@ -76,7 +90,7 @@ class RequestService extends getx.GetxService {
   Future<List<Friend>> getFriendsLocation() async {
     try {
       Response response = await dio.get(
-        "${ApiPath}/get-endpoint",
+        "${ApiPath}/friends/basic",
       );
       if (response.statusCode == 200) {
         var people = (json.decode(response.data) as List)

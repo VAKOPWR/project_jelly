@@ -17,6 +17,7 @@ import 'package:project_jelly/service/request_service.dart';
 // TODO: Add optimization logic
 class MapService extends GetxService {
   Position? _currentLocation;
+  DateTime? lastUpdate;
   Stream<Position> locationStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
   StreamSubscription<Position>? _locationStreamSubscription;
@@ -36,6 +37,8 @@ class MapService extends GetxService {
   Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
+  bool requestSent = false;
+  int locationPerception = 2;
 
   @override
   Future<void> onInit() async {
@@ -107,7 +110,12 @@ class MapService extends GetxService {
 
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
-    Get.find<RequestService>().putUserUpdate(newLocation);
+    DateTime now = DateTime.now();
+    if (lastUpdate == null ||
+        now.difference(lastUpdate!) > Duration(seconds: locationPerception)) {
+      Get.find<RequestService>().putUserUpdate(newLocation);
+      lastUpdate = now;
+    }
   }
 
   Future<void> loadDefaultAvatar() async {
@@ -124,14 +132,14 @@ class MapService extends GetxService {
         avatars[MarkerId(key)] = await modifyImage(
             value,
             Colors.red,
-            friendsData[MarkerId(key)]!.isOnline,
-            friendsData[MarkerId(key)]!.offlineStatus);
+            friendsData[MarkerId(key)]!.isOnline ?? false,
+            friendsData[MarkerId(key)]!.offlineStatus ?? '**');
       } else {
         avatars[MarkerId(key)] = await modifyImage(
             defaultAvatar!,
             Colors.red,
-            friendsData[MarkerId(key)]!.isOnline,
-            friendsData[MarkerId(key)]!.offlineStatus);
+            friendsData[MarkerId(key)]!.isOnline ?? false,
+            friendsData[MarkerId(key)]!.offlineStatus ?? '**');
       }
     }
   }
@@ -148,8 +156,8 @@ class MapService extends GetxService {
             await modifyImage(
                 defaultAvatar!,
                 Colors.red,
-                friendsData[friendId]!.isOnline,
-                friendsData[friendId]!.offlineStatus));
+                friendsData[friendId]!.isOnline ?? false,
+                friendsData[friendId]!.offlineStatus ?? '**'));
       }
     }
   }

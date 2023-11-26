@@ -57,7 +57,7 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
   Widget _buildRow(Friend friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage: NetworkImage(friend.avatar),
+        backgroundImage: NetworkImage(friend.avatar!),
         radius: 29,
       ),
       title: Text(

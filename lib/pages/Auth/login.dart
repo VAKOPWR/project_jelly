@@ -59,6 +59,7 @@ class _LogInPageState extends State<LogInPage> {
   @override
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
+      print(FirebaseAuth.instance.currentUser);
       Future.delayed(Duration.zero, () {
         Get.off(() => const HomePage(),
             transition: Transition.circularReveal,
@@ -247,7 +248,6 @@ class _LogInPageState extends State<LogInPage> {
                                                     await FirebaseAuth
                                                         .instance.currentUser!
                                                         .getIdToken(true);
-                                                print(idToken!.length);
                                                 print(idToken);
                                                 Get.find<RequestService>()
                                                     .setupInterceptor(idToken);

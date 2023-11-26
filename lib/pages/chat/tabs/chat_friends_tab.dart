@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/service/map_service.dart';
 
 import '../../../classes/friend_chat.dart';
 import '../../../classes/friend.dart';
@@ -50,25 +52,26 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                 leading: Stack(
                   children: [
                     CircleAvatar(
-                      backgroundImage: NetworkImage(chat.friend.avatar),
+                      backgroundImage:
+                          Get.find<MapService>().imageProviders[chat.friend.id],
                     ),
-                    if (chat.friend.isOnline)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).canvasColor,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                      ),
+                    // if (chat.friend.isOnline)
+                    //   Positioned(
+                    //     right: 0,
+                    //     bottom: 0,
+                    //     child: Container(
+                    //       width: 12,
+                    //       height: 12,
+                    //       decoration: BoxDecoration(
+                    //         color: Colors.green,
+                    //         shape: BoxShape.circle,
+                    //         border: Border.all(
+                    //           color: Theme.of(context).canvasColor,
+                    //           width: 2,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
                   ],
                 ),
                 title: Text(chat.friend.name),
