@@ -161,7 +161,7 @@ class _FriendsPageState extends State<FriendsPage>
 
   Future<void> _fetchActiveFriends() async {
     List<BasicUser> _listFriends = await Get.find<RequestService>()
-        .getFriendsBasedOnEndpoint('/friend/active');
+        .getFriendsBasedOnEndpoint('/friend/basic');
 
     setState(() {
       listFriends = _listFriends;
@@ -191,6 +191,7 @@ class _FriendsPageState extends State<FriendsPage>
         if (acceptedFriend != null) {
           listFriends.add(acceptedFriend);
         }
+        _fetchActiveFriends();
       });
     } else {
       // Handle the error, such as displaying a message
