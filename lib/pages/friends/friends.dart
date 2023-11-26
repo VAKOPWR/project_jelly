@@ -32,7 +32,19 @@ class _FriendsPageState extends State<FriendsPage>
     super.initState();
     _tabController = TabController(length: _numberOfTabs, vsync: this);
     _tabController.addListener(() {
-      setState(() {});
+      if (_tabController.indexIsChanging) {
+        switch (_tabController.index) {
+          case 0:
+            _fetchActiveFriends();
+            break;
+          case 1:
+            break;
+          case 2:
+            _fetchPendingFriends();
+            break;
+          default:
+        }
+      }
     });
     _fetchActiveFriends();
     _fetchPendingFriends();
@@ -183,6 +195,7 @@ class _FriendsPageState extends State<FriendsPage>
     } else {
       // Handle the error, such as displaying a message
     }
+    _fetchPendingFriends();
   }
 
   Future<void> _declineFriendRequest(String friendId) async {
@@ -200,5 +213,6 @@ class _FriendsPageState extends State<FriendsPage>
     } else {
       // Handle the error, such as displaying a message
     }
+    _fetchPendingFriends();
   }
 }

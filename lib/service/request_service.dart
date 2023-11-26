@@ -199,6 +199,26 @@ class RequestService extends getx.GetxService {
     }
   }
 
+  Future<bool> deleteFriend(int friendId) async {
+    try {
+      String url = '/friend/delete/$friendId';
+
+      Response response = await dio.delete("${ApiPath}${url}");
+
+      if (response.statusCode == 200) {
+        print('Friend was successfully deleted');
+        return true;
+      } else {
+        print(
+            'Failed to delete friend. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error deleting friend: ${error.toString()}');
+      return false;
+    }
+  }
+
   Future<bool> declineFriendRequest(String friendId) async {
     try {
       String url = '/friend/decline/$friendId';
