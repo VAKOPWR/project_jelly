@@ -51,6 +51,7 @@ class _FriendsPageState extends State<FriendsPage>
 
   @override
   void dispose() {
+    _tabController.removeListener(() {});
     _tabController.dispose();
     super.dispose();
   }
