@@ -82,17 +82,29 @@ class _FriendListTabState extends State<FriendListTab> {
                 setState(() {
                   filteredFriends.removeWhere((BasicUser f) => f.id == friend.id);
                 });
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content:
-                      Text('Friend was deleted with a nickname ${friend.name}'),
-                  duration: Duration(seconds: 2),
-                ));
+                Get.snackbar("Sorry to hear that",
+                    "Your friend was deleted: ${friend.name}",
+                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined ,
+                        color: Colors.white, size: 35),
+                    snackPosition: SnackPosition.TOP,
+                    isDismissible: false,
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.green[400],
+                    margin: EdgeInsets.zero,
+                    snackStyle: SnackStyle.GROUNDED
+                );
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                      'Failed to delete friend with a nickname ${friend.name}'),
-                  duration: Duration(seconds: 2),
-                ));
+                Get.snackbar("Sorry to hear that",
+                    "Failed to delete friend: ${friend.name}",
+                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined ,
+                        color: Colors.white, size: 35),
+                    snackPosition: SnackPosition.TOP,
+                    isDismissible: false,
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.red[400],
+                    margin: EdgeInsets.zero,
+                    snackStyle: SnackStyle.GROUNDED
+                );
               }
             },
           ),

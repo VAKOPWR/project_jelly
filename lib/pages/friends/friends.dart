@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/basic_user.dart';
-import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/service/request_service.dart';
 
@@ -190,12 +189,23 @@ class _FriendsPageState extends State<FriendsPage>
 
         if (acceptedFriend != null) {
           listFriends.add(acceptedFriend);
+          Get.snackbar(
+              "Congratulations!",
+              "You decided to become a friends with a ${acceptedFriend.name}",
+              icon: Icon(Icons.add_reaction, color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED
+          );
         }
+
         _fetchActiveFriends();
         _fetchPendingFriends();
       });
     } else {
-      // Handle the error, such as displaying a message
     }
 
   }
@@ -210,10 +220,23 @@ class _FriendsPageState extends State<FriendsPage>
         );
 
         pendingFriends.removeWhere((friend) => friend.id == friendId);
+
+        if (declinedFriend != null) {
+          Get.snackbar(
+              "Ooops!",
+              "You decided to decline friendship with a ${declinedFriend.name}",
+              icon: Icon(Icons.sentiment_very_dissatisfied_outlined, color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED
+          );
+        }
         _fetchPendingFriends();
       });
     } else {
-      // Handle the error, such as displaying a message
     }
 
   }
