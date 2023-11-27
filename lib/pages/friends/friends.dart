@@ -2,11 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/service/map_service.dart';
-import 'package:project_jelly/service/request_service.dart';
-
 import 'friend_finding_tab.dart';
 import 'friend_list_tab.dart';
 import 'friend_pending_tab.dart';
@@ -25,8 +22,8 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage>
     with SingleTickerProviderStateMixin {
-  List<BasicUser> pendingFriends = [];
   late TabController _tabController;
+  late Timer _stateTimer;
 
   @override
   void initState() {
@@ -40,17 +37,23 @@ class _FriendsPageState extends State<FriendsPage>
           case 1:
             break;
           case 2:
-            _fetchPendingFriends();
+            Get.find<MapService>().fetchPendingFriends();
             break;
           default:
         }
       }
     });
-    _fetchPendingFriends();
+    _stateTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      setState(() {
+        print('setting friends page state');
+      });
+    });
+    Get.find<MapService>().fetchPendingFriends();
   }
 
   @override
   void dispose() {
+    _stateTimer.cancel();
     _tabController.removeListener(() {});
     _tabController.dispose();
     super.dispose();
@@ -106,10 +109,7 @@ class _FriendsPageState extends State<FriendsPage>
               onShakeButtonPressed: _handleShakeButtonPressed,
             ),
             FriendPendingTab(
-              friends: pendingFriends,
               onTabChange: _handleTabChange,
-              onAccept: _acceptFriendRequest,
-              onDecline: _declineFriendRequest,
             ),
           ],
         ),
@@ -145,7 +145,7 @@ class _FriendsPageState extends State<FriendsPage>
                 color: Colors.red,
               ),
               child: Text(
-                pendingFriends.length.toString(),
+                Get.find<MapService>().pendingFriends.length.toString(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -156,68 +156,5 @@ class _FriendsPageState extends State<FriendsPage>
         ),
       ),
     ];
-  }
-
-  Future<void> _fetchPendingFriends() async {
-    List<BasicUser> _pendingFriends = await Get.find<RequestService>()
-        .getFriendsBasedOnEndpoint('/friend/pending');
-
-    setState(() {
-      pendingFriends = _pendingFriends;
-    });
-  }
-
-  Future<void> _acceptFriendRequest(String friendId) async {
-    bool success =
-        await Get.find<RequestService>().acceptFriendRequest(friendId);
-    if (success) {
-      setState(() {
-        BasicUser? acceptedFriend = pendingFriends.firstWhereOrNull(
-          (friend) => friend.id == friendId,
-        );
-
-        pendingFriends.removeWhere((friend) => friend.id == friendId);
-        print(pendingFriends);
-
-        if (acceptedFriend != null) {
-          Get.snackbar("Congratulations!",
-              "You decided to become a friends with a ${acceptedFriend.name}",
-              icon: Icon(Icons.add_reaction, color: Colors.white, size: 35),
-              snackPosition: SnackPosition.TOP,
-              isDismissible: false,
-              duration: Duration(seconds: 2),
-              backgroundColor: Colors.green[400],
-              margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED);
-        }
-        _fetchPendingFriends();
-      });
-    } else {}
-  }
-
-  Future<void> _declineFriendRequest(String friendId) async {
-    bool success =
-        await Get.find<RequestService>().declineFriendRequest(friendId);
-    if (success) {
-      setState(() {
-        BasicUser? declinedFriend = pendingFriends.firstWhereOrNull(
-          (friend) => friend.id == friendId,
-        );
-        pendingFriends.removeWhere((friend) => friend.id == friendId);
-        if (declinedFriend != null) {
-          Get.snackbar("Ooops!",
-              "You decided to decline friendship with a ${declinedFriend.name}",
-              icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
-                  color: Colors.white, size: 35),
-              snackPosition: SnackPosition.TOP,
-              isDismissible: false,
-              duration: Duration(seconds: 2),
-              backgroundColor: Colors.red[400],
-              margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED);
-        }
-        _fetchPendingFriends();
-      });
-    } else {}
   }
 }

@@ -1,23 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
-import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendPendingTab extends StatefulWidget {
-  final List<BasicUser> friends;
   final void Function(int) onTabChange;
-  final void Function(String) onAccept;
-  final void Function(String) onDecline;
 
   const FriendPendingTab({
     Key? key,
-    required this.friends,
     required this.onTabChange,
-    required this.onAccept,
-    required this.onDecline,
   }) : super(key: key);
 
   @override
@@ -26,16 +21,30 @@ class FriendPendingTab extends StatefulWidget {
 
 class _FriendPendingTabState extends State<FriendPendingTab> {
   List<BasicUser> filteredFriends = [];
+  // late Timer _stateTimer;
 
   @override
   void initState() {
     super.initState();
-    filteredFriends = widget.friends;
+    filteredFriends = Get.find<MapService>().pendingFriends;
+    // _stateTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    //   setState(() {
+    //     print('setting pending page state');
+    //     filteredFriends = Get.find<MapService>().pendingFriends;
+    //   });
+    // });
+  }
+
+  @override
+  void dispose() {
+    // _stateTimer.cancel();
+    super.dispose();
   }
 
   void _onSearchChanged(String value) {
     setState(() {
-      filteredFriends = widget.friends
+      filteredFriends = Get.find<MapService>()
+          .pendingFriends
           .where((friend) =>
               friend.name.toLowerCase().contains(value.toLowerCase()))
           .toList();
@@ -72,15 +81,77 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
         children: [
           IconButton(
             icon: Icon(Icons.add),
-            onPressed: () => widget.onAccept(friend.id),
+            onPressed: () => _acceptFriendRequest(friend.id),
           ),
           IconButton(
             icon: Icon(Icons.close),
-            onPressed: () => widget.onDecline(friend.id),
+            onPressed: () => _declineFriendRequest(friend.id),
           ),
         ],
       ),
       onTap: () {},
     );
+  }
+
+  Future<void> _acceptFriendRequest(String friendId) async {
+    bool success =
+        await Get.find<RequestService>().acceptFriendRequest(friendId);
+    if (success) {
+      setState(() {
+        BasicUser? acceptedFriend =
+            Get.find<MapService>().pendingFriends.firstWhereOrNull(
+                  (friend) => friend.id == friendId,
+                );
+
+        Get.find<MapService>()
+            .pendingFriends
+            .removeWhere((friend) => friend.id == friendId);
+        print(Get.find<MapService>().pendingFriends);
+
+        if (acceptedFriend != null) {
+          Get.snackbar("Congratulations!",
+              "You decided to become a friends with a ${acceptedFriend.name}",
+              icon: Icon(Icons.add_reaction, color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        }
+        Get.find<MapService>().fetchPendingFriends();
+        filteredFriends = Get.find<MapService>().pendingFriends;
+      });
+    } else {}
+  }
+
+  Future<void> _declineFriendRequest(String friendId) async {
+    bool success =
+        await Get.find<RequestService>().declineFriendRequest(friendId);
+    if (success) {
+      setState(() {
+        BasicUser? declinedFriend =
+            Get.find<MapService>().pendingFriends.firstWhereOrNull(
+                  (friend) => friend.id == friendId,
+                );
+        Get.find<MapService>()
+            .pendingFriends
+            .removeWhere((friend) => friend.id == friendId);
+        if (declinedFriend != null) {
+          Get.snackbar("Ooops!",
+              "You decided to decline friendship with a ${declinedFriend.name}",
+              icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        }
+        Get.find<MapService>().fetchPendingFriends();
+        filteredFriends = Get.find<MapService>().pendingFriends;
+      });
+    } else {}
   }
 }

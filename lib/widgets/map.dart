@@ -81,8 +81,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       Get.find<SnackbarService>().checkLocationAccess();
-      Get.find<LocationService>().updateMarkers();
-      Get.find<LocationService>().loadImageProviders();
+      Get.find<MapService>().updateMarkers();
+      Get.find<MapService>().loadImageProviders();
       setState(() {});
     }
   }
@@ -153,7 +153,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     myLocationEnabled: true,
                     padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
                     mapType: _mapType,
-                    markers: Get.find<LocationService>().markers.values.toSet(),
+                    markers: Get.find<MapService>().markers.values.toSet(),
                     onCameraMove: _onCameraMove),
                 AnimatedContainer(
                     duration: Duration(milliseconds: 300), // Animation duration
@@ -207,7 +207,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                               Icons.map_rounded,
                               color: Colors.grey[700],
                             ),
-                            backgroundColor: Colors.white.withOpacity(0.95),
+                            backgroundColor: Colors.white.withOpacity(0.8),
                             elevation: 2.0,
                             shape: RoundedRectangleBorder(
                               borderRadius:
@@ -216,20 +216,44 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                           ),
                         )),
                 NavButtons(),
-                Positioned(
-                  top: 120.0,
-                  right: 10.0,
-                  child: FloatingActionButton(
-                      heroTag: 'placeIconButton',
-                      onPressed: () {
-                        _showMarkerListBottomSheet();
-                      },
-                      child: Icon(
-                        Icons.place_rounded,
-                        color: Colors.grey[700],
-                      ),
-                      backgroundColor: Colors.grey[50]),
-                ),
+                Platform.isIOS
+                    ? Positioned(
+                        top: 120.0,
+                        right: 10.0,
+                        child: FloatingActionButton(
+                            heroTag: 'placeIconButton',
+                            onPressed: () {
+                              _showMarkerListBottomSheet();
+                            },
+                            child: Icon(
+                              Icons.place_rounded,
+                              color: Colors.grey[700],
+                            ),
+                            backgroundColor: Colors.grey[50]),
+                      )
+                    : Positioned(
+                        top: 150.0,
+                        right: 12.0,
+                        child: SizedBox(
+                          height: 38,
+                          width: 38,
+                          child: FloatingActionButton(
+                            heroTag: 'staticIconButton',
+                            onPressed: () {
+                              _showMarkerListBottomSheet();
+                            },
+                            child: Icon(
+                              Icons.place_rounded,
+                              color: Colors.grey[700],
+                            ),
+                            backgroundColor: Colors.white.withOpacity(0.8),
+                            elevation: 2.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(0)),
+                            ),
+                          ),
+                        )),
                 Positioned(
                   top: 60.0,
                   left: 25.0,
@@ -279,27 +303,27 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                       children: [
                         _buildMarkerOption(
                             "Home",
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                 .staticImages[MarkerId("Home")]!),
                         _buildMarkerOption(
                             "Work",
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                 .staticImages[MarkerId("Work")]!),
                         _buildMarkerOption(
                             "School",
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                 .staticImages[MarkerId("School")]!),
                         _buildMarkerOption(
                             "Shop",
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                 .staticImages[MarkerId("Shop")]!),
                         _buildMarkerOption(
                             "Gym",
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                 .staticImages[MarkerId("Gym")]!),
                         _buildMarkerOption(
                             "Favorite",
-                            Get.find<LocationService>()
+                            Get.find<MapService>()
                                 .staticImages[MarkerId("Favorite")]!),
                       ],
                     ),
@@ -334,12 +358,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   Widget _buildMarkerOption(String markerName, Uint8List iconData) {
     return GestureDetector(
       onTap: () {
-        if (Get.find<LocationService>()
-                .staticMarkerTypeId
-                .containsKey(markerName) &&
-            Get.find<LocationService>()
-                    .staticMarkerTypeId[markerName]!
-                    .length >=
+        if (Get.find<MapService>().staticMarkerTypeId.containsKey(markerName) &&
+            Get.find<MapService>().staticMarkerTypeId[markerName]!.length >=
                 5) {
           Get.dialog(
             AlertDialog(
@@ -399,10 +419,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     String newMarkerName = markerType;
 
     int i = 1;
-    if (Get.find<LocationService>()
-        .staticMarkerTypeId
-        .containsKey(markerType)) {
-      while (Get.find<LocationService>()
+    if (Get.find<MapService>().staticMarkerTypeId.containsKey(markerType)) {
+      while (Get.find<MapService>()
           .staticMarkerTypeId[markerType]!
           .contains(newMarkerName)) {
         newMarkerName = "${markerType} ${i.toString()}";
@@ -414,8 +432,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       markerId: markerId,
       position: center,
       draggable: true,
-      icon:
-          Get.find<LocationService>().staticMarkerIcons[MarkerId(markerType)]!,
+      icon: Get.find<MapService>().staticMarkerIcons[MarkerId(markerType)]!,
       onTap: () {
         setState(() {
           Get.find<VisibilitySevice>().isInfoSheetVisible = true;
@@ -432,18 +449,14 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       },
     );
     setState(() {
-      Get.find<LocationService>().addStaticMarker(marker);
-      Get.find<LocationService>().updateMarkers();
-      if (Get.find<LocationService>()
-          .staticMarkerTypeId
-          .containsKey(markerType)) {
-        Get.find<LocationService>()
+      Get.find<MapService>().addStaticMarker(marker);
+      Get.find<MapService>().updateMarkers();
+      if (Get.find<MapService>().staticMarkerTypeId.containsKey(markerType)) {
+        Get.find<MapService>()
             .staticMarkerTypeId[markerType]!
             .add(newMarkerName);
       } else {
-        Get.find<LocationService>().staticMarkerTypeId[markerType] = {
-          newMarkerName
-        };
+        Get.find<MapService>().staticMarkerTypeId[markerType] = {newMarkerName};
       }
     });
   }

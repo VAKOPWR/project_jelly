@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/misc/image_modifier.dart';
@@ -17,7 +18,7 @@ import 'package:project_jelly/service/visibility_service.dart';
 
 // TODO: Add optimization logic
 // TODO: Leave markers in memory
-class LocationService extends GetxService {
+class MapService extends GetxService {
   Position? _currentLocation;
   DateTime? lastUpdate;
   Stream<Position> locationStream = Geolocator.getPositionStream(
@@ -44,6 +45,7 @@ class LocationService extends GetxService {
   Map<String, Set<String>> staticMarkerTypeId = <String, Set<String>>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
+  List<BasicUser> pendingFriends = <BasicUser>[];
   bool requestSent = false;
   int locationPerception = 2;
 
@@ -73,6 +75,7 @@ class LocationService extends GetxService {
       await loadCustomAvatars();
       await loadImageProviders();
       await updateMarkers();
+      await fetchPendingFriends();
     }
     Timer.periodic(Duration(minutes: 30), (timer) async {
       if (FirebaseAuth.instance.currentUser != null) {
@@ -187,14 +190,14 @@ class LocationService extends GetxService {
         avatars[MarkerId(key)] = await modifyImage(
             value,
             Colors.red,
-            friendsData[MarkerId(key)]!.isOnline ?? false,
-            friendsData[MarkerId(key)]!.offlineStatus ?? '**');
+            friendsData[MarkerId(key)]!.isOnline,
+            friendsData[MarkerId(key)]!.offlineStatus);
       } else {
         avatars[MarkerId(key)] = await modifyImage(
             defaultAvatar!,
             Colors.red,
-            friendsData[MarkerId(key)]!.isOnline ?? false,
-            friendsData[MarkerId(key)]!.offlineStatus ?? '**');
+            friendsData[MarkerId(key)]!.isOnline,
+            friendsData[MarkerId(key)]!.offlineStatus);
       }
     }
   }
@@ -211,10 +214,11 @@ class LocationService extends GetxService {
             await modifyImage(
                 defaultAvatar!,
                 Colors.red,
-                friendsData[friendId]!.isOnline ?? false,
-                friendsData[friendId]!.offlineStatus ?? '**'));
+                friendsData[friendId]!.isOnline,
+                friendsData[friendId]!.offlineStatus));
       }
     }
+    print(imageProviders.keys.toList());
   }
 
   Marker _createMarker(Friend friend) {
@@ -235,24 +239,29 @@ class LocationService extends GetxService {
   }
 
   Future<void> fetchFriendsData() async {
-    friendsData.clear();
     List<Friend> friendsLocations =
         await Get.find<RequestService>().getFriendsLocation();
+    Map<MarkerId, Friend> newFriendsData = {};
     for (Friend friend in friendsLocations) {
-      friendsData[MarkerId(friend.id)] = friend;
+      newFriendsData[MarkerId(friend.id)] = friend;
     }
+    friendsData.clear();
+    friendsData = newFriendsData;
   }
 
   Future<void> updateMarkers() async {
-    markers.clear();
+    Map<MarkerId, Marker> newMarkers = {};
     List<MarkerId> friendIDs = avatars.keys.toList();
     for (var friend in friendsData.entries) {
       if (!friendIDs.contains(friend.key)) {
         await loadCustomAvatars();
+        await loadImageProviders();
       }
-      markers[friend.key] = _createMarker(friend.value);
+      newMarkers[friend.key] = _createMarker(friend.value);
     }
-    markers.addEntries(Get.find<LocationService>().staticMarkers.entries);
+    newMarkers.addEntries(staticMarkers.entries);
+    markers.clear();
+    markers = newMarkers;
   }
 
   static Future<Uint8List> getBytesFromAsset(String path, int width) async {
@@ -263,5 +272,11 @@ class LocationService extends GetxService {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
+  }
+
+  Future<void> fetchPendingFriends() async {
+    List<BasicUser> _pendingFriends = await Get.find<RequestService>()
+        .getFriendsBasedOnEndpoint('/friend/pending');
+    pendingFriends = _pendingFriends;
   }
 }

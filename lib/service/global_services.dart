@@ -12,6 +12,7 @@ import 'package:project_jelly/service/visibility_service.dart';
 
 class GlobalServices {
   static Future<void> init() async {
+    await Get.putAsync(() async => await RequestService());
     await Get.putAsync(() async => await MapService());
     await Get.putAsync(() async => await AuthService());
     await Get.putAsync(() async => await StyleService());

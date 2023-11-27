@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 
 class MarkerInfoBox extends StatefulWidget {
   final bool isStaticMarker;
@@ -25,7 +25,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.21,
+      initialChildSize: 0.4,
       minChildSize: 0.1,
       maxChildSize: 1,
       builder: (BuildContext context, ScrollController scrollController) {
@@ -66,21 +66,14 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                     backgroundColor: Theme.of(context).primaryColor,
                     radius: 50,
                     backgroundImage:
-                        Get.find<LocationService>().imageProviders[widget.id],
+                        Get.find<MapService>().imageProviders[widget.id],
                   ),
                 ],
               ),
               Column(
                 children: [
-                  Text(
-                    Get.find<LocationService>().friendsData[widget.id]?.name ??
-                        '',
-                    style: GoogleFonts.bebasNeue(
-                      color: Theme.of(context).colorScheme.onBackground,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2.0,
-                    ),
+                  _buildSplitText(
+                    Get.find<MapService>().friendsData[widget.id]?.name ?? '',
                   ),
                   Divider(
                     height: 5,
@@ -90,7 +83,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                     children: [
                       Icon(Icons.speed, color: Colors.orange),
                       Text(
-                          (Get.find<LocationService>()
+                          (Get.find<MapService>()
                                           .friendsData[widget.id]
                                           ?.movementSpeed
                                           .toString() ??
@@ -106,12 +99,12 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      calculateBatteryIcon(Get.find<LocationService>()
+                      calculateBatteryIcon(Get.find<MapService>()
                               .friendsData[widget.id]
                               ?.batteryPercentage ??
                           50),
                       Text(
-                          (Get.find<LocationService>()
+                          (Get.find<MapService>()
                                           .friendsData[widget.id]
                                           ?.batteryPercentage
                                           .toString() ??
@@ -154,6 +147,58 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
     );
   }
 
+  // Function to split and truncate text
+  Widget _buildSplitText(String text) {
+    final maxCharacters = 11;
+    final maxWords = 2;
+
+    if (text.length > maxCharacters) {
+      List<String> words = text.split(' ');
+      if (words.length >= maxWords) {
+        int halfLength = (words.length / 2).ceil();
+        String firstHalf = words.take(halfLength).join(' ');
+        String secondHalf = words.skip(halfLength).join(' ');
+        return Column(
+          children: [
+            Text(
+              firstHalf,
+              style: GoogleFonts.bebasNeue(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2.0,
+              ),
+            ),
+            Text(
+              secondHalf,
+              style: GoogleFonts.bebasNeue(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2.0,
+              ),
+            ),
+          ],
+        );
+      }
+    }
+
+    if (text.length > maxCharacters) {
+      text = text.substring(0, maxCharacters - 3) + '...';
+    }
+
+    // Return a single column with the text
+    return Text(
+      text,
+      style: GoogleFonts.bebasNeue(
+        color: Theme.of(context).colorScheme.onBackground,
+        fontSize: 30,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 2.0,
+      ),
+    );
+  }
+
   Widget _buildStaticDescription() {
     return Container(
         decoration: BoxDecoration(
@@ -176,7 +221,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                       Column(
                         children: [
                           Image.memory(
-                            Get.find<LocationService>().staticImages[
+                            Get.find<MapService>().staticImages[
                                 MarkerId(widget.markerType ?? '')]!,
                             width: 100,
                             height: 100,
@@ -200,7 +245,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                         children: [
                           TextButton(
                             onPressed: () {
-                              Get.find<LocationService>().deleteStaticMarker(
+                              Get.find<MapService>().deleteStaticMarker(
                                   widget.markerType!, widget.id);
                             },
                             style: TextButton.styleFrom(
