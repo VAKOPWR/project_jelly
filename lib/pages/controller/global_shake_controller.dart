@@ -1,21 +1,24 @@
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/classes/basic_user.dart';
+import 'package:project_jelly/service/request_service.dart';
 
 class GlobalShakeController extends GetxController {
   var isShaking = false.obs;
-  List<Friend> shakingFriends = [];
+  List<BasicUser> shakingFriends = [];
   int lastShakeTimestamp = 0;
   int shakeCount = 0;
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
-    shakingFriends = _generateFakeShakingFriends();
+    shakingFriends = await Get.find<RequestService>()
+        .getFriendsBasedOnEndpoint('/user/nearby');
   }
 
-  void updateShakingState(bool shaking) {
+  Future<void> updateShakingState(bool shaking) async {
     isShaking.value = shaking;
+    await Get.find<RequestService>().updateShakingStatus(shaking);
+
     if (shaking) {
       showShakingPopup();
     }
@@ -27,19 +30,5 @@ class GlobalShakeController extends GetxController {
         Get.toNamed('/shake');
       }
     }
-  }
-
-  List<Friend> _generateFakeShakingFriends() {
-    return List<Friend>.generate(
-        3,
-            (int index) => Friend(
-            id: (index + 1).toString(),
-            name: 'Friend $index',
-            avatar: 'assets/andrii.jpeg',
-            location: LatLng(37.4219999, -122.0840575),
-            batteryPercentage: index,
-            movementSpeed: index,
-            isOnline: true,
-            offlineStatus: ''));
   }
 }

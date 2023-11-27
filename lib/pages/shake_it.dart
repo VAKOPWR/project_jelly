@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-
-import 'package:project_jelly/classes/friend.dart';
+import 'package:get/get.dart';
+import 'package:project_jelly/classes/basic_user.dart';
+import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/service/request_service.dart';
 
 class ShakeItScreen extends StatefulWidget {
   ShakeItScreen({Key? key}) : super(key: key);
@@ -12,53 +12,21 @@ class ShakeItScreen extends StatefulWidget {
 }
 
 class _ShakeItScreenState extends State<ShakeItScreen> {
-  List<Friend> friends = [];
+  List<BasicUser> usersWhoAreShaking = [];
   bool isShaking = false;
 
   @override
   void initState() {
     super.initState();
-    friends = _generateFakeShakingFriends();
-    _startListeningShake();
+    _fetchShakingUsers();
   }
 
-  List<Friend> _generateFakeShakingFriends() {
-    return List<Friend>.generate(5, (int index) => Friend(
-        id: 'id_$index',
-        name: 'Friend $index',
-        avatar: defaultFriendAvatar,
-        location: LatLng(37.4219999, -122.0840575)
-    ));
-  }
+  Future<void> _fetchShakingUsers() async {
+    List<BasicUser> _usersWhoAreShaking = await Get.find<RequestService>()
+        .getFriendsBasedOnEndpoint('/user/nearby');
 
-  void _startListeningShake() {
-    double shakeThresholdGravity = 2.7;
-    var lastShakeTimestamp = DateTime.now();
-
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      var now = DateTime.now();
-      var acceleration = event.x * event.x + event.y * event.y + event.z * event.z;
-      acceleration = acceleration / (9.81 * 9.81);
-      if (
-          acceleration > shakeThresholdGravity
-          && now.difference(lastShakeTimestamp) > Duration(seconds: 2)
-      ) {
-        lastShakeTimestamp = now;
-        if (!isShaking) {
-          setState(() {
-            isShaking = true;
-            friends = _generateFakeShakingFriends();
-          });
-
-          Future.delayed(const Duration(seconds: 5), () {
-            if (mounted) {
-              setState(() {
-                isShaking = false;
-              });
-            }
-          });
-        }
-      }
+    setState(() {
+      usersWhoAreShaking = _usersWhoAreShaking;
     });
   }
 
@@ -104,9 +72,9 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
                       Expanded(
                         child: ListView.builder(
                           shrinkWrap: true,
-                          itemCount: friends.length,
+                          itemCount: usersWhoAreShaking.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return _buildFriendRow(friends[index]);
+                            return _buildFriendRow(usersWhoAreShaking[index]);
                           },
                         ),
                       ),
@@ -127,14 +95,14 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
     );
   }
 
-  Widget _buildFriendRow(Friend friend) {
+  Widget _buildFriendRow(BasicUser userWhoIsShaking) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.grey,
-        backgroundImage: NetworkImage(friend.avatar),
+        backgroundImage: Get.find<MapService>().imageProviders[userWhoIsShaking.id],
+        radius: 29,
       ),
       title: Text(
-        friend.name,
+        userWhoIsShaking.name,
         style: TextStyle(color: Colors.black),
       ),
       onTap: () {
