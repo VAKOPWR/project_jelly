@@ -6,9 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
+import 'package:project_jelly/service/map_service.dart';
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
@@ -89,19 +91,24 @@ class RequestService extends getx.GetxService {
   }
 
   Future<List<Friend>> getFriendsLocation() async {
+    print('Getting friends location');
     try {
       Response response = await dio.get(
-        "${ApiPath}/friends/basic",
+        "${ApiPath}/friend/statuses",
       );
       if (response.statusCode == 200) {
-        var people = (json.decode(response.data) as List)
-            .map((i) => Friend.fromJson(i))
-            .toList();
-        return people;
+        var responseData = response.data;
+        print(responseData);
+        if (responseData is List) {
+          var people = responseData.map((i) => Friend.fromJson(i)).toList();
+          return people;
+        } else {
+          return List.empty();
+        }
       }
       return List.empty();
     } catch (error) {
-      print(error.toString());
+      print('Error: $error');
       return List.empty();
     }
   }
@@ -111,12 +118,20 @@ class RequestService extends getx.GetxService {
     try {
       print('User avatars');
       Response response = await dio.get(
-        "${ApiPath}/get-endpoint",
+        "${ApiPath}/friend/basic",
       );
       if (response.statusCode == 200) {
-        var data = json.decode(response.data) as List;
+        var data = response.data;
+        print(data);
         for (var icon in data) {
-          icons[icon['id']] = await getUint8ListFromImageUrl(icon['icon']);
+          icons[icon['id'].toString()] =
+              await getUint8ListFromImageUrl(icon['profilePicture']);
+          getx.Get.find<MapService>()
+              .friendsData[MarkerId(icon['id'].toString())]!
+              .isOnline = icon['isOnline'];
+          getx.Get.find<MapService>()
+              .friendsData[MarkerId(icon['id'].toString())]!
+              .offlineStatus = '**';
         }
         return icons;
       }
@@ -209,8 +224,7 @@ class RequestService extends getx.GetxService {
         print('Friend was successfully deleted');
         return true;
       } else {
-        print(
-            'Failed to delete friend. Status code: ${response.statusCode}');
+        print('Failed to delete friend. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {

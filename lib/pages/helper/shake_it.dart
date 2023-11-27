@@ -7,16 +7,17 @@ import 'package:project_jelly/service/map_service.dart';
 class ShakeItScreen extends StatelessWidget {
   ShakeItScreen({Key? key}) : super(key: key);
 
+//TODO :REMOVE MOCK
   List<Friend> _generateFakeShakingFriends() {
     return List<Friend>.generate(
         3,
         (int index) => Friend(
             id: (index + 1).toString(),
             name: 'Friend $index',
-            avatar: 'assets/andrii.jpeg',
+            // avatar: 'assets/andrii.jpeg',
             location: LatLng(37.4219999, -122.0840575),
             batteryPercentage: index,
-            movementSpeed: index,
+            movementSpeed: index.toDouble(),
             isOnline: true,
             offlineStatus: ''));
   }
