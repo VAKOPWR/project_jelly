@@ -55,7 +55,6 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
@@ -89,16 +88,29 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
             // setState(() {
             //   allFriends.removeWhere((Friend f) => f.id == friend.id);
             // });
-
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Friend request sent to ${basicUser.name}'),
-              duration: Duration(seconds: 2),
-            ));
+            Get.snackbar("Congratulations!",
+                "Your friend request sent to ${basicUser.name}",
+                icon: Icon(Icons.sentiment_satisfied_alt_outlined,
+                    color: Colors.white, size: 35),
+                snackPosition: SnackPosition.TOP,
+                isDismissible: false,
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.green[400],
+                margin: EdgeInsets.zero,
+                snackStyle: SnackStyle.GROUNDED
+            );
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Failed to send friend request to ${basicUser.name}'),
-              duration: Duration(seconds: 2),
-            ));
+            Get.snackbar("Ooops!",
+                "Failed to send friend request to ${basicUser.name}",
+                icon: Icon(Icons.sentiment_very_dissatisfied_outlined ,
+                    color: Colors.white, size: 35),
+                snackPosition: SnackPosition.TOP,
+                isDismissible: false,
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.red[400],
+                margin: EdgeInsets.zero,
+                snackStyle: SnackStyle.GROUNDED
+            );
           }
         },
       ),
