@@ -1,6 +1,7 @@
 // ignore: unused_import
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -19,6 +20,7 @@ import 'package:project_jelly/pages/helper/splash_screen.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/themes/theme_constants.dart';
 
@@ -26,6 +28,9 @@ void main() async {
   await GetStorage.init();
   await Firebase.initializeApp();
   await GlobalServices.init();
+  if (FirebaseAuth.instance.currentUser != null) {
+    Get.find<RequestService>().setupInterceptor('');
+  }
   await Get.find<StyleService>().loadMapStyles();
   await Get.find<MapService>().prepareService();
   await InternetCheckerBanner().initialize(title: "Whoops");

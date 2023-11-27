@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 
 import 'friend_finding_tab.dart';
@@ -22,7 +23,6 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage>
     with SingleTickerProviderStateMixin {
-  List<BasicUser> listFriends = [];
   List<BasicUser> pendingFriends = [];
   late TabController _tabController;
 
@@ -34,7 +34,6 @@ class _FriendsPageState extends State<FriendsPage>
       if (_tabController.indexIsChanging) {
         switch (_tabController.index) {
           case 0:
-            _fetchActiveFriends();
             break;
           case 1:
             break;
@@ -45,7 +44,6 @@ class _FriendsPageState extends State<FriendsPage>
         }
       }
     });
-    _fetchActiveFriends();
     _fetchPendingFriends();
   }
 
@@ -99,7 +97,7 @@ class _FriendsPageState extends State<FriendsPage>
           controller: _tabController,
           children: [
             FriendListTab(
-              friends: listFriends,
+              friends: Get.find<MapService>().friendsData.values.toList(),
               onTabChange: _handleTabChange,
             ),
             FriendFindingTab(
@@ -159,15 +157,6 @@ class _FriendsPageState extends State<FriendsPage>
     ];
   }
 
-  Future<void> _fetchActiveFriends() async {
-    List<BasicUser> _listFriends = await Get.find<RequestService>()
-        .getFriendsBasedOnEndpoint('/friend/basic');
-
-    setState(() {
-      listFriends = _listFriends;
-    });
-  }
-
   Future<void> _fetchPendingFriends() async {
     List<BasicUser> _pendingFriends = await Get.find<RequestService>()
         .getFriendsBasedOnEndpoint('/friend/pending');
@@ -187,11 +176,10 @@ class _FriendsPageState extends State<FriendsPage>
         );
 
         pendingFriends.removeWhere((friend) => friend.id == friendId);
+        print(pendingFriends);
 
         if (acceptedFriend != null) {
-          listFriends.add(acceptedFriend);
-          Get.snackbar(
-              "Congratulations!",
+          Get.snackbar("Congratulations!",
               "You decided to become a friends with a ${acceptedFriend.name}",
               icon: Icon(Icons.add_reaction, color: Colors.white, size: 35),
               snackPosition: SnackPosition.TOP,
@@ -199,46 +187,36 @@ class _FriendsPageState extends State<FriendsPage>
               duration: Duration(seconds: 2),
               backgroundColor: Colors.green[400],
               margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED
-          );
+              snackStyle: SnackStyle.GROUNDED);
         }
-
-        _fetchActiveFriends();
         _fetchPendingFriends();
       });
-    } else {
-    }
-
+    } else {}
   }
 
   Future<void> _declineFriendRequest(String friendId) async {
     bool success =
-    await Get.find<RequestService>().declineFriendRequest(friendId);
+        await Get.find<RequestService>().declineFriendRequest(friendId);
     if (success) {
       setState(() {
         BasicUser? declinedFriend = pendingFriends.firstWhereOrNull(
-              (friend) => friend.id == friendId,
+          (friend) => friend.id == friendId,
         );
-
         pendingFriends.removeWhere((friend) => friend.id == friendId);
-
         if (declinedFriend != null) {
-          Get.snackbar(
-              "Ooops!",
+          Get.snackbar("Ooops!",
               "You decided to decline friendship with a ${declinedFriend.name}",
-              icon: Icon(Icons.sentiment_very_dissatisfied_outlined, color: Colors.white, size: 35),
+              icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+                  color: Colors.white, size: 35),
               snackPosition: SnackPosition.TOP,
               isDismissible: false,
               duration: Duration(seconds: 2),
               backgroundColor: Colors.red[400],
               margin: EdgeInsets.zero,
-              snackStyle: SnackStyle.GROUNDED
-          );
+              snackStyle: SnackStyle.GROUNDED);
         }
         _fetchPendingFriends();
       });
-    } else {
-    }
-
+    } else {}
   }
 }

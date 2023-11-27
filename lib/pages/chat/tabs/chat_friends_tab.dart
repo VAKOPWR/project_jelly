@@ -109,13 +109,14 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
     return generateFakeChats();
   }
 
+//TODO :REMOVE MOCK
   List<FriendChat> generateFakeChats() {
     return [
       FriendChat(
         friend: Friend(
           id: '1',
           name: 'Orest Haman',
-          avatar: 'https://placekitten.com/200/200',
+          // avatar: 'https://placekitten.com/200/200',
           location: LatLng(37.7749, -122.4194),
           batteryPercentage: 80,
           movementSpeed: 3,
@@ -130,7 +131,7 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
         friend: Friend(
           id: '2',
           name: 'Andrii Papusha',
-          avatar: 'https://placekitten.com/200/201',
+          // avatar: 'https://placekitten.com/200/201',
           location: LatLng(34.0522, -118.2437),
           batteryPercentage: 50,
           movementSpeed: 0,
@@ -145,7 +146,7 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
         friend: Friend(
           id: '3',
           name: 'Jone Stone',
-          avatar: 'https://placekitten.com/200/202',
+          // avatar: 'https://placekitten.com/200/202',
           location: LatLng(40.7128, -74.0060),
           batteryPercentage: 65,
           movementSpeed: 5,
@@ -160,7 +161,7 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
         friend: Friend(
           id: '4',
           name: 'Diana Prince',
-          avatar: 'https://placekitten.com/200/203',
+          // avatar: 'https://placekitten.com/200/203',
           // Placeholder avatar image
           location: LatLng(42.3601, -71.0589),
           batteryPercentage: 90,

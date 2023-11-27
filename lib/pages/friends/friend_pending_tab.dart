@@ -59,8 +59,7 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
   Widget _buildRow(BasicUser friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage:
-            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
+        backgroundImage: NetworkImage(friend.avatar!),
         radius: 29,
         backgroundColor: Theme.of(context).canvasColor,
       ),
