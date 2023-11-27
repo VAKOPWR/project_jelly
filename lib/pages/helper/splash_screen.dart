@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_jelly/service/request_service.dart';
 
 class SplashScreen extends StatelessWidget {
   @override
@@ -22,18 +23,6 @@ class SplashScreen extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        // child: Center(
-        //   child: Column(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: <Widget>[
-        //       SizedBox(
-        //         width: 120,
-        //         height: 120,
-        //         child: Image.asset('assets/logo.png'),
-        //       ), // App logo image path
-        //     ],
-        //   ),
-        // ),
       ),
     );
   }

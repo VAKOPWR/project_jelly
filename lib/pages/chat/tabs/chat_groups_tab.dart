@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import '../../../classes/friend.dart';
-import '../../../classes/group_chat.dart';
-import '../../../widgets/search_bar.dart';
-import '../messages/common.dart';
+import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/classes/group_chat.dart';
+import 'package:project_jelly/pages/chat/messages/common.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 class ChatGroupsTab extends StatefulWidget {
   const ChatGroupsTab({Key? key}) : super(key: key);
@@ -56,7 +55,6 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     );
   }
 
-
   void updateSearchQuery(String newQuery) {
     filterAndSortChats(newQuery);
   }
@@ -97,13 +95,14 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     return generateFakeGroupChats();
   }
 
+//TODO :REMOVE MOCK
   List<GroupChat> generateFakeGroupChats() {
     return [
       GroupChat(
         lastFriend: Friend(
           id: '1',
           name: 'Orest Haman',
-          avatar: 'https://placekitten.com/200/200',
+          // avatar: 'https://placekitten.com/200/200',
           location: LatLng(37.7749, -122.4194),
           batteryPercentage: 80,
           movementSpeed: 3,
@@ -120,7 +119,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
         lastFriend: Friend(
           id: '2',
           name: 'Andrii Papusha',
-          avatar: 'https://placekitten.com/200/201',
+          // avatar: 'https://placekitten.com/200/201',
           location: LatLng(34.0522, -118.2437),
           batteryPercentage: 50,
           movementSpeed: 0,
@@ -137,7 +136,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
         lastFriend: Friend(
           id: '4',
           name: 'Diana Prince',
-          avatar: 'https://placekitten.com/200/203',
+          // avatar: 'https://placekitten.com/200/203',
           // Placeholder avatar image
           location: LatLng(42.3601, -71.0589),
           batteryPercentage: 90,
@@ -155,7 +154,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
         lastFriend: Friend(
           id: '3',
           name: 'Jone Stone',
-          avatar: 'https://placekitten.com/200/202',
+          // avatar: 'https://placekitten.com/200/202',
           location: LatLng(40.7128, -74.0060),
           batteryPercentage: 65,
           movementSpeed: 5,

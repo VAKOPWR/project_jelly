@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/pages/ghost_mode/friend_specific_ghost_mode.dart';
-import 'package:project_jelly/service/location_service.dart';
-// ignore: unused_import
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class GhostModeTabFriends extends StatefulWidget {
@@ -30,9 +29,6 @@ class _GhostModeTabFriends extends State<GhostModeTabFriends> {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      // child: SearchBarWidget(
-      //   content: _buildContent(),
-      // ),
     );
   }
 
@@ -85,8 +81,7 @@ class _GhostModeTabFriends extends State<GhostModeTabFriends> {
       context,
       MaterialPageRoute(
         builder: (context) => FriendSpecificGhostMode(
-          person:
-              person, // Replace 'personObject' with the actual Person object
+          person: person,
         ),
       ),
     );
@@ -94,7 +89,7 @@ class _GhostModeTabFriends extends State<GhostModeTabFriends> {
 
   _fetchFriendsList() async {
     setState(() {
-      _listFriends = Get.find<LocationService>().friendsData.values.toList();
+      _listFriends = Get.find<MapService>().friendsData.values.toList();
     });
   }
 }

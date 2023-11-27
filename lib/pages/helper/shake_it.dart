@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 
 class ShakeItScreen extends StatelessWidget {
   ShakeItScreen({Key? key}) : super(key: key);
 
+//TODO :REMOVE MOCK
   List<Friend> _generateFakeShakingFriends() {
     return List<Friend>.generate(
         3,
         (int index) => Friend(
             id: (index + 1).toString(),
             name: 'Friend $index',
-            avatar: 'assets/andrii.jpeg',
+            // avatar: 'assets/andrii.jpeg',
             location: LatLng(37.4219999, -122.0840575),
             batteryPercentage: index,
-            movementSpeed: index,
+            movementSpeed: index.toDouble(),
             isOnline: true,
             offlineStatus: ''));
   }
@@ -90,7 +91,7 @@ class ShakeItScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         radius: 25,
         backgroundImage:
-            Get.find<LocationService>().imageProviders[MarkerId(friend.id)],
+            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
       ),
       title: Text(
         friend.name,

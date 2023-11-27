@@ -58,6 +58,7 @@ dependencies:
   custom_map_markers: ^0.0.2+1
   emoji_picker_flutter: ^1.6.3
   intl: ^0.17.0
+  dio: ^5.3.3
 
 dev_dependencies:
   flutter_test:

@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/misc/geocoding.dart';
 import 'package:project_jelly/pages/helper/loading.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
 import 'package:project_jelly/widgets/nav_buttons.dart';
@@ -36,8 +36,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   void initState() {
     Get.find<SnackbarService>().checkLocationAccess();
     _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
-      await Get.find<LocationService>().fetchFriendsData();
-      await Get.find<LocationService>().updateMarkers();
+      await Get.find<MapService>().fetchFriendsData();
+      await Get.find<MapService>().updateMarkers();
     });
     _stateTimer = Timer.periodic(Duration(milliseconds: 1), (timer) async {
       setState(() {});
@@ -45,7 +45,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     _debounce = Timer(Duration(seconds: 1), () {});
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    Get.find<LocationService>().startPositionStream();
+    Get.find<MapService>().startPositionStream();
   }
 
   MapType getNextMap(MapType currentMapType) {
@@ -124,7 +124,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        body: Get.find<LocationService>().getCurrentLocation() == null
+        body: Get.find<MapService>().getCurrentLocation() == null
             ? BasicLoadingPage()
             : Stack(children: [
                 GoogleMap(
@@ -134,12 +134,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     onTap: hideBottomSheet,
                     initialCameraPosition: CameraPosition(
                       target: LatLng(
-                        Get.find<LocationService>()
-                            .getCurrentLocation()!
-                            .latitude,
-                        Get.find<LocationService>()
-                            .getCurrentLocation()!
-                            .longitude,
+                        Get.find<MapService>().getCurrentLocation()!.latitude,
+                        Get.find<MapService>().getCurrentLocation()!.longitude,
                       ),
                       zoom: 13,
                     ),
@@ -457,7 +453,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     _debounce.cancel();
     _markersTimer.cancel();
     _stateTimer.cancel();
-    Get.find<LocationService>().pausePositionStream();
+    Get.find<MapService>().pausePositionStream();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

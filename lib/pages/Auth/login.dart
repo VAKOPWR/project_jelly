@@ -7,7 +7,8 @@ import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/service/auth_service.dart';
-import 'package:project_jelly/service/location_service.dart';
+import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/service/request_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class LogInPage extends StatefulWidget {
@@ -58,6 +59,7 @@ class _LogInPageState extends State<LogInPage> {
   @override
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
+      print(FirebaseAuth.instance.currentUser);
       Future.delayed(Duration.zero, () {
         Get.off(() => const HomePage(),
             transition: Transition.circularReveal,
@@ -240,9 +242,17 @@ class _LogInPageState extends State<LogInPage> {
                                                   await Get.find<AuthService>()
                                                       .signInWithGoogle();
                                               if (userCredentials != null) {
-                                                await Get.find<
-                                                        LocationService>()
+                                                await Get.find<MapService>()
                                                     .prepareService();
+                                                String? idToken =
+                                                    await FirebaseAuth
+                                                        .instance.currentUser!
+                                                        .getIdToken(true);
+                                                print(idToken);
+                                                Get.find<RequestService>()
+                                                    .setupInterceptor(idToken);
+                                                await Get.find<RequestService>()
+                                                    .createUser();
                                                 _submitBtnController.success();
                                                 Get.off(() => const HomePage(),
                                                     transition: Transition
