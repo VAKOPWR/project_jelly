@@ -175,6 +175,7 @@ class MapService extends GetxService {
   }
 
   Future<void> fetchFriendsData() async {
+    friendsData.clear();
     List<Friend> friendsLocations =
         await Get.find<RequestService>().getFriendsLocation();
     for (Friend friend in friendsLocations) {

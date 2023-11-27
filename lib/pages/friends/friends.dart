@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/basic_user.dart';
@@ -97,7 +99,6 @@ class _FriendsPageState extends State<FriendsPage>
           controller: _tabController,
           children: [
             FriendListTab(
-              friends: Get.find<MapService>().friendsData.values.toList(),
               onTabChange: _handleTabChange,
             ),
             FriendFindingTab(
