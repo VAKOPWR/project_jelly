@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
@@ -97,20 +96,18 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
                 duration: Duration(seconds: 2),
                 backgroundColor: Colors.green[400],
                 margin: EdgeInsets.zero,
-                snackStyle: SnackStyle.GROUNDED
-            );
+                snackStyle: SnackStyle.GROUNDED);
           } else {
-            Get.snackbar("Ooops!",
-                "Failed to send friend request to ${basicUser.name}",
-                icon: Icon(Icons.sentiment_very_dissatisfied_outlined ,
+            Get.snackbar(
+                "Ooops!", "Failed to send friend request to ${basicUser.name}",
+                icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
                     color: Colors.white, size: 35),
                 snackPosition: SnackPosition.TOP,
                 isDismissible: false,
                 duration: Duration(seconds: 2),
                 backgroundColor: Colors.red[400],
                 margin: EdgeInsets.zero,
-                snackStyle: SnackStyle.GROUNDED
-            );
+                snackStyle: SnackStyle.GROUNDED);
           }
         },
       ),

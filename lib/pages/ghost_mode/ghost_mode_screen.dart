@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_global.dart';
 import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_friends.dart';
-import 'package:project_jelly/pages/ghost_mode/tabs/ghost_mode_tab_groups.dart';
 
 class GhostMode extends StatefulWidget {
   const GhostMode({Key? key}) : super(key: key);
@@ -13,7 +12,7 @@ class GhostMode extends StatefulWidget {
 class _GhostModeState extends State<GhostMode> {
   Widget build(BuildContext context) {
     return DefaultTabController(
-        length: 3,
+        length: 2,
         child: Scaffold(
             appBar: AppBar(
               title: Text('Ghost Mode'),
@@ -30,20 +29,13 @@ class _GhostModeState extends State<GhostMode> {
                         text: 'Global',
                       ),
                       Tab(
-                        text: 'Groups',
-                      ),
-                      Tab(
                         text: 'Friends',
                       )
                     ],
                   ),
                   Expanded(
                       child: TabBarView(
-                    children: [
-                      GhostModeTabGlobal(),
-                      GhostModeTabGroups(),
-                      GhostModeTabFriends()
-                    ],
+                    children: [GhostModeTabGlobal(), GhostModeTabFriends()],
                   ))
                 ],
               ),

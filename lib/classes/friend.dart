@@ -21,8 +21,7 @@ class Friend {
   factory Friend.fromJson(Map<String, dynamic> json) {
     return Friend(
       id: json['id'].toString(),
-      // name: json['nickname'],
-      name: 'TMP',
+      name: json['nickname'],
       location: LatLng(json['positionLat'], json['positionLon']),
       batteryPercentage: json['batteryLevel'],
       movementSpeed: json['speed'],

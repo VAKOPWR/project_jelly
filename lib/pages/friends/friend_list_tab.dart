@@ -1,19 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
-  final List<Friend> friends;
   final void Function(int) onTabChange;
 
   const FriendListTab({
     Key? key,
-    required this.friends,
     required this.onTabChange,
   }) : super(key: key);
 
@@ -23,16 +21,32 @@ class FriendListTab extends StatefulWidget {
 
 class _FriendListTabState extends State<FriendListTab> {
   List<Friend> filteredFriends = [];
+  late Timer _stateTimer;
 
   @override
   void initState() {
     super.initState();
-    filteredFriends = widget.friends;
+    filteredFriends = Get.find<MapService>().friendsData.values.toList();
+    _stateTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      setState(() {
+        print('setting list page state');
+        filteredFriends = Get.find<MapService>().friendsData.values.toList();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _stateTimer.cancel();
+    super.dispose();
   }
 
   void _onSearchChanged(String value) {
     setState(() {
-      filteredFriends = widget.friends
+      filteredFriends = Get.find<MapService>()
+          .friendsData
+          .values
+          .toList()
           .where((friend) =>
               friend.name.toLowerCase().contains(value.toLowerCase()))
           .toList();
@@ -58,7 +72,8 @@ class _FriendListTabState extends State<FriendListTab> {
       leading: CircleAvatar(
         backgroundImage:
             Get.find<MapService>().imageProviders[MarkerId(friend.id)],
-        radius: 29,
+        radius: 27,
+        backgroundColor: Theme.of(context).canvasColor,
       ),
       title: Text(
         friend.name,
@@ -82,7 +97,10 @@ class _FriendListTabState extends State<FriendListTab> {
               } else {}
               if (success) {
                 setState(() {
-                  filteredFriends.removeWhere((Friend f) => f.id == friend.id);
+                  Get.find<MapService>().friendsData.removeWhere(
+                      (MarkerId mid, Friend f) => mid.value == friend.id);
+                  filteredFriends =
+                      Get.find<MapService>().friendsData.values.toList();
                 });
                 Get.snackbar("Sorry to hear that",
                     "Your friend was deleted: ${friend.name}",

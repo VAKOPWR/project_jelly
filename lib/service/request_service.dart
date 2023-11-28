@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,10 +20,8 @@ class RequestService extends getx.GetxService {
       InterceptorsWrapper(
         onRequest:
             (RequestOptions options, RequestInterceptorHandler handler) async {
-          print('Request');
           if (isTokenExpired()) {
             idToken = await refreshToken();
-            print('checking token');
           }
           options.headers['Authorization'] = idToken ?? '';
           options.headers['Content-Type'] = 'application/json';
@@ -45,14 +42,12 @@ class RequestService extends getx.GetxService {
 
   Future<dynamic> createUser() async {
     try {
-      print("${ApiPath}/user/create");
       Response response = await dio.post(
         "${ApiPath}/user/create",
         options: Options(
           receiveTimeout: Duration(seconds: 5),
         ),
       );
-      print(response.statusCode);
       return response.statusCode;
     } catch (error) {
       print(error.toString());
@@ -71,19 +66,19 @@ class RequestService extends getx.GetxService {
     }
   }
 
+// TODO Device battery level
   Future<dynamic> putUserUpdate(Position locationData) async {
     try {
       String requestBody = json.encode({
         "latitude": locationData.latitude,
         "longitude": locationData.longitude,
-        "speed": locationData.speed.toInt()
+        "speed": locationData.speed.toInt(),
+        "batteryLevel": 1
       });
-      print(requestBody);
       Response response = await dio.put(
         "${ApiPath}/user/status/update",
         data: requestBody,
       );
-      print(response.statusCode);
       return response.statusCode;
     } catch (error) {
       print(error.toString());
@@ -91,14 +86,12 @@ class RequestService extends getx.GetxService {
   }
 
   Future<List<Friend>> getFriendsLocation() async {
-    print('Getting friends location');
     try {
       Response response = await dio.get(
         "${ApiPath}/friend/statuses",
       );
       if (response.statusCode == 200) {
         var responseData = response.data;
-        print(responseData);
         if (responseData is List) {
           var people = responseData.map((i) => Friend.fromJson(i)).toList();
           return people;
@@ -116,13 +109,11 @@ class RequestService extends getx.GetxService {
   Future<Map<String, Uint8List?>> getFriendsIcons() async {
     Map<String, Uint8List?> icons = {};
     try {
-      print('User avatars');
       Response response = await dio.get(
         "${ApiPath}/friend/basic",
       );
       if (response.statusCode == 200) {
         var data = response.data;
-        print(data);
         for (var icon in data) {
           icons[icon['id'].toString()] =
               await getUint8ListFromImageUrl(icon['profilePicture']);

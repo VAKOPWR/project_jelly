@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class Uint8ListImageProvider extends ImageProvider<Uint8ListImageProvider> {
   final Uint8List uint8List;
