@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
+import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
-  final List<BasicUser> friends;
+  final List<Friend> friends;
   final void Function(int) onTabChange;
 
   const FriendListTab({
@@ -20,7 +22,7 @@ class FriendListTab extends StatefulWidget {
 }
 
 class _FriendListTabState extends State<FriendListTab> {
-  List<BasicUser> filteredFriends = [];
+  List<Friend> filteredFriends = [];
 
   @override
   void initState() {
@@ -51,10 +53,11 @@ class _FriendListTabState extends State<FriendListTab> {
     );
   }
 
-  Widget _buildRow(BasicUser friend) {
+  Widget _buildRow(Friend friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage: NetworkImage(friend.avatar!),
+        backgroundImage:
+            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
         radius: 29,
       ),
       title: Text(
@@ -74,37 +77,34 @@ class _FriendListTabState extends State<FriendListTab> {
               bool success = false;
               int? friendId = int.tryParse(friend.id);
               if (friendId != null) {
-                success = await Get.find<RequestService>().deleteFriend(friendId);
-              } else {
-              }
-
+                success =
+                    await Get.find<RequestService>().deleteFriend(friendId);
+              } else {}
               if (success) {
                 setState(() {
-                  filteredFriends.removeWhere((BasicUser f) => f.id == friend.id);
+                  filteredFriends.removeWhere((Friend f) => f.id == friend.id);
                 });
                 Get.snackbar("Sorry to hear that",
                     "Your friend was deleted: ${friend.name}",
-                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined ,
+                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
                         color: Colors.white, size: 35),
                     snackPosition: SnackPosition.TOP,
                     isDismissible: false,
                     duration: Duration(seconds: 2),
                     backgroundColor: Colors.green[400],
                     margin: EdgeInsets.zero,
-                    snackStyle: SnackStyle.GROUNDED
-                );
+                    snackStyle: SnackStyle.GROUNDED);
               } else {
                 Get.snackbar("Sorry to hear that",
                     "Failed to delete friend: ${friend.name}",
-                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined ,
+                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
                         color: Colors.white, size: 35),
                     snackPosition: SnackPosition.TOP,
                     isDismissible: false,
                     duration: Duration(seconds: 2),
                     backgroundColor: Colors.red[400],
                     margin: EdgeInsets.zero,
-                    snackStyle: SnackStyle.GROUNDED
-                );
+                    snackStyle: SnackStyle.GROUNDED);
               }
             },
           ),
