@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/pages/helper/shake_it.dart';
+import 'package:project_jelly/classes/basic_user.dart';
+import 'package:project_jelly/pages/shake_it.dart';
+import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/service/request_service.dart';
 
-import '../../service/request_service.dart';
 import 'friend_finding_tab.dart';
 import 'friend_list_tab.dart';
 import 'friend_pending_tab.dart';
@@ -22,9 +23,7 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage>
     with SingleTickerProviderStateMixin {
-  List<Friend> listFriends = [];
-  List<Friend> pendingFriends = [];
-  List<Friend> usersToFind = [];
+  List<BasicUser> pendingFriends = [];
   late TabController _tabController;
 
   @override
@@ -32,15 +31,25 @@ class _FriendsPageState extends State<FriendsPage>
     super.initState();
     _tabController = TabController(length: _numberOfTabs, vsync: this);
     _tabController.addListener(() {
-      setState(() {});
+      if (_tabController.indexIsChanging) {
+        switch (_tabController.index) {
+          case 0:
+            break;
+          case 1:
+            break;
+          case 2:
+            _fetchPendingFriends();
+            break;
+          default:
+        }
+      }
     });
-    _fetchActiveFriends();
     _fetchPendingFriends();
-    _fetchUsersToFind();
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(() {});
     _tabController.dispose();
     super.dispose();
   }
@@ -88,11 +97,10 @@ class _FriendsPageState extends State<FriendsPage>
           controller: _tabController,
           children: [
             FriendListTab(
-              friends: listFriends,
+              friends: Get.find<MapService>().friendsData.values.toList(),
               onTabChange: _handleTabChange,
             ),
             FriendFindingTab(
-              friends: usersToFind,
               onTabChange: _handleTabChange,
               onShakeButtonPressed: _handleShakeButtonPressed,
             ),
@@ -149,30 +157,12 @@ class _FriendsPageState extends State<FriendsPage>
     ];
   }
 
-  Future<void> _fetchActiveFriends() async {
-    List<Friend> _listFriends = await Get.find<RequestService>()
-        .getFriendsBasedOnEndpoint('/friend/active');
-
-    setState(() {
-      listFriends = _listFriends;
-    });
-  }
-
   Future<void> _fetchPendingFriends() async {
-    List<Friend> _pendingFriends = await Get.find<RequestService>()
+    List<BasicUser> _pendingFriends = await Get.find<RequestService>()
         .getFriendsBasedOnEndpoint('/friend/pending');
 
     setState(() {
       pendingFriends = _pendingFriends;
-    });
-  }
-
-  Future<void> _fetchUsersToFind() async {
-    List<Friend> _usersToFind =
-        await Get.find<RequestService>().getFriendsBasedOnEndpoint('/user');
-
-    setState(() {
-      usersToFind = _usersToFind;
     });
   }
 
@@ -181,22 +171,52 @@ class _FriendsPageState extends State<FriendsPage>
         await Get.find<RequestService>().acceptFriendRequest(friendId);
     if (success) {
       setState(() {
-        Friend? acceptedFriend = pendingFriends.firstWhereOrNull(
-              (friend) => friend.id == friendId,
+        BasicUser? acceptedFriend = pendingFriends.firstWhereOrNull(
+          (friend) => friend.id == friendId,
         );
 
         pendingFriends.removeWhere((friend) => friend.id == friendId);
+        print(pendingFriends);
 
         if (acceptedFriend != null) {
-          listFriends.add(acceptedFriend);
+          Get.snackbar("Congratulations!",
+              "You decided to become a friends with a ${acceptedFriend.name}",
+              icon: Icon(Icons.add_reaction, color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
         }
+        _fetchPendingFriends();
       });
-    } else {
-      // Handle the error, such as displaying a message
-    }
+    } else {}
   }
 
   Future<void> _declineFriendRequest(String friendId) async {
-    return; // Currently waiting for endpoint from backend
+    bool success =
+        await Get.find<RequestService>().declineFriendRequest(friendId);
+    if (success) {
+      setState(() {
+        BasicUser? declinedFriend = pendingFriends.firstWhereOrNull(
+          (friend) => friend.id == friendId,
+        );
+        pendingFriends.removeWhere((friend) => friend.id == friendId);
+        if (declinedFriend != null) {
+          Get.snackbar("Ooops!",
+              "You decided to decline friendship with a ${declinedFriend.name}",
+              icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        }
+        _fetchPendingFriends();
+      });
+    } else {}
   }
 }

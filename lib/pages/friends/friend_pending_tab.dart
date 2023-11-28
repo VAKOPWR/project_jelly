@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
-
-import '../../service/map_service.dart';
-import '../../widgets/search_bar.dart';
+import 'package:project_jelly/service/map_service.dart';
+import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendPendingTab extends StatefulWidget {
-  final List<Friend> friends;
+  final List<BasicUser> friends;
   final void Function(int) onTabChange;
   final void Function(String) onAccept;
   final void Function(String) onDecline;
@@ -25,7 +25,7 @@ class FriendPendingTab extends StatefulWidget {
 }
 
 class _FriendPendingTabState extends State<FriendPendingTab> {
-  List<Friend> filteredFriends = [];
+  List<BasicUser> filteredFriends = [];
 
   @override
   void initState() {
@@ -50,17 +50,16 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
         itemCount: filteredFriends.length,
         separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) {
-          return _buildRow(widget.friends[index]);
+          return _buildRow(filteredFriends[index]);
         },
       ),
     );
   }
 
-  Widget _buildRow(Friend friend) {
+  Widget _buildRow(BasicUser friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage:
-            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
+        backgroundImage: NetworkImage(friend.avatar!),
         radius: 29,
         backgroundColor: Theme.of(context).canvasColor,
       ),
