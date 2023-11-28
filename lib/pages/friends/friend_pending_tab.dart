@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
-import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendPendingTab extends StatefulWidget {
