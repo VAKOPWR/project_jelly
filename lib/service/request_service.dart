@@ -261,4 +261,21 @@ class RequestService extends getx.GetxService {
       return false;
     }
   }
+
+  Future<bool> updateShakingStatus(bool isShaking) async {
+    String endpoint = '/user/shaking/update/${isShaking ? 'true' : 'false'}';
+    try {
+      Response response = await dio.get("${ApiPath}${endpoint}");
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print(
+            'Failed to update the shaking status. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error updating shaking status: ${error.toString()}');
+      return false;
+    }
+  }
 }

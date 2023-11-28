@@ -16,6 +16,7 @@ import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/profile/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';
+import 'package:project_jelly/pages/shake_it.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/map_service.dart';
@@ -83,6 +84,11 @@ class ProjectJelly extends StatelessWidget {
             name: '/ghost_mode',
             page: () => GhostMode(),
             transition: Transition.zoom,
+          ),
+          GetPage(
+            name: '/shake',
+            page: () => ShakeItScreen(),
+            transition: Transition.rightToLeft,
           ),
         ]);
   }
