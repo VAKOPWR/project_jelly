@@ -1,0 +1,1 @@
+enum StealthChoice { HIDE, PRECISE }
