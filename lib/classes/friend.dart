@@ -8,6 +8,7 @@ class Friend {
   double movementSpeed;
   bool isOnline;
   String offlineStatus;
+  bool isGhosted;
 
   Friend(
       {required this.id,
@@ -16,7 +17,8 @@ class Friend {
       required this.batteryPercentage,
       required this.movementSpeed,
       this.isOnline = false,
-      this.offlineStatus = '**'});
+      this.offlineStatus = '**',
+      this.isGhosted = false});
 
   factory Friend.fromJson(Map<String, dynamic> json) {
     return Friend(

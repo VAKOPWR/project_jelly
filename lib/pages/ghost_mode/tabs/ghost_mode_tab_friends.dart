@@ -16,27 +16,31 @@ class GhostModeTabFriends extends StatefulWidget {
 
 class _GhostModeTabFriendsState extends State<GhostModeTabFriends> {
   List<Friend> filteredFriends = [];
-  Map<String, bool> ghostModeStatus = {};
 
   @override
   void initState() {
     super.initState();
-    var friendsData = Get.find<MapService>().friendsData.values.toList();
-    filteredFriends = friendsData;
-    ghostModeStatus = {for (var friend in friendsData) friend.id: false};
+    filteredFriends = Get.find<MapService>().friendsData.values.toList();
   }
 
   void _onSearchChanged(String value) {
-    setState(() {
-      filteredFriends = Get.find<MapService>()
-          .friendsData
-          .values
-          .toList()
-          .where((friend) =>
-              friend.name.toLowerCase().contains(value.toLowerCase()))
-          .toList();
-    });
+    if (value.isEmpty) {
+      setState(() {
+        filteredFriends = Get.find<MapService>().friendsData.values.toList();
+      });
+    } else {
+      setState(() {
+        filteredFriends = Get.find<MapService>()
+            .friendsData
+            .values
+            .toList()
+            .where((friend) =>
+            friend.name.toLowerCase().contains(value.toLowerCase()))
+            .toList();
+      });
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -65,13 +69,9 @@ class _GhostModeTabFriendsState extends State<GhostModeTabFriends> {
         style: TextStyle(fontSize: 18.0),
       ),
       trailing: Checkbox(
-        value: ghostModeStatus[friend.id] ?? false,
+        value: friend.isGhosted,
         onChanged: (bool? isChecked) async {
           if (isChecked == null) return;
-
-          setState(() {
-            ghostModeStatus[friend.id] = isChecked;
-          });
 
           StealthChoice choice = isChecked
               ? StealthChoice.HIDE
@@ -80,19 +80,12 @@ class _GhostModeTabFriendsState extends State<GhostModeTabFriends> {
           bool success = await Get.find<RequestService>()
               .updateStealthChoiceOnRelationshipLevel(friend.id, choice);
 
-          if (!success) {
+          if (success) {
             setState(() {
-              ghostModeStatus[friend.id] = !isChecked;
+              friend.isGhosted = isChecked;
             });
-            Get.snackbar("Update Failed",
-                "Failed to update ghost mode status for ${friend.name}",
-                icon: Icon(Icons.error_outline, color: Colors.white, size: 35),
-                snackPosition: SnackPosition.TOP,
-                isDismissible: true,
-                duration: Duration(seconds: 3),
-                backgroundColor: Colors.red[400],
-                margin: EdgeInsets.zero,
-                snackStyle: SnackStyle.GROUNDED);
+            Get.find<MapService>().updateFriendGhostStatus(friend.id, isChecked);
+          } else {
           }
         },
       ),

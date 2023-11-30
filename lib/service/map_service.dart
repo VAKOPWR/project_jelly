@@ -307,4 +307,10 @@ class MapService extends GetxService {
     }
     print(staticMarkerTypeId);
   }
+
+  void updateFriendGhostStatus(String friendId, bool isGhosted) {
+    if (friendsData.containsKey(friendId)) {
+      friendsData[friendId]!.isGhosted = isGhosted;
+    }
+  }
 }
