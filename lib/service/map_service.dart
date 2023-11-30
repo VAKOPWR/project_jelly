@@ -304,4 +304,10 @@ class MapService extends GetxService {
               key, (value as List<dynamic>).cast<String>())));
     }
   }
+
+  void updateFriendGhostStatus(String friendId, bool isGhosted) {
+    if (friendsData.containsKey(friendId)) {
+      friendsData[friendId]!.isGhosted = isGhosted;
+    }
+  }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:project_jelly/misc/stealth_choice.dart';
+import 'package:project_jelly/service/request_service.dart';
 
 class GhostModeTabGlobal extends StatefulWidget {
   const GhostModeTabGlobal({Key? key}) : super(key: key);
@@ -9,7 +12,7 @@ class GhostModeTabGlobal extends StatefulWidget {
 
 class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
   int locationPrecisionOption = 0;
-  int otherOption = 0;
+  int previousLocationPrecisionOption = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -49,98 +52,7 @@ class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
                         });
                       },
                     ),
-                    Text('City district'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 3,
-                      groupValue: locationPrecisionOption,
-                      onChanged: (value) {
-                        setState(() {
-                          locationPrecisionOption = value!;
-                        });
-                      },
-                    ),
-                    Text('City'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 4,
-                      groupValue: locationPrecisionOption,
-                      onChanged: (value) {
-                        setState(() {
-                          locationPrecisionOption = value!;
-                        });
-                      },
-                    ),
                     Text('Hide my location'),
-                  ],
-                ),
-                Divider(
-                  color: Theme.of(context).colorScheme.onBackground,
-                  height: 40.0,
-                  indent: 20,
-                  endIndent: 20,
-                ),
-                Text('Some other settings'),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 1,
-                      groupValue: otherOption,
-                      onChanged: (value) {
-                        setState(() {
-                          otherOption = value!;
-                        });
-                      },
-                    ),
-                    Text('Option 1'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 2,
-                      groupValue: otherOption,
-                      onChanged: (value) {
-                        setState(() {
-                          otherOption = value!;
-                        });
-                      },
-                    ),
-                    Text('Option 2'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 3,
-                      groupValue: otherOption,
-                      onChanged: (value) {
-                        setState(() {
-                          otherOption = value!;
-                        });
-                      },
-                    ),
-                    Text('Option 3'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 4,
-                      groupValue: otherOption,
-                      onChanged: (value) {
-                        setState(() {
-                          otherOption = value!;
-                        });
-                      },
-                    ),
-                    Text('Option 4'),
                   ],
                 ),
               ],
@@ -152,18 +64,53 @@ class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
                 child: SizedBox(
                   height: 80,
                   child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary),
-                      child: Text(
-                        'Save',
-                        style: TextStyle(fontSize: 32),
-                      ),
-                    ),
-                  ),
+                      padding: EdgeInsets.all(10.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (locationPrecisionOption !=
+                              previousLocationPrecisionOption) {
+                            StealthChoice choice = locationPrecisionOption == 1
+                                ? StealthChoice.PRECISE
+                                : StealthChoice.HIDE;
+
+                            bool success = await Get.find<RequestService>()
+                                .updateStealthChoiceOnUserLevel(choice);
+
+                            if (success) {
+                              previousLocationPrecisionOption =
+                                  locationPrecisionOption;
+                              Get.snackbar("Congratulations!",
+                                  "Your location setting has been updated successfully",
+                                  icon: Icon(Icons.add_reaction,
+                                      color: Colors.white, size: 35),
+                                  snackPosition: SnackPosition.TOP,
+                                  isDismissible: false,
+                                  duration: Duration(seconds: 2),
+                                  backgroundColor: Colors.green[400],
+                                  margin: EdgeInsets.zero,
+                                  snackStyle: SnackStyle.GROUNDED);
+                            }
+                          } else {
+                            Get.snackbar("No Change",
+                                "Your location setting is already set as desired",
+                                icon: Icon(Icons.info_outline,
+                                    color: Colors.white, size: 35),
+                                snackPosition: SnackPosition.TOP,
+                                isDismissible: true,
+                                duration: Duration(seconds: 2),
+                                backgroundColor: Colors.blue[400],
+                                margin: EdgeInsets.zero,
+                                snackStyle: SnackStyle.GROUNDED);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary),
+                        child: Text(
+                          'Save',
+                          style: TextStyle(fontSize: 32),
+                        ),
+                      )),
                 ))
           ],
         ));
