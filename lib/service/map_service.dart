@@ -205,7 +205,6 @@ class MapService extends GetxService {
                 friendsData[friendId]!.offlineStatus));
       }
     }
-    print(imageProviders.keys.toList());
   }
 
   Marker _createMarker(Friend friend) {
@@ -216,12 +215,12 @@ class MapService extends GetxService {
             ? BitmapDescriptor.fromBytes(avatars[MarkerId(friend.id)]!)
             : BitmapDescriptor.fromBytes(defaultAvatar!),
         onTap: () {
-          Get.find<VisibilitySevice>().isInfoSheetVisible = true;
-          if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
-            Get.find<VisibilitySevice>().isInfoSheetVisible = false;
+          Get.find<VisibilityService>().isInfoSheetVisible = true;
+          if (Get.find<VisibilityService>().isBottomSheetOpen) {
+            Get.find<VisibilityService>().isInfoSheetVisible = false;
           }
-          Get.find<VisibilitySevice>().highlightedMarker = MarkerId(friend.id);
-          Get.find<VisibilitySevice>().highlightedMarkerType = null;
+          Get.find<VisibilityService>().highlightedMarker = MarkerId(friend.id);
+          Get.find<VisibilityService>().highlightedMarkerType = null;
         });
   }
 
@@ -294,7 +293,6 @@ class MapService extends GetxService {
   void writeStaticMarkersData(Map<MarkerId, Marker> staticMarkers) {
     String _markers = markersToJson(staticMarkers);
     box.write('staticMarkers', _markers);
-    print(box.read('staticMarkers'));
     box.write('staticMarkerTypeId', staticMarkerTypeId);
   }
 
@@ -305,6 +303,5 @@ class MapService extends GetxService {
           (key, value) => MapEntry<String, List<String>>(
               key, (value as List<dynamic>).cast<String>())));
     }
-    print(staticMarkerTypeId);
   }
 }

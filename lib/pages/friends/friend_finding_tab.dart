@@ -41,8 +41,6 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
             await Get.find<RequestService>().searchFriends(value);
         setState(() {
           filteredFriends = results;
-          print(filteredFriends);
-          log(filteredFriends.toString());
         });
       }
     });

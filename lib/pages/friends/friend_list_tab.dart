@@ -5,15 +5,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
+import 'package:project_jelly/service/visibility_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
   final void Function(int) onTabChange;
+  final Function(LatLng) moveMapToPosition;
 
-  const FriendListTab({
-    Key? key,
-    required this.onTabChange,
-  }) : super(key: key);
+  const FriendListTab(
+      {Key? key, required this.onTabChange, required this.moveMapToPosition})
+      : super(key: key);
 
   @override
   _FriendListTabState createState() => _FriendListTabState();
@@ -29,7 +30,6 @@ class _FriendListTabState extends State<FriendListTab> {
     filteredFriends = Get.find<MapService>().friendsData.values.toList();
     _stateTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
       setState(() {
-        print('setting list page state');
         filteredFriends = Get.find<MapService>().friendsData.values.toList();
       });
     });
@@ -83,8 +83,16 @@ class _FriendListTabState extends State<FriendListTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {},
+            icon: Icon(Icons.location_searching_rounded),
+            onPressed: () {
+              Get.find<VisibilityService>().isInfoSheetVisible = true;
+              Get.find<VisibilityService>().highlightedMarker =
+                  MarkerId(friend.id);
+              Get.back();
+              widget.moveMapToPosition(Get.find<MapService>()
+                  .friendsData[MarkerId(friend.id)]!
+                  .location);
+            },
           ),
           IconButton(
             icon: Icon(Icons.delete),
@@ -125,10 +133,6 @@ class _FriendListTabState extends State<FriendListTab> {
                     snackStyle: SnackStyle.GROUNDED);
               }
             },
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {},
           ),
         ],
       ),

@@ -63,10 +63,10 @@ class ProjectJelly extends StatelessWidget {
               page: () => const HomePage(),
               transition: Transition.circularReveal,
               transitionDuration: const Duration(seconds: 2)),
-          GetPage(
-              name: '/friends',
-              page: () => const FriendsPage(),
-              transition: Transition.downToUp),
+          // GetPage(
+          //     name: '/friends',
+          //     page: () => const FriendsPage(),
+          //     transition: Transition.downToUp),
           GetPage(
               name: '/messages',
               page: () => const MessagesPage(),
