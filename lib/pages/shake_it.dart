@@ -124,7 +124,33 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
         userWhoIsShaking.name,
         style: TextStyle(color: Colors.black),
       ),
-      onTap: () {},
+      onTap: () async {
+        bool success = await Get.find<RequestService>()
+            .sendFriendRequest(userWhoIsShaking.id);
+        if (success) {
+          Get.snackbar("Congratulations!",
+              "Your friend request sent to ${userWhoIsShaking.name}",
+              icon: Icon(Icons.sentiment_satisfied_alt_outlined,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        } else {
+          Get.snackbar("Ooops!",
+              "Failed to send friend request to ${userWhoIsShaking.name}",
+              icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+                  color: Colors.white, size: 35),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: false,
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.red[400],
+              margin: EdgeInsets.zero,
+              snackStyle: SnackStyle.GROUNDED);
+        }
+      },
     );
   }
 }
