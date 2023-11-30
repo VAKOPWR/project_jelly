@@ -21,7 +21,7 @@ class GlobalServices {
     await Get.putAsync(() async => await StyleService());
     await Get.putAsync(() async => await PermissionsService());
     await Get.putAsync(() async => await SnackbarService());
-    await Get.put(VisibilitySevice());
+    await Get.put(VisibilityService());
     await Get.putAsync(() async => ShakeDetectorService().init());
     Get.put(GlobalShakeController());
   }

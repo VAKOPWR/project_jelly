@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 // ignore: unused_import
 import 'dart:developer';
 import 'dart:io';
@@ -31,10 +32,13 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   late Timer _debounce;
   MapType _mapType = MapType.normal;
   String _locationName = "The Earth";
+  Map<MarkerId, Marker> staticMarkers = <MarkerId, Marker>{};
+  final box = GetStorage();
 
   @override
   void initState() {
     Get.find<SnackbarService>().checkLocationAccess();
+    createMarkersFromJSON();
     _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await Get.find<MapService>().fetchFriendsData();
       await Get.find<MapService>().updateMarkers();
@@ -89,12 +93,12 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   void hideBottomSheet(CameraPosition) {
     setState(() {
-      if (Get.find<VisibilitySevice>().isInfoSheetVisible) {
-        Get.find<VisibilitySevice>().isInfoSheetVisible = false;
+      if (Get.find<VisibilityService>().isInfoSheetVisible) {
+        Get.find<VisibilityService>().isInfoSheetVisible = false;
       }
-      if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
+      if (Get.find<VisibilityService>().isBottomSheetOpen) {
         Navigator.of(context).pop();
-        Get.find<VisibilitySevice>().isBottomSheetOpen = false;
+        Get.find<VisibilityService>().isBottomSheetOpen = false;
       }
     });
   }
@@ -153,27 +157,31 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     myLocationEnabled: true,
                     padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
                     mapType: _mapType,
-                    markers: Get.find<MapService>().markers.values.toSet(),
+                    markers: Set<Marker>.from(
+                            Get.find<MapService>().markers.values.toSet())
+                        .union(staticMarkers.values.toSet()),
                     onCameraMove: _onCameraMove),
                 AnimatedContainer(
                     duration: Duration(milliseconds: 300), // Animation duration
-                    height: Get.find<VisibilitySevice>().isInfoSheetVisible
+                    height: Get.find<VisibilityService>().isInfoSheetVisible
                         ? MediaQuery.of(context).size.height * 0.78
                         : 0,
                     width: MediaQuery.of(context).size.width * 0.9,
                     margin: EdgeInsets.fromLTRB(
                         MediaQuery.of(context).size.width * 0.05, 0, 0, 0),
-                    child: Get.find<VisibilitySevice>().highlightedMarker !=
-                            null
-                        ? MarkerInfoBox(
-                            isStaticMarker: Get.find<VisibilitySevice>()
-                                    .highlightedMarkerType !=
-                                null,
-                            id: Get.find<VisibilitySevice>().highlightedMarker!,
-                            markerType: Get.find<VisibilitySevice>()
-                                .highlightedMarkerType,
-                          )
-                        : null),
+                    child:
+                        Get.find<VisibilityService>().highlightedMarker != null
+                            ? MarkerInfoBox(
+                                deleteStaticMarker: deleteStaticMarker,
+                                isStaticMarker: Get.find<VisibilityService>()
+                                        .highlightedMarkerType !=
+                                    null,
+                                id: Get.find<VisibilityService>()
+                                    .highlightedMarker!,
+                                markerType: Get.find<VisibilityService>()
+                                    .highlightedMarkerType,
+                              )
+                            : null),
                 Platform.isIOS
                     ? Positioned(
                         top: 50.0,
@@ -215,7 +223,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                             ),
                           ),
                         )),
-                NavButtons(),
+                NavButtons(moveMapToPosition: moveMapToPosition),
                 Platform.isIOS
                     ? Positioned(
                         top: 120.0,
@@ -275,9 +283,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   }
 
   void _showMarkerListBottomSheet() {
-    if (!Get.find<VisibilitySevice>().isBottomSheetOpen) {
-      Get.find<VisibilitySevice>().isInfoSheetVisible = false;
-      Get.find<VisibilitySevice>().isBottomSheetOpen = true;
+    if (!Get.find<VisibilityService>().isBottomSheetOpen) {
+      Get.find<VisibilityService>().isInfoSheetVisible = false;
+      Get.find<VisibilityService>().isBottomSheetOpen = true;
       _scaffoldKey.currentState?.showBottomSheet(
         (BuildContext context) {
           return Stack(
@@ -337,7 +345,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Get.find<VisibilitySevice>().isBottomSheetOpen = false;
+                    Get.find<VisibilityService>().isBottomSheetOpen = false;
                   },
                   style: ElevatedButton.styleFrom(
                     shape: CircleBorder(),
@@ -378,7 +386,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
         } else {
           _addStaticMarker(markerName);
           Navigator.of(context).pop();
-          Get.find<VisibilitySevice>().isBottomSheetOpen = false;
+          Get.find<VisibilityService>().isBottomSheetOpen = false;
         }
       },
       child: Container(
@@ -428,37 +436,85 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       }
     }
     markerId = MarkerId(newMarkerName);
-    Marker marker = Marker(
+    Marker marker = createMarker(markerId, center, markerType);
+    setState(() {
+      addStaticMarker(marker);
+      Get.find<MapService>().addStaticMarkerTypeId(markerType, newMarkerName);
+    });
+  }
+
+  Future<void> createMarkersFromJSON() async {
+    String? markerData = box.read('staticMarkers');
+    if (markerData != null) {
+      List<Map<String, dynamic>> data =
+          List<Map<String, dynamic>>.from(json.decode(markerData));
+
+      for (Map<String, dynamic> marker in data) {
+        String markerType = marker["id"].toString().split(' ')[0];
+        MarkerId markerId = MarkerId(marker["id"].toString());
+        LatLng markerPosition = LatLng(marker["latitude"], marker["longitude"]);
+        staticMarkers[markerId] =
+            createMarker(markerId, markerPosition, markerType);
+        Get.find<MapService>()
+            .addStaticMarkerTypeId(markerType, marker["id"].toString());
+      }
+    }
+  }
+
+  Marker createMarker(
+      MarkerId markerId, LatLng markerPosition, String markerType) {
+    return Marker(
       markerId: markerId,
-      position: center,
+      position: markerPosition,
       draggable: true,
       icon: Get.find<MapService>().staticMarkerIcons[MarkerId(markerType)]!,
       onTap: () {
         setState(() {
-          Get.find<VisibilitySevice>().isInfoSheetVisible = true;
-          if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
+          Get.find<VisibilityService>().isInfoSheetVisible = true;
+          if (Get.find<VisibilityService>().isBottomSheetOpen) {
             Navigator.of(context).pop();
-            Get.find<VisibilitySevice>().isBottomSheetOpen = false;
+            Get.find<VisibilityService>().isBottomSheetOpen = false;
           }
-          Get.find<VisibilitySevice>().highlightedMarker = markerId;
-          Get.find<VisibilitySevice>().highlightedMarkerType = markerType;
+          Get.find<VisibilityService>().highlightedMarker = markerId;
+          Get.find<VisibilityService>().highlightedMarkerType = markerType;
         });
       },
       onDragEnd: (LatLng newPosition) {
-        // TODO: update the marker's position in the data structure
+        staticMarkers.remove(markerId);
+        staticMarkers[markerId] =
+            createMarker(markerId, newPosition, markerType);
+        Get.find<MapService>().writeStaticMarkersData(staticMarkers);
       },
     );
-    setState(() {
-      Get.find<MapService>().addStaticMarker(marker);
-      Get.find<MapService>().updateMarkers();
+  }
+
+  void addStaticMarker(Marker marker) {
+    staticMarkers[marker.markerId] = marker;
+    Get.find<MapService>().writeStaticMarkersData(staticMarkers);
+  }
+
+  void deleteStaticMarker(String markerType, MarkerId markerId) {
+    if (staticMarkers.containsKey(markerId)) {
+      Marker markerToDelete = staticMarkers[markerId]!;
+      staticMarkers.remove(markerId);
+      Get.find<VisibilityService>().isInfoSheetVisible = false;
       if (Get.find<MapService>().staticMarkerTypeId.containsKey(markerType)) {
         Get.find<MapService>()
             .staticMarkerTypeId[markerType]!
-            .add(newMarkerName);
-      } else {
-        Get.find<MapService>().staticMarkerTypeId[markerType] = {newMarkerName};
+            .remove(markerToDelete.markerId.value);
       }
-    });
+    }
+    Get.find<MapService>().writeStaticMarkersData(staticMarkers);
+  }
+
+  Future<void> moveMapToPosition(LatLng newCameraPosition) async {
+    GoogleMapController controller = await _mapController.future;
+    controller.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        newCameraPosition, // New York City coordinates
+        15, // Zoom level
+      ),
+    );
   }
 
   @override

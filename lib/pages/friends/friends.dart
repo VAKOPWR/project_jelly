@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/classes/basic_user.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/pages/shake_it.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'friend_finding_tab.dart';
@@ -15,7 +15,8 @@ String tutorialText = "You can add someone to your friend list if both of you "
 String tutorialTitle = "SHAKE IT TUTORIAL";
 
 class FriendsPage extends StatefulWidget {
-  const FriendsPage({super.key});
+  final Function(LatLng) moveMapToPosition;
+  const FriendsPage({super.key, required this.moveMapToPosition});
 
   @override
   State<FriendsPage> createState() => _FriendsPageState();
@@ -45,9 +46,7 @@ class _FriendsPageState extends State<FriendsPage>
       }
     });
     _stateTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      setState(() {
-        print('setting friends page state');
-      });
+      setState(() {});
     });
     Get.find<MapService>().fetchPendingFriends();
   }
@@ -103,8 +102,8 @@ class _FriendsPageState extends State<FriendsPage>
           controller: _tabController,
           children: [
             FriendListTab(
-              onTabChange: _handleTabChange,
-            ),
+                onTabChange: _handleTabChange,
+                moveMapToPosition: widget.moveMapToPosition),
             FriendFindingTab(
               onTabChange: _handleTabChange,
               onShakeButtonPressed: _handleShakeButtonPressed,

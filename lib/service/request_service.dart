@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:battery/battery.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
@@ -9,11 +10,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
+import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
+
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
   String ApiPath = "http://10.90.50.101/api/v1";
+  DateTime? lastBatteryUpdate;
+  Battery battery = Battery();
+  int batteryLevel = 100;
 
   void setupInterceptor(String? idToken) {
     dio.interceptors.add(
@@ -66,14 +72,18 @@ class RequestService extends getx.GetxService {
     }
   }
 
-// TODO Device battery level
   Future<dynamic> putUserUpdate(Position locationData) async {
+    DateTime now = DateTime.now();
+    if (lastBatteryUpdate == null ||
+        now.difference(lastBatteryUpdate!) > Duration(minutes: 5)) {
+      batteryLevel = await battery.batteryLevel;
+    }
     try {
       String requestBody = json.encode({
         "latitude": locationData.latitude,
         "longitude": locationData.longitude,
         "speed": locationData.speed.toInt(),
-        "batteryLevel": 1
+        "batteryLevel": batteryLevel
       });
       Response response = await dio.put(
         "${ApiPath}/user/status/update",
@@ -226,9 +236,9 @@ class RequestService extends getx.GetxService {
 
   Future<bool> declineFriendRequest(String friendId) async {
     try {
-      String url = '/friend/decline/$friendId';
+      String url = '/friend/delete/$friendId';
 
-      Response response = await dio.put("${ApiPath}${url}");
+      Response response = await dio.delete("${ApiPath}${url}");
 
       if (response.statusCode == 200) {
         print('Friend request accepted');
@@ -265,7 +275,7 @@ class RequestService extends getx.GetxService {
   Future<bool> updateShakingStatus(bool isShaking) async {
     String endpoint = '/user/shaking/update/${isShaking ? 'true' : 'false'}';
     try {
-      Response response = await dio.get("${ApiPath}${endpoint}");
+      Response response = await dio.put("${ApiPath}${endpoint}");
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -275,6 +285,46 @@ class RequestService extends getx.GetxService {
       }
     } catch (error) {
       print('Error updating shaking status: ${error.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> updateStealthChoiceOnUserLevel(
+      StealthChoice userStealthChoice) async {
+    String endpoint = '/user/ghost/update/${userStealthChoice.name}';
+    try {
+      Response response = await dio.put("${ApiPath}${endpoint}");
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print(
+            'Failed to update the steath choice status on user level. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print(
+          'Error updating steath choice status on user level: ${error.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> updateStealthChoiceOnRelationshipLevel(
+      String idFriendWhoWillBeInGhostMode,
+      StealthChoice friendStealthChoice) async {
+    String endpoint =
+        '/friend/ghost/update/${idFriendWhoWillBeInGhostMode}/${friendStealthChoice.name}';
+    try {
+      Response response = await dio.put("${ApiPath}${endpoint}");
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print(
+            'Failed to update the steath choice status on relationship level. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print(
+          'Error updating steath choice status on relationship level: ${error.toString()}');
       return false;
     }
   }

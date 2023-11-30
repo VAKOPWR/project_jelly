@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/pages/friends/friends.dart';
 
 class NavButtons extends StatelessWidget {
-  const NavButtons({super.key});
+  final Function(LatLng) moveMapToPosition;
+  const NavButtons({super.key, required this.moveMapToPosition});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,8 @@ class NavButtons extends StatelessWidget {
             child: FloatingActionButton(
               heroTag: "friendsBtn",
               onPressed: () {
-                Get.toNamed('/friends');
+                Get.to(() => FriendsPage(moveMapToPosition: moveMapToPosition),
+                    transition: Transition.downToUp);
               },
               backgroundColor: Theme.of(context).colorScheme.primary,
               shape: const RoundedRectangleBorder(

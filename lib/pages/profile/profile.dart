@@ -39,10 +39,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 160,
                 height: 160,
                 margin: const EdgeInsets.only(bottom: 20),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    image: AssetImage('assets/profile_image.jpg'),
+                    image: NetworkImage(
+                        FirebaseAuth.instance.currentUser!.photoURL!),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -66,15 +67,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           // Description text
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Lorem ipsum dolor sit amet",
-              style: TextStyle(
-                fontSize: 20,
-              ),
-            ),
-          ),
           SizedBox(
             height: 20,
           ),
@@ -92,7 +84,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
 }
 
 class CircularButton extends StatelessWidget {

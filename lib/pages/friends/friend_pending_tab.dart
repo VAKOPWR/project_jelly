@@ -27,12 +27,6 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
   void initState() {
     super.initState();
     filteredFriends = Get.find<MapService>().pendingFriends;
-    // _stateTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
-    //   setState(() {
-    //     print('setting pending page state');
-    //     filteredFriends = Get.find<MapService>().pendingFriends;
-    //   });
-    // });
   }
 
   @override
@@ -106,7 +100,6 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
         Get.find<MapService>()
             .pendingFriends
             .removeWhere((friend) => friend.id == friendId);
-        print(Get.find<MapService>().pendingFriends);
 
         if (acceptedFriend != null) {
           Get.snackbar("Congratulations!",
