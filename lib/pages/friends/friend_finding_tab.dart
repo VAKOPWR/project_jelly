@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/basic_user.dart';
@@ -82,9 +81,6 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
           bool success =
               await Get.find<RequestService>().sendFriendRequest(basicUser.id);
           if (success) {
-            // setState(() {
-            //   allFriends.removeWhere((Friend f) => f.id == friend.id);
-            // });
             Get.snackbar("Congratulations!",
                 "Your friend request sent to ${basicUser.name}",
                 icon: Icon(Icons.sentiment_satisfied_alt_outlined,

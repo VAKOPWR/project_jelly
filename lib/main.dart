@@ -8,7 +8,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/auth/reset_password.dart';
-import 'package:project_jelly/pages/friends/friends.dart';
 import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/pages/auth/login.dart';
@@ -63,10 +62,6 @@ class ProjectJelly extends StatelessWidget {
               page: () => const HomePage(),
               transition: Transition.circularReveal,
               transitionDuration: const Duration(seconds: 2)),
-          // GetPage(
-          //     name: '/friends',
-          //     page: () => const FriendsPage(),
-          //     transition: Transition.downToUp),
           GetPage(
               name: '/messages',
               page: () => const MessagesPage(),

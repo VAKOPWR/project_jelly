@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/basic_user.dart';
-import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 
 class ShakeItScreen extends StatefulWidget {
@@ -77,9 +76,7 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(
-                          height:
-                              8.0), // Add some space between the Text widgets
+                      SizedBox(height: 8.0),
                       Container(
                         height: 1.0,
                         width: 250,
@@ -87,12 +84,17 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
                             .colorScheme
                             .onBackground, // Line color
                       ),
+                      SizedBox(height: 8.0),
                       Expanded(
                         child: ListView.builder(
                           shrinkWrap: true,
                           itemCount: usersWhoAreShaking.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return _buildFriendRow(usersWhoAreShaking[index]);
+                            return Container(
+                              margin: EdgeInsets.only(
+                                  bottom: 8.0), // Adjust the value as needed
+                              child: _buildFriendRow(usersWhoAreShaking[index]),
+                            );
                           },
                         ),
                       ),
@@ -116,13 +118,13 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
   Widget _buildFriendRow(BasicUser userWhoIsShaking) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage:
-            Get.find<MapService>().imageProviders[userWhoIsShaking.id],
+        backgroundImage: NetworkImage(userWhoIsShaking.avatar ??
+            'https://shireoakinternational.asia/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2022/12/Person-650x650.jpg.webp'),
         radius: 29,
       ),
       title: Text(
         userWhoIsShaking.name,
-        style: TextStyle(color: Colors.black),
+        style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
       ),
       onTap: () async {
         bool success = await Get.find<RequestService>()

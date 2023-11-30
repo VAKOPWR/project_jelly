@@ -509,7 +509,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   Future<void> moveMapToPosition(LatLng newCameraPosition) async {
     GoogleMapController controller = await _mapController.future;
-    double zoomLevel = await controller.getZoomLevel();
     controller.animateCamera(
       CameraUpdate.newLatLngZoom(
         newCameraPosition, // New York City coordinates
