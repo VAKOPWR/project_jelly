@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 // ignore: unused_import
 import 'dart:developer';
 import 'dart:io';
@@ -31,10 +32,13 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   late Timer _debounce;
   MapType _mapType = MapType.normal;
   String _locationName = "The Earth";
+  Map<MarkerId, Marker> staticMarkers = <MarkerId, Marker>{};
+  final box = GetStorage();
 
   @override
   void initState() {
     Get.find<SnackbarService>().checkLocationAccess();
+    createMarkersFromJSON();
     _markersTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await Get.find<MapService>().fetchFriendsData();
       await Get.find<MapService>().updateMarkers();
@@ -153,7 +157,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     myLocationEnabled: true,
                     padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
                     mapType: _mapType,
-                    markers: Get.find<MapService>().markers.values.toSet(),
+                    markers: Set<Marker>.from(
+                            Get.find<MapService>().markers.values.toSet())
+                        .union(staticMarkers.values.toSet()),
                     onCameraMove: _onCameraMove),
                 AnimatedContainer(
                     duration: Duration(milliseconds: 300), // Animation duration
@@ -166,6 +172,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     child: Get.find<VisibilitySevice>().highlightedMarker !=
                             null
                         ? MarkerInfoBox(
+                            deleteStaticMarker: deleteStaticMarker,
                             isStaticMarker: Get.find<VisibilitySevice>()
                                     .highlightedMarkerType !=
                                 null,
@@ -449,16 +456,66 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       },
     );
     setState(() {
-      Get.find<MapService>().addStaticMarker(marker);
-      Get.find<MapService>().updateMarkers();
+      addStaticMarker(marker);
+      Get.find<MapService>().addStaticMarkerTypeId(markerType, newMarkerName);
+    });
+  }
+
+  Future<void> createMarkersFromJSON() async {
+    String? markerData = box.read('staticMarkers');
+    if (markerData != null) {
+      print('markerData:');
+      print(markerData);
+
+      List<Map<String, dynamic>> data =
+          List<Map<String, dynamic>>.from(json.decode(markerData));
+
+      for (Map<String, dynamic> marker in data) {
+        String markerType = marker["id"].toString().split(' ')[0];
+        MarkerId markerId = MarkerId(marker["id"].toString());
+        staticMarkers[markerId] = Marker(
+          markerId: markerId,
+          position: LatLng(marker["latitude"], marker["longitude"]),
+          draggable: true,
+          icon: Get.find<MapService>().staticMarkerIcons[MarkerId(markerType)]!,
+          onTap: () {
+            setState(() {
+              Get.find<VisibilitySevice>().isInfoSheetVisible = true;
+              if (Get.find<VisibilitySevice>().isBottomSheetOpen) {
+                Navigator.of(context).pop();
+                Get.find<VisibilitySevice>().isBottomSheetOpen = false;
+              }
+              Get.find<VisibilitySevice>().highlightedMarker = markerId;
+              Get.find<VisibilitySevice>().highlightedMarkerType = markerType;
+            });
+          },
+          onDragEnd: (LatLng newPosition) {
+            // TODO: update the marker's position in the data structure
+          },
+        );
+        Get.find<MapService>()
+            .addStaticMarkerTypeId(markerType, marker["id"].toString());
+      }
+    }
+  }
+
+  void addStaticMarker(Marker marker) {
+    staticMarkers[marker.markerId] = marker;
+    Get.find<MapService>().writeStaticMarkersData(staticMarkers);
+  }
+
+  void deleteStaticMarker(String markerType, MarkerId markerId) {
+    if (staticMarkers.containsKey(markerId)) {
+      Marker markerToDelete = staticMarkers[markerId]!;
+      staticMarkers.remove(markerId);
+      Get.find<VisibilitySevice>().isInfoSheetVisible = false;
       if (Get.find<MapService>().staticMarkerTypeId.containsKey(markerType)) {
         Get.find<MapService>()
             .staticMarkerTypeId[markerType]!
-            .add(newMarkerName);
-      } else {
-        Get.find<MapService>().staticMarkerTypeId[markerType] = {newMarkerName};
+            .remove(markerToDelete.markerId.value);
       }
-    });
+    }
+    Get.find<MapService>().writeStaticMarkersData(staticMarkers);
   }
 
   @override

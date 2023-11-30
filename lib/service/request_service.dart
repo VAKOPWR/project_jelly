@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:battery/battery.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
@@ -14,6 +15,9 @@ import 'package:project_jelly/service/map_service.dart';
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
   String ApiPath = "http://10.90.50.101/api/v1";
+  DateTime? lastBatteryUpdate;
+  Battery battery = Battery();
+  int batteryLevel = 100;
 
   void setupInterceptor(String? idToken) {
     dio.interceptors.add(
@@ -66,14 +70,18 @@ class RequestService extends getx.GetxService {
     }
   }
 
-// TODO Device battery level
   Future<dynamic> putUserUpdate(Position locationData) async {
+    DateTime now = DateTime.now();
+    if (lastBatteryUpdate == null ||
+        now.difference(lastBatteryUpdate!) > Duration(minutes: 5)) {
+      batteryLevel = await battery.batteryLevel;
+    }
     try {
       String requestBody = json.encode({
         "latitude": locationData.latitude,
         "longitude": locationData.longitude,
         "speed": locationData.speed.toInt(),
-        "batteryLevel": 1
+        "batteryLevel": batteryLevel
       });
       Response response = await dio.put(
         "${ApiPath}/user/status/update",

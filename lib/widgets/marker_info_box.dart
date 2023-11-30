@@ -7,11 +7,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/service/map_service.dart';
 
 class MarkerInfoBox extends StatefulWidget {
+  final Function deleteStaticMarker;
   final bool isStaticMarker;
   final MarkerId id;
   final String? markerType;
   const MarkerInfoBox(
       {super.key,
+      required this.deleteStaticMarker,
       required this.isStaticMarker,
       required this.id,
       this.markerType});
@@ -147,7 +149,6 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
     );
   }
 
-  // Function to split and truncate text
   Widget _buildSplitText(String text) {
     final maxCharacters = 11;
     final maxWords = 2;
@@ -245,7 +246,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                         children: [
                           TextButton(
                             onPressed: () {
-                              Get.find<MapService>().deleteStaticMarker(
+                              widget.deleteStaticMarker(
                                   widget.markerType!, widget.id);
                             },
                             style: TextButton.styleFrom(

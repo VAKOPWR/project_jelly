@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/pages/shake_it.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'friend_finding_tab.dart';

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
@@ -20,7 +21,7 @@ import 'package:project_jelly/service/visibility_service.dart';
 // TODO: Leave markers in memory
 class MapService extends GetxService {
   Position? _currentLocation;
-  DateTime? lastUpdate;
+  DateTime? lastPositionUpdate;
   Stream<Position> locationStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
   StreamSubscription<Position>? _locationStreamSubscription;
@@ -37,15 +38,15 @@ class MapService extends GetxService {
       headingAccuracy: 0.0);
   Uint8List? defaultAvatar;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<MarkerId, Marker> staticMarkers = <MarkerId, Marker>{};
   Map<MarkerId, BitmapDescriptor> staticMarkerIcons =
       <MarkerId, BitmapDescriptor>{};
   Map<MarkerId, Uint8List> staticImages = <MarkerId, Uint8List>{};
   Map<MarkerId, Friend> friendsData = <MarkerId, Friend>{};
-  Map<String, Set<String>> staticMarkerTypeId = <String, Set<String>>{};
+  Map<String, List<String>> staticMarkerTypeId = <String, List<String>>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   List<BasicUser> pendingFriends = <BasicUser>[];
+  final box = GetStorage();
   bool requestSent = false;
   int locationPerception = 2;
 
@@ -83,6 +84,7 @@ class MapService extends GetxService {
         await loadImageProviders();
       }
     });
+    readStaticMarkersData();
   }
 
   void startPositionStream() async {
@@ -123,10 +125,11 @@ class MapService extends GetxService {
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
     DateTime now = DateTime.now();
-    if (lastUpdate == null ||
-        now.difference(lastUpdate!) > Duration(seconds: locationPerception)) {
+    if (lastPositionUpdate == null ||
+        now.difference(lastPositionUpdate!) >
+            Duration(seconds: locationPerception)) {
       Get.find<RequestService>().putUserUpdate(newLocation);
-      lastUpdate = now;
+      lastPositionUpdate = now;
     }
   }
 
@@ -158,22 +161,6 @@ class MapService extends GetxService {
         BitmapDescriptor.fromBytes(staticImages[MarkerId('Gym')]!);
     staticMarkerIcons[MarkerId('Favorite')] =
         BitmapDescriptor.fromBytes(staticImages[MarkerId('Favorite')]!);
-  }
-
-  void addStaticMarker(Marker marker) {
-    staticMarkers[marker.markerId] = marker;
-  }
-
-  void deleteStaticMarker(String markerType, MarkerId markerId) {
-    if (staticMarkers.containsKey(markerId)) {
-      Marker markerToDelete = staticMarkers[markerId]!;
-      staticMarkers.remove(markerId);
-      Get.find<VisibilitySevice>().isInfoSheetVisible = false;
-      updateMarkers();
-      if (staticMarkerTypeId.containsKey(markerType)) {
-        staticMarkerTypeId[markerType]!.remove(markerToDelete.markerId.value);
-      }
-    }
   }
 
   Future<void> loadDefaultAvatar() async {
@@ -259,7 +246,6 @@ class MapService extends GetxService {
       }
       newMarkers[friend.key] = _createMarker(friend.value);
     }
-    newMarkers.addEntries(staticMarkers.entries);
     markers.clear();
     markers = newMarkers;
   }
@@ -278,5 +264,47 @@ class MapService extends GetxService {
     List<BasicUser> _pendingFriends = await Get.find<RequestService>()
         .getFriendsBasedOnEndpoint('/friend/pending');
     pendingFriends = _pendingFriends;
+  }
+
+  String markerToJson(Marker marker) {
+    return "{\"id\": \"${marker.markerId.value}\",\"latitude\": ${marker.position.latitude},\"longitude\": ${marker.position.longitude}}";
+  }
+
+  String markersToJson(Map<MarkerId, Marker> staticMarkers) {
+    String result = '[';
+    for (Marker marker in staticMarkers.values) {
+      result += markerToJson(marker);
+      result += ',';
+    }
+    if (result.endsWith(',')) {
+      result = result.substring(0, result.length - 1);
+    }
+    result += ']';
+    return result;
+  }
+
+  void addStaticMarkerTypeId(String markerType, String newMarkerName) {
+    if (staticMarkerTypeId.containsKey(markerType)) {
+      staticMarkerTypeId[markerType]!.add(newMarkerName);
+    } else {
+      staticMarkerTypeId[markerType] = [newMarkerName];
+    }
+  }
+
+  void writeStaticMarkersData(Map<MarkerId, Marker> staticMarkers) {
+    String _markers = markersToJson(staticMarkers);
+    box.write('staticMarkers', _markers);
+    print(box.read('staticMarkers'));
+    box.write('staticMarkerTypeId', staticMarkerTypeId);
+  }
+
+  void readStaticMarkersData() {
+    Map<String, dynamic>? _markerTypeId = box.read('staticMarkerTypeId');
+    if (_markerTypeId != null) {
+      staticMarkerTypeId = Map<String, List<String>>.from(_markerTypeId.map(
+          (key, value) => MapEntry<String, List<String>>(
+              key, (value as List<dynamic>).cast<String>())));
+    }
+    print(staticMarkerTypeId);
   }
 }
