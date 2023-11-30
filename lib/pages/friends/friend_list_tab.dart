@@ -70,10 +70,14 @@ class _FriendListTabState extends State<FriendListTab> {
   Widget _buildRow(Friend friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage:
-            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
-        radius: 27,
+        radius: 28,
         backgroundColor: Theme.of(context).canvasColor,
+        child: Image(
+          image: Get.find<MapService>().imageProviders[MarkerId(friend.id)]!,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover, // Adjust the fit as needed
+        ),
       ),
       title: Text(
         friend.name,

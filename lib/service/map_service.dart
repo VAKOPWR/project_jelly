@@ -18,7 +18,6 @@ import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
 
 // TODO: Add optimization logic
-// TODO: Leave markers in memory
 class MapService extends GetxService {
   Position? _currentLocation;
   DateTime? lastPositionUpdate;
@@ -45,6 +44,7 @@ class MapService extends GetxService {
   Map<String, List<String>> staticMarkerTypeId = <String, List<String>>{};
   Map<MarkerId, Uint8List> avatars = <MarkerId, Uint8List>{};
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
+  Map<String, bool> ghostedFriends = <String, bool>{};
   List<BasicUser> pendingFriends = <BasicUser>[];
   final box = GetStorage();
   bool requestSent = false;
@@ -85,6 +85,7 @@ class MapService extends GetxService {
       }
     });
     readStaticMarkersData();
+    readGhostedFriends();
   }
 
   void startPositionStream() async {
@@ -305,9 +306,15 @@ class MapService extends GetxService {
     }
   }
 
-  void updateFriendGhostStatus(String friendId, bool isGhosted) {
-    if (friendsData.containsKey(friendId)) {
-      friendsData[friendId]!.isGhosted = isGhosted;
+  void updateFriendGhostStatus(String friendId, bool newGhostedState) {
+    ghostedFriends[friendId] = newGhostedState;
+    box.write('ghostedFriends', ghostedFriends);
+  }
+
+  void readGhostedFriends() {
+    Map<String, dynamic>? _ghostedFriends = box.read('ghostedFriends');
+    if (_ghostedFriends != null) {
+      ghostedFriends = _ghostedFriends.cast<String, bool>();
     }
   }
 }

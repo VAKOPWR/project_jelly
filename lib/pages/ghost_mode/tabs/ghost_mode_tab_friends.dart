@@ -35,63 +35,62 @@ class _GhostModeTabFriendsState extends State<GhostModeTabFriends> {
             .values
             .toList()
             .where((friend) =>
-            friend.name.toLowerCase().contains(value.toLowerCase()))
+                friend.name.toLowerCase().contains(value.toLowerCase()))
             .toList();
       });
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return SearchBarWidget(
-      onSearchChanged: _onSearchChanged,
-      content: ListView.separated(
-        itemCount: filteredFriends.length,
-        separatorBuilder: (context, index) => const Divider(),
-        itemBuilder: (context, index) {
-          return _buildRow(filteredFriends[index]);
-        },
-      ),
-    );
+    return Container(
+        color: Theme.of(context).canvasColor,
+        child: SearchBarWidget(
+          onSearchChanged: _onSearchChanged,
+          content: ListView.separated(
+            itemCount: filteredFriends.length,
+            separatorBuilder: (context, index) => const Divider(),
+            itemBuilder: (context, index) {
+              return _buildRow(filteredFriends[index]);
+            },
+          ),
+        ));
   }
 
   Widget _buildRow(Friend friend) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage:
-            Get.find<MapService>().imageProviders[MarkerId(friend.id)],
-        radius: 27,
+        radius: 28,
         backgroundColor: Theme.of(context).canvasColor,
+        child: Image(
+          image: Get.find<MapService>().imageProviders[MarkerId(friend.id)]!,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover, // Adjust the fit as needed
+        ),
       ),
       title: Text(
         friend.name,
         style: TextStyle(fontSize: 18.0),
       ),
       trailing: Checkbox(
-        value: friend.isGhosted,
+        value: Get.find<MapService>().ghostedFriends[friend.id] ?? false,
         onChanged: (bool? isChecked) async {
           if (isChecked == null) return;
 
-          StealthChoice choice = isChecked
-              ? StealthChoice.HIDE
-              : StealthChoice.PRECISE;
+          StealthChoice choice =
+              isChecked ? StealthChoice.HIDE : StealthChoice.PRECISE;
 
           bool success = await Get.find<RequestService>()
               .updateStealthChoiceOnRelationshipLevel(friend.id, choice);
 
           if (success) {
-            setState(() {
-              friend.isGhosted = isChecked;
-            });
-            Get.find<MapService>().updateFriendGhostStatus(friend.id, isChecked);
-          } else {
-          }
+            setState(() {});
+            Get.find<MapService>()
+                .updateFriendGhostStatus(friend.id, isChecked);
+          } else {}
         },
       ),
-      onTap: () {
-        // TODO: Get.to profile of friend
-      },
     );
   }
 }

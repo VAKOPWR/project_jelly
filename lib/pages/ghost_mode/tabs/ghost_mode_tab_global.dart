@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/request_service.dart';
 
@@ -11,8 +12,19 @@ class GhostModeTabGlobal extends StatefulWidget {
 }
 
 class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
-  int locationPrecisionOption = 0;
+  int locationPrecisionOption = 1;
   int previousLocationPrecisionOption = 1;
+  final box = GetStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    int? isSharingLocation = box.read('isSharingLocation');
+    if (isSharingLocation != null) {
+      locationPrecisionOption = isSharingLocation;
+      previousLocationPrecisionOption = locationPrecisionOption;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +38,7 @@ class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
                   color: Theme.of(context).canvasColor,
                   height: 20.0,
                 ),
-                Text('Location precision visibility'),
+                Text('Location Precision Visibility'),
                 Row(
                   children: [
                     Radio<int>(
@@ -72,13 +84,13 @@ class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
                             StealthChoice choice = locationPrecisionOption == 1
                                 ? StealthChoice.PRECISE
                                 : StealthChoice.HIDE;
-
                             bool success = await Get.find<RequestService>()
                                 .updateStealthChoiceOnUserLevel(choice);
-
                             if (success) {
                               previousLocationPrecisionOption =
                                   locationPrecisionOption;
+                              box.write(
+                                  'isSharingLocation', locationPrecisionOption);
                               Get.snackbar("Congratulations!",
                                   "Your location setting has been updated successfully",
                                   icon: Icon(Icons.add_reaction,
