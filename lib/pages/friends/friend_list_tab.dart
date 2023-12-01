@@ -9,11 +9,9 @@ import 'package:project_jelly/service/visibility_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendListTab extends StatefulWidget {
-  final void Function(int) onTabChange;
   final Function(LatLng) moveMapToPosition;
 
-  const FriendListTab(
-      {Key? key, required this.onTabChange, required this.moveMapToPosition})
+  const FriendListTab({Key? key, required this.moveMapToPosition})
       : super(key: key);
 
   @override
@@ -53,6 +51,10 @@ class _FriendListTabState extends State<FriendListTab> {
     });
   }
 
+  void closeKeyboard(BuildContext context) {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
@@ -89,13 +91,36 @@ class _FriendListTabState extends State<FriendListTab> {
           IconButton(
             icon: Icon(Icons.location_searching_rounded),
             onPressed: () {
-              Get.find<VisibilityService>().isInfoSheetVisible = true;
-              Get.find<VisibilityService>().highlightedMarker =
-                  MarkerId(friend.id);
-              Get.back();
-              widget.moveMapToPosition(Get.find<MapService>()
-                  .friendsData[MarkerId(friend.id)]!
-                  .location);
+              if (Get.find<MapService>()
+                          .friendsData[MarkerId(friend.id)]!
+                          .location
+                          .latitude <
+                      0 &&
+                  Get.find<MapService>()
+                          .friendsData[MarkerId(friend.id)]!
+                          .location
+                          .longitude <
+                      0) {
+                Get.snackbar("Sorry to hear that",
+                    "Friend's location is unavailable: ${friend.name}",
+                    icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+                        color: Colors.white, size: 35),
+                    snackPosition: SnackPosition.TOP,
+                    isDismissible: false,
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.red[400],
+                    margin: EdgeInsets.zero,
+                    snackStyle: SnackStyle.GROUNDED);
+              } else {
+                Get.find<VisibilityService>().isInfoSheetVisible = true;
+                Get.find<VisibilityService>().highlightedMarker =
+                    MarkerId(friend.id);
+                Get.find<VisibilityService>().highlightedMarkerType = null;
+                Get.back();
+                widget.moveMapToPosition(Get.find<MapService>()
+                    .friendsData[MarkerId(friend.id)]!
+                    .location);
+              }
             },
           ),
           IconButton(

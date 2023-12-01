@@ -8,11 +8,8 @@ import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendPendingTab extends StatefulWidget {
-  final void Function(int) onTabChange;
-
   const FriendPendingTab({
     Key? key,
-    required this.onTabChange,
   }) : super(key: key);
 
   @override
