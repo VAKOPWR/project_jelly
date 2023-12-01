@@ -33,6 +33,7 @@ class _FriendsPageState extends State<FriendsPage>
     _tabController = TabController(length: _numberOfTabs, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
+        FocusScope.of(context).unfocus();
         switch (_tabController.index) {
           case 0:
             break;
@@ -57,12 +58,6 @@ class _FriendsPageState extends State<FriendsPage>
     _tabController.removeListener(() {});
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _handleTabChange(int newIndex) {
-    setState(() {
-      _tabController.index = newIndex;
-    });
   }
 
   void _handleShakeButtonPressed() {
@@ -101,16 +96,11 @@ class _FriendsPageState extends State<FriendsPage>
         body: TabBarView(
           controller: _tabController,
           children: [
-            FriendListTab(
-                onTabChange: _handleTabChange,
-                moveMapToPosition: widget.moveMapToPosition),
+            FriendListTab(moveMapToPosition: widget.moveMapToPosition),
             FriendFindingTab(
-              onTabChange: _handleTabChange,
               onShakeButtonPressed: _handleShakeButtonPressed,
             ),
-            FriendPendingTab(
-              onTabChange: _handleTabChange,
-            ),
+            FriendPendingTab(),
           ],
         ),
       ),

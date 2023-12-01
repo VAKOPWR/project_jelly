@@ -6,12 +6,10 @@ import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
 
 class FriendFindingTab extends StatefulWidget {
-  final void Function(int) onTabChange;
   final VoidCallback? onShakeButtonPressed;
 
   const FriendFindingTab({
     Key? key,
-    required this.onTabChange,
     this.onShakeButtonPressed,
   }) : super(key: key);
 

@@ -13,7 +13,6 @@ import 'package:http/http.dart' as http;
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
 
-
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
   String ApiPath = "http://10.90.50.101/api/v1";
@@ -120,7 +119,7 @@ class RequestService extends getx.GetxService {
     Map<String, Uint8List?> icons = {};
     try {
       Response response = await dio.get(
-        "${ApiPath}/friend/basic",
+        "${ApiPath}/friend/online",
       );
       if (response.statusCode == 200) {
         var data = response.data;
@@ -132,7 +131,7 @@ class RequestService extends getx.GetxService {
               .isOnline = icon['isOnline'];
           getx.Get.find<MapService>()
               .friendsData[MarkerId(icon['id'].toString())]!
-              .offlineStatus = '**';
+              .offlineStatus = icon['lastOnline'];
         }
         return icons;
       }

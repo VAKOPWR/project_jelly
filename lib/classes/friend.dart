@@ -19,6 +19,15 @@ class Friend {
       this.offlineStatus = '**'});
 
   factory Friend.fromJson(Map<String, dynamic> json) {
+    if (json['positionLat'] == 0 && json['positionLon'] == 0) {
+      return Friend(
+        id: json['id'].toString(),
+        name: json['nickname'],
+        location: LatLng(-90.0, -90.0),
+        batteryPercentage: json['batteryLevel'],
+        movementSpeed: json['speed'],
+      );
+    }
     return Friend(
       id: json['id'].toString(),
       name: json['nickname'],
