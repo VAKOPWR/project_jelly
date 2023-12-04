@@ -100,6 +100,8 @@ class _LogInPageState extends State<LogInPage> {
                           Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: TextFormField(
+                                  // TODO : Remove when server auth is ready
+                                  enabled: false,
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
                                   validator: MultiValidator([
@@ -138,6 +140,8 @@ class _LogInPageState extends State<LogInPage> {
                           Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: TextFormField(
+                              // TODO : Remove when server auth is ready
+                              enabled: false,
                               obscureText: _obscurePassword,
                               validator: MultiValidator([
                                 RequiredValidator(
