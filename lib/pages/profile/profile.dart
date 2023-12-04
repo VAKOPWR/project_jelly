@@ -12,6 +12,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  TextEditingController _usernameController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     var userName = FirebaseAuth.instance.currentUser!.displayName!;
@@ -73,7 +74,10 @@ class _ProfilePageState extends State<ProfilePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CircularButton(icon: Icons.edit, destinationPath: ''),
+              CircularButton(
+                icon: Icons.edit,
+                onPressed: _showUsernameEditDialog,
+              ),
               CircularButton(icon: Icons.settings, destinationPath: ''),
               CircularButton(
                   icon: Icons.remove_red_eye_outlined,
@@ -84,34 +88,76 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
+  void _showUsernameEditDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(36.0),
+          child: AlertDialog(
+            title: Text("Edit Username"),
+            content: TextField(
+              controller: _usernameController,
+              maxLength: 10,
+              decoration: InputDecoration(labelText: 'New Username'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  // TODO: Implement the logic to update the username
+                  Navigator.of(context).pop();
+                },
+                child: Text('Save'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class CircularButton extends StatelessWidget {
   final IconData icon;
-  final String destinationPath;
+  final String? destinationPath;
+  final VoidCallback? onPressed;
 
-  CircularButton({required this.icon, required this.destinationPath});
+  CircularButton({
+    required this.icon,
+    this.destinationPath,
+    this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, destinationPath);
+        if (onPressed != null) {
+          onPressed!();
+        } else if (destinationPath != null) {
+          Navigator.pushNamed(context, destinationPath!);
+        }
       },
       child: Container(
-        width: 80.0, // Adjust the size as needed
-        height: 80.0, // Adjust the size as needed
+        width: 80.0,
+        height: 80.0,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Theme.of(context)
-              .colorScheme
-              .primary, // Change the color as needed
+          color: Theme.of(context).colorScheme.primary,
         ),
         child: Center(
-          child: Icon(icon, // Use the passed icon
-              color: Theme.of(context).colorScheme.onPrimary,
-              size: 42.0 // Change the icon color as needed
-              ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.onPrimary,
+            size: 42.0,
+          ),
         ),
       ),
     );
