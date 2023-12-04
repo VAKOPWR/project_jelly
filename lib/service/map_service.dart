@@ -1,6 +1,7 @@
 import 'dart:async';
 // ignore: unused_import
 import 'dart:developer';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -46,9 +47,12 @@ class MapService extends GetxService {
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   Map<String, bool> ghostedFriends = <String, bool>{};
   List<BasicUser> pendingFriends = <BasicUser>[];
+  Map<MarkerId, LatLng> targetPoints = <MarkerId, LatLng>{};
   final box = GetStorage();
   bool requestSent = false;
   int locationPerception = 2;
+  int nearPointThreshold = 50;
+  int nearPointUpdateFrequency = 30;
 
   @override
   Future<void> onInit() async {
@@ -126,12 +130,48 @@ class MapService extends GetxService {
   void updateCurrentLocation(Position newLocation) async {
     _currentLocation = newLocation;
     DateTime now = DateTime.now();
-    if (lastPositionUpdate == null ||
-        now.difference(lastPositionUpdate!) >
-            Duration(seconds: locationPerception)) {
-      Get.find<RequestService>().putUserUpdate(newLocation);
-      lastPositionUpdate = now;
+
+    bool nearAnyPoint = targetPoints.entries.any((targetPoint) {
+      double distanceToTarget = calculateDistance(
+        newLocation.latitude,
+        newLocation.longitude,
+        targetPoint.value.latitude,
+        targetPoint.value.longitude,
+      );
+      return distanceToTarget <= nearPointThreshold;
+    });
+
+    if (nearAnyPoint) {
+      if (lastPositionUpdate == null ||
+          now.difference(lastPositionUpdate!) >
+              Duration(minutes: nearPointUpdateFrequency)) {
+        Get.find<RequestService>().putUserUpdate(newLocation);
+        lastPositionUpdate = now;
+      }
+    } else {
+      if (lastPositionUpdate == null ||
+          now.difference(lastPositionUpdate!) >
+              Duration(seconds: locationPerception)) {
+        Get.find<RequestService>().putUserUpdate(newLocation);
+        lastPositionUpdate = now;
+      }
     }
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const int earthRadius = 6371000;
+
+    double dLat = (lat2 - lat1) * (3.141592653589793 / 180);
+    double dLon = (lon2 - lon1) * (3.141592653589793 / 180);
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * (3.141592653589793 / 180)) *
+            cos(lat2 * (3.141592653589793 / 180)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = earthRadius * c;
+
+    return distance;
   }
 
   Future<void> loadStaticImages() async {
@@ -295,6 +335,16 @@ class MapService extends GetxService {
     String _markers = markersToJson(staticMarkers);
     box.write('staticMarkers', _markers);
     box.write('staticMarkerTypeId', staticMarkerTypeId);
+  }
+
+  void addStaticPoint(Marker newPoint) {
+    targetPoints[newPoint.markerId] = newPoint.position;
+  }
+
+  void deleteStaticPoint(MarkerId markerId) {
+    if (targetPoints.containsKey(markerId)) {
+      targetPoints.remove(markerId);
+    }
   }
 
   void readStaticMarkersData() {

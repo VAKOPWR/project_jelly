@@ -438,8 +438,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     markerId = MarkerId(newMarkerName);
     Marker marker = createMarker(markerId, center, markerType);
     setState(() {
-      addStaticMarker(marker);
-      Get.find<MapService>().addStaticMarkerTypeId(markerType, newMarkerName);
+      addStaticMarker(marker, markerType, newMarkerName);
     });
   }
 
@@ -448,13 +447,13 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     if (markerData != null) {
       List<Map<String, dynamic>> data =
           List<Map<String, dynamic>>.from(json.decode(markerData));
-
       for (Map<String, dynamic> marker in data) {
         String markerType = marker["id"].toString().split(' ')[0];
         MarkerId markerId = MarkerId(marker["id"].toString());
         LatLng markerPosition = LatLng(marker["latitude"], marker["longitude"]);
-        staticMarkers[markerId] =
-            createMarker(markerId, markerPosition, markerType);
+        Marker newMarker = createMarker(markerId, markerPosition, markerType);
+        staticMarkers[markerId] = newMarker;
+        Get.find<MapService>().addStaticPoint(newMarker);
         Get.find<MapService>()
             .addStaticMarkerTypeId(markerType, marker["id"].toString());
       }
@@ -481,16 +480,20 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       },
       onDragEnd: (LatLng newPosition) {
         staticMarkers.remove(markerId);
-        staticMarkers[markerId] =
-            createMarker(markerId, newPosition, markerType);
+        Get.find<MapService>().deleteStaticPoint(markerId);
+        Marker newMarker = createMarker(markerId, newPosition, markerType);
+        staticMarkers[markerId] = newMarker;
+        Get.find<MapService>().addStaticPoint(newMarker);
         Get.find<MapService>().writeStaticMarkersData(staticMarkers);
       },
     );
   }
 
-  void addStaticMarker(Marker marker) {
+  void addStaticMarker(Marker marker, String markerType, String newMarkerName) {
     staticMarkers[marker.markerId] = marker;
+    Get.find<MapService>().addStaticPoint(marker);
     Get.find<MapService>().writeStaticMarkersData(staticMarkers);
+    Get.find<MapService>().addStaticMarkerTypeId(markerType, newMarkerName);
   }
 
   void deleteStaticMarker(String markerType, MarkerId markerId) {
@@ -504,6 +507,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
             .remove(markerToDelete.markerId.value);
       }
     }
+    Get.find<MapService>().deleteStaticPoint(markerId);
     Get.find<MapService>().writeStaticMarkersData(staticMarkers);
   }
 
@@ -511,8 +515,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     GoogleMapController controller = await _mapController.future;
     controller.animateCamera(
       CameraUpdate.newLatLngZoom(
-        newCameraPosition, // New York City coordinates
-        15, // Zoom level
+        newCameraPosition,
+        15,
       ),
     );
   }
