@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
@@ -73,7 +71,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
     GroupChatResponse? groupChatResponse = await Get.find<RequestService>()
         .createGroupChat(chatName, description, userIds);
     if (groupChatResponse != null) {
-      Long chatId = groupChatResponse.groupId;
+      int chatId = groupChatResponse.groupId;
       List<ChatUser> chatUsersList =
           groupChatResponse.chatUser.cast<ChatUser>();
 

@@ -1,9 +1,7 @@
-import 'dart:ffi';
-
 import 'chat_user.dart';
 
 class GroupChatResponse {
-  final Long groupId;
+  final int groupId;
   final List<ChatUser> chatUser;
 
   GroupChatResponse({required this.groupId, required this.chatUser});
