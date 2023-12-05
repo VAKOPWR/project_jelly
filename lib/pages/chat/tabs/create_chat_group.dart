@@ -1,5 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_jelly/classes/GroupChatResponse.dart';
+import 'package:project_jelly/classes/chat.dart';
+import 'package:project_jelly/classes/chat_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
@@ -31,7 +36,8 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
         filteredFriends = Get.find<MapService>()
             .friendsData
             .values
-            .where((friend) => friend.name.toLowerCase().contains(value.toLowerCase()))
+            .where((friend) =>
+                friend.name.toLowerCase().contains(value.toLowerCase()))
             .toList();
       }
     });
@@ -63,19 +69,28 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
     );
   }
 
-
-
   Future<void> _createGroupChat() async {
-    bool success = await Get.find<RequestService>()
+    GroupChatResponse? groupChatResponse = await Get.find<RequestService>()
         .createGroupChat(chatName, description, userIds);
-    if (success) {
-      // Prototype TODO finish after updated endpoint on backend side
-      // Get.find<MapService>().chatUsers.putIfAbsent(chatId, () => chatUsersList);
-      // Get.find<MapService>().chats.putIfAbsent(chatId, () => chatName);
-      // Get.find<MapService>().newMessagesBool = true;
+    if (groupChatResponse != null) {
+      Long chatId = groupChatResponse.groupId;
+      List<ChatUser> chatUsersList =
+          groupChatResponse.chatUser.cast<ChatUser>();
 
-      Get.snackbar("Congratulations!",
-          "Your group was created! ${chatName}",
+      Get.find<MapService>()
+          .chatUsers
+          .putIfAbsent(chatId, () => chatUsersList);
+
+      Chat newChat = Chat(
+          chatId: chatId,
+          chatName: chatName,
+          isFriendship: false,
+          isMuted: false,
+          isPinned: false);
+      Get.find<MapService>().chats.putIfAbsent(chatId, () => newChat);
+      Get.find<MapService>().newMessagesBool = true;
+
+      Get.snackbar("Congratulations!", "Your group was created! ${chatName}",
           icon: Icon(Icons.sentiment_satisfied_alt_outlined,
               color: Colors.white, size: 35),
           snackPosition: SnackPosition.TOP,
@@ -85,8 +100,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
           margin: EdgeInsets.zero,
           snackStyle: SnackStyle.GROUNDED);
     } else {
-      Get.snackbar(
-          "Ooops!", "Failed to create group ${chatName}",
+      Get.snackbar("Ooops!", "Failed to create group ${chatName}",
           icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
               color: Colors.white, size: 35),
           snackPosition: SnackPosition.TOP,
@@ -97,6 +111,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
           snackStyle: SnackStyle.GROUNDED);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,7 +139,6 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
               ),
             ),
           ),
-
           Expanded(
             child: SearchBarWidget(
               onSearchChanged: _onSearchChanged,
@@ -137,7 +151,6 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
               ),
             ),
           ),
-
           ElevatedButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
@@ -151,6 +164,4 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
       ),
     );
   }
-
-
 }

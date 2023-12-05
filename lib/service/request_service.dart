@@ -9,6 +9,7 @@ import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
@@ -424,29 +425,27 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> createGroupChat(
+  Future<GroupChatResponse?> createGroupChat(
       String chatName, String description, List<int> userIds) async {
     String endpoint = "${ApiPath}/chats/createGroupChat";
     try {
-      Map<String, dynamic> queryParams = {
+      String requestBody = json.encode({
         "chatName": chatName,
-        "description": description.isEmpty ? "" : description,
-      };
-
-      String requestBody = json.encode(userIds);
-      print('Request body: ' + requestBody);
-      print('queryParams: ' + queryParams.toString());
+        "description": description,
+        "userIds": userIds,
+      });
+      print(requestBody);
       Response response = await dio.put(endpoint,
-          data: requestBody, queryParameters: queryParams);
+          data: requestBody);
       if (response.statusCode == 200) {
-        return true;
+        return GroupChatResponse.fromJson(response.data);
       } else {
         print('Error creating group. Status code: ${response.statusCode}');
-        return false;
+        return null;
       }
     } catch (error) {
       print('Error creating group: ${error.toString()}');
-      return false;
+      return null;
     }
   }
 }
