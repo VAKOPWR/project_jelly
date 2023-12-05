@@ -237,8 +237,9 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                 messages.add(Message(
                                     text: messageText,
                                     time: DateTime.now().toLocal(),
-                                    chatId: widget.chatId, senderId:
-                                    FirebaseAuth.instance.currentUser!.uid as Long, messageStatus: MessageStatus.SENT));
+                                    chatId: widget.chatId,
+                                    senderId: int.parse(FirebaseAuth.instance.currentUser!.uid),
+                                    messageStatus: MessageStatus.SENT));
                                 _controller.clear();
                                 _scrollController.animateTo(
                                   _scrollController.position.maxScrollExtent,
@@ -315,7 +316,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     bool response = await Get.find<RequestService>().sendMessage(Message(
         text: _controller.text, time: DateTime.now().toLocal(),
         chatId: widget.chatId,
-        senderId: int.parse(FirebaseAuth.instance.currentUser!.uid) as Long,
+        senderId: int.parse(FirebaseAuth.instance.currentUser!.uid),
         messageStatus: MessageStatus.SENT,
         attachedPhoto: handleImagesToText(_pickedImage)
     )

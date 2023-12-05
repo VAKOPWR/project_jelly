@@ -26,11 +26,11 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
   @override
   void initState() {
     super.initState();
-    fetchAndSortFriendChats();
+    fetchAndSortGroupChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
         if (Get.find<MapService>().newMessagesBool){
-          fetchAndSortFriendChats();
+          fetchAndSortGroupChats();
         }
       });
     });
@@ -42,7 +42,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     super.dispose();
   }
 
-  Future<void> fetchAndSortFriendChats() async {
+  Future<void> fetchAndSortGroupChats() async {
     List<Chat> fetchedChats = await getChatsFromNetwork();
 
     fetchedChats.sort((a, b) {

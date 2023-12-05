@@ -5,9 +5,10 @@ import 'dart:ffi';
 import 'message.dart';
 
 class Chat {
-  final Long chatId;
-  final Long? friendId;
+  final int chatId;
+  final int? friendId;
   final String chatName;
+  final String? description;
   final String? picture;
   final bool isFriendship;
   bool isPinned;
@@ -17,6 +18,7 @@ class Chat {
   Chat ({
     required this.isFriendship,
     required this.chatName,
+    this.description,
     this.friendId,
     required this.chatId,
     this.picture,

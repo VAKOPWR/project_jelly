@@ -2,7 +2,7 @@
 import 'dart:ffi';
 
 class ChatUser {
-  final Long id;
+  final int id;
   final String nickname;
   final String profilePicture;
 

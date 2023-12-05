@@ -53,10 +53,10 @@ class MapService extends GetxService {
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   Map<String, bool> ghostedFriends = <String, bool>{};
   List<BasicUser> pendingFriends = <BasicUser>[];
-  Map<Long, Chat> chats = <Long, Chat>{};
+  Map<int, Chat> chats = <int, Chat>{};
   late DateTime messagesLastChecked;
-  Map<Long, List<Message>> newMessages = <Long, List<Message>>{};
-  Map<Long, List<ChatUser>> chatUsers = <Long, List<ChatUser>>{};
+  Map<int, List<Message>> newMessages = <int, List<Message>>{};
+  Map<int, List<ChatUser>> chatUsers = <int, List<ChatUser>>{};
   bool newMessagesBool = false;
   final box = GetStorage();
   bool requestSent = false;
@@ -117,6 +117,7 @@ class MapService extends GetxService {
         }
         messagesLastChecked = DateTime.now();
       }
+
     });
   }
 

@@ -3,8 +3,8 @@ import 'dart:ffi';
 import 'message_status.dart';
 
 class Message{
-  Long chatId;
-  Long senderId;
+  int chatId;
+  int senderId;
   String text;
   DateTime time;
   MessageStatus messageStatus;

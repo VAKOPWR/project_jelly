@@ -4,11 +4,12 @@ import 'chat_user.dart';
 import 'message_status.dart';
 
 class ChatDTO {
-  final Long groupId;
+  final int groupId;
   final String groupName;
   final String? picture;
-  final Long? friendId;
-  final Long? lastMessageSenderId;
+  final String? description;
+  final int? friendId;
+  final int? lastMessageSenderId;
   final String? lastMessageText;
   final DateTime? lastMessageTimeSent;
   final MessageStatus? lastMessageMessagesStatus;
@@ -24,6 +25,7 @@ class ChatDTO {
     required this.pinned,
     required this.friendship,
     required this.muted,
+    this.description,
     this.friendId,
     this.picture,
     this.lastMessageSenderId,
@@ -39,6 +41,7 @@ class ChatDTO {
       groupId: json['groupId'],
       groupName: json['groupName'],
       picture: json['picture'],
+      description: json['description'],
       friendId: json['friendId'],
       lastMessageSenderId: json['lastMessageSenderId'],
       lastMessageText: json['lastMessageText'],

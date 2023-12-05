@@ -106,8 +106,11 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                     children: [
                       CircleAvatar(
                         backgroundImage:
-                        Get.find<MapService>().imageProviders[chat.picture],
+                        handleTextToImages(chat.picture),
                       )
+                      // CircleAvatar(
+                      //   backgroundImage: handleTextToImages(chat.picture),
+                      // )
                     ],
                   ),
                   title: Row(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -41,11 +43,11 @@ String? handleImagesToText(XFile? image){
   return "mocked//url";
 }
 
-XFile handleTextToImages(String? imageUrl) {
+ImageProvider<Object> handleTextToImages(String? imageUrl) {
   //more magic
   if (imageUrl == null) {
-    return XFile('assets/default_image.jpg');
+    return FileImage(File('assets/default_image.jpg'));
   } else {
-    return XFile('assets/mock_image.png');
+    return FileImage(File('assets/mock_image.png'));
   }
 }
