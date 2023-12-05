@@ -11,7 +11,7 @@ import 'package:project_jelly/pages/auth/reset_password.dart';
 import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/pages/auth/login.dart';
-import 'package:project_jelly/pages/messages.dart';
+import 'package:project_jelly/pages/chat/messages.dart';
 import 'package:project_jelly/pages/profile/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';

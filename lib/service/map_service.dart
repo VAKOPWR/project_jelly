@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:core';
 // ignore: unused_import
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,11 @@ import 'package:project_jelly/misc/image_modifier.dart';
 import 'package:project_jelly/misc/uint8list_image.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
+
+import '../classes/chat.dart';
+import '../classes/chat_DTO.dart';
+import '../classes/chat_user.dart';
+import '../classes/message.dart';
 
 // TODO: Add optimization logic
 class MapService extends GetxService {
@@ -46,6 +53,11 @@ class MapService extends GetxService {
   Map<MarkerId, ImageProvider> imageProviders = <MarkerId, ImageProvider>{};
   Map<String, bool> ghostedFriends = <String, bool>{};
   List<BasicUser> pendingFriends = <BasicUser>[];
+  Map<Long, Chat> chats = <Long, Chat>{};
+  late DateTime messagesLastChecked;
+  Map<Long, List<Message>> newMessages = <Long, List<Message>>{};
+  Map<Long, List<ChatUser>> chatUsers = <Long, List<ChatUser>>{};
+  bool newMessagesBool = false;
   final box = GetStorage();
   bool requestSent = false;
   int locationPerception = 2;
@@ -77,6 +89,8 @@ class MapService extends GetxService {
       await loadImageProviders();
       await updateMarkers();
       await fetchPendingFriends();
+      await loadChats();
+      messagesLastChecked = DateTime.now();
     }
     Timer.periodic(Duration(minutes: 30), (timer) async {
       if (FirebaseAuth.instance.currentUser != null) {
@@ -86,6 +100,53 @@ class MapService extends GetxService {
     });
     readStaticMarkersData();
     readGhostedFriends();
+
+    Timer.periodic(Duration(seconds: 5), (timer) async {
+      if ((FirebaseAuth.instance.currentUser != null) && !chats.isEmpty) {
+        List<Message> newMessagesFetched = await Get.find<RequestService>().loadNewMessages();
+        if (!newMessagesFetched.isEmpty){
+          for (Message message in newMessagesFetched){
+            chats[message.chatId]?.message = message;
+            if (!newMessages.containsKey(message.chatId)) {
+              newMessages[message.chatId] = [message];
+            } else {
+              newMessages[message.chatId]!.add(message);
+            }
+          }
+          newMessagesBool = true;
+        }
+        messagesLastChecked = DateTime.now();
+      }
+    });
+  }
+
+  Future<void> loadChats() async{
+    List<ChatDTO> listedChats = await Get.find<RequestService>().loadChatsRequest();
+    for (ChatDTO chat in listedChats){
+      Message? message = null;
+      if (chat.lastMessageSenderId!=null){
+        message = Message(chatId: chat.groupId,
+            senderId: chat.lastMessageSenderId!,
+            text: chat.lastMessageText!,
+            time: chat.lastMessageTimeSent!,
+            messageStatus: chat.lastMessageMessagesStatus!,
+            attachedPhoto: chat.lastMessageAttachedPhoto);
+      }
+      chats.putIfAbsent(chat.groupId, () => new Chat(
+          isFriendship: chat.friendship,
+          chatName: chat.groupName,
+          friendId: chat.friendId,
+          chatId: chat.groupId,
+          picture: chat.picture,
+          isMuted: chat.muted,
+          isPinned: chat.pinned,
+          message: message
+      ));
+      if (chat.groupUsers!=null){
+        chatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+      }
+    }
+    messagesLastChecked = DateTime.now();
   }
 
   void startPositionStream() async {

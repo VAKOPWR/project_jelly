@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:battery/battery.dart';
@@ -6,12 +7,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
+import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
+import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
+
+import '../classes/chat_DTO.dart';
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
@@ -324,6 +330,102 @@ class RequestService extends getx.GetxService {
     } catch (error) {
       print(
           'Error updating steath choice status on relationship level: ${error.toString()}');
+      return false;
+    }
+  }
+
+  Future<List<ChatDTO>> loadChatsRequest() async{
+    String endpoint =
+        'chats/${FirebaseAuth.instance.currentUser?.uid}';
+    try{
+      Response response = await dio.get("${ApiPath}${endpoint}");
+      if (response.statusCode == 200){
+        var data = response.data;
+        return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
+      }
+      else {
+        print('Error loading chats. Status code: ${response.statusCode}');
+        return List.empty();
+      }
+    }
+    catch (error){
+      print('Error loading chats: ${error.toString()}');
+      return List.empty();
+    }
+  }
+
+  Future<List<Message>> loadNewMessages() async {
+    String endpoint = 'chats/loadMessagesNew';
+
+    try {
+      Response response = await dio.put(
+        "${ApiPath}${endpoint}?lastChecked=${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
+        data: {
+          'groupIds': Get.find<MapService>().chats.keys.toList(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var data = response.data;
+        return (data as List).map((item) => Message.fromJson(item)).toList();
+      } else {
+        print('Error loading messages. Status code: ${response.statusCode}');
+        return List.empty();
+      }
+    } catch (error) {
+      print('Error loading messages: ${error.toString()}');
+      return List.empty();
+    }
+  }
+
+
+  Future<List<Message>> loadMessagesPaged(Long groupId, int page) async {
+    String endpoint = '/chats/loadMessagesPaged';
+
+    try {
+      String url = "${ApiPath}${endpoint}?groupId=${groupId}&page=${page}";
+
+      Response response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+        var data = response.data;
+        return (data as List).map((item) => Message.fromJson(item)).toList();
+      } else {
+        print('Error loading messages. Status code: ${response.statusCode}');
+        return List.empty();
+      }
+    } catch (error) {
+      print('Error loading messages: ${error.toString()}');
+      return List.empty();
+    }
+  }
+
+  Future<bool> sendMessage(Message message) async{
+    String endpoint = '/chats/sendMessage';
+
+    try {
+      String url = "${ApiPath}${endpoint}";
+
+      Map<String, dynamic> queryParams = {
+        'groupId': message.chatId,
+        'senderId': message.senderId,
+        'text': message.text,
+        'timeSent': message.time.toIso8601String(),
+        'messageStatus': message.messageStatus.toString(),
+        'attachedPhoto': message.attachedPhoto ?? '',
+      };
+
+      Response response = await dio.put(url, queryParameters: queryParams);
+
+      if (response.statusCode == 200) {
+
+        return true;
+      } else {
+        print('Error sending message. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error sending message: ${error.toString()}');
       return false;
     }
   }

@@ -1,7 +1,9 @@
+import 'dart:ffi';
+
 import 'friend.dart';
 
 class FriendChat {
-  final Friend friend;
+  final Long friend;
   final String lastMessage;
   final bool hasRead;
   final DateTime lastSentTime;

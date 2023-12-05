@@ -1,11 +1,14 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/classes/friend_chat.dart';
+import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
+
+import '../messages/chat_messages_friend.dart';
 
 class ChatFriendsTab extends StatefulWidget {
   const ChatFriendsTab({Key? key}) : super(key: key);
@@ -15,86 +18,137 @@ class ChatFriendsTab extends StatefulWidget {
 }
 
 class _ChatFriendsTabState extends State<ChatFriendsTab> {
-  late final List<FriendChat> chats;
-  List<FriendChat> filteredChats = [];
+  late final List<Chat> chats;
+  List<Chat> filteredChats = [];
   String searchQuery = "";
+  late Timer _stateTimer;
 
   @override
   void initState() {
     super.initState();
     fetchAndSortFriendChats();
+    _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      setState(() {
+        if (Get.find<MapService>().newMessagesBool){
+          fetchAndSortFriendChats();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _stateTimer.cancel();
+    super.dispose();
   }
 
   Future<void> fetchAndSortFriendChats() async {
-    List<FriendChat> fetchedChats = await getChatsFromNetwork();
+    List<Chat> fetchedChats = await getChatsFromNetwork();
 
-    fetchedChats.sort((a, b) => b.lastSentTime.compareTo(a.lastSentTime));
+    fetchedChats.sort((a, b) {
+      if (a.isPinned && !b.isPinned) {
+        return -1;
+      } else if (!a.isPinned && b.isPinned) {
+        return 1;
+      }
+
+      var timeA = a.message?.time;
+      var timeB = b.message?.time;
+
+      if (timeA != null && timeB != null) {
+        return timeB.compareTo(timeA);
+      }
+
+      if (timeA == null && timeB == null) {
+        return 0;
+      } else if (timeA == null) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
 
     setState(() {
       chats = fetchedChats;
-      filteredChats =
-          searchQuery.isEmpty ? chats : filterChats(searchQuery, chats);
+      filteredChats = searchQuery.isEmpty ? chats : filterChats(searchQuery, chats);
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     return SearchBarWidget(
         onSearchChanged: updateSearchQuery,
-        content: Container(
+        content: Builder(
+        builder: (BuildContext context){
+      if (filteredChats.isEmpty){
+        //TODO: also style this
+        return Container(
+          child: Center(
+            child: Text("Ooooops, nothing to see here..."),
+          ),
+        );
+      }
+      else{
+        return Container(
           child: ListView.separated(
             itemCount: filteredChats.length,
             separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, index) {
               final chat = filteredChats[index];
-              return ListTile(
-                leading: Stack(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage:
-                          Get.find<MapService>().imageProviders[chat.friend.id],
-                    ),
-                    // if (chat.friend.isOnline)
-                    //   Positioned(
-                    //     right: 0,
-                    //     bottom: 0,
-                    //     child: Container(
-                    //       width: 12,
-                    //       height: 12,
-                    //       decoration: BoxDecoration(
-                    //         color: Colors.green,
-                    //         shape: BoxShape.circle,
-                    //         border: Border.all(
-                    //           color: Theme.of(context).canvasColor,
-                    //           width: 2,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                  ],
-                ),
-                title: Text(chat.friend.name),
-                subtitle: Text(chat.lastMessage),
-                trailing: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    buildReadStatusIcon(chat.hasRead),
-                    Text(
-                      formatLastSentTime(chat.lastSentTime),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+              return GestureDetector(
+                onTap: () {
+                  Get.to(() => ChatMessagesFriend(chatId: chat.chatId));
+                },
+                child: ListTile(
+                  leading: Stack(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage:
+                        Get.find<MapService>().imageProviders[chat.picture],
+                      )
+                    ],
+                  ),
+                  title: Row(
+                    children: [
+                      Text(chat.chatName),
+                      if (chat.isPinned)
+                        Icon(Icons.push_pin),
+                      if (chat.isMuted)
+                        Icon(Icons.volume_off)
+                    ],
+                  ),
+                  subtitle: Text(
+                    chat.message?.attachedPhoto != null ? 'Photo' : chat.message?.text ?? '',
+                  ),
+                  trailing: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (chat.message != null)
+                        buildReadStatusIcon(chat.message!.messageStatus),
+                      Text(
+                        chat.message != null ? formatLastSentTime(chat.message!.time) : '',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
           ),
-        ));
+
+        );
+      }
+    }
+    )
+    );
   }
 
-  List<FriendChat> filterChats(String query, List<FriendChat> chatList) {
+  List<Chat> filterChats(String query, List<Chat> chatList) {
     return chatList
         .where((chat) =>
-            chat.friend.name.toLowerCase().contains(query.toLowerCase()))
+            chat.chatName.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 
@@ -105,74 +159,10 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
     });
   }
 
-  Future<List<FriendChat>> getChatsFromNetwork() async {
-    return generateFakeChats();
+  Future<List<Chat>> getChatsFromNetwork() async {
+    List<Chat> allChats = Get.find<MapService>().chats.values.toList();
+    return allChats.where((chat) => chat.isFriendship).toList();
   }
 
-//TODO :REMOVE MOCK
-  List<FriendChat> generateFakeChats() {
-    return [
-      FriendChat(
-        friend: Friend(
-          id: '1',
-          name: 'Orest Haman',
-          // avatar: 'https://placekitten.com/200/200',
-          location: LatLng(37.7749, -122.4194),
-          batteryPercentage: 80,
-          movementSpeed: 3,
-          isOnline: true,
-          offlineStatus: '2 hours ago',
-        ),
-        lastMessage: 'Hey, when are we going hiking?',
-        hasRead: false,
-        lastSentTime: DateTime.now().subtract(Duration(hours: 1)),
-      ),
-      FriendChat(
-        friend: Friend(
-          id: '2',
-          name: 'Andrii Papusha',
-          // avatar: 'https://placekitten.com/200/201',
-          location: LatLng(34.0522, -118.2437),
-          batteryPercentage: 50,
-          movementSpeed: 0,
-          isOnline: false,
-          offlineStatus: '1 day ago',
-        ),
-        lastMessage: 'Don\'t forget about the meeting tomorrow!',
-        hasRead: true,
-        lastSentTime: DateTime.now().subtract(Duration(minutes: 1)),
-      ),
-      FriendChat(
-        friend: Friend(
-          id: '3',
-          name: 'Jone Stone',
-          // avatar: 'https://placekitten.com/200/202',
-          location: LatLng(40.7128, -74.0060),
-          batteryPercentage: 65,
-          movementSpeed: 5,
-          isOnline: false,
-          offlineStatus: '5 minutes ago',
-        ),
-        lastMessage: 'That was a great game last night!',
-        hasRead: true,
-        lastSentTime: DateTime.now().subtract(Duration(days: 1)),
-      ),
-      FriendChat(
-        friend: Friend(
-          id: '4',
-          name: 'Diana Prince',
-          // avatar: 'https://placekitten.com/200/203',
-          // Placeholder avatar image
-          location: LatLng(42.3601, -71.0589),
-          batteryPercentage: 90,
-          movementSpeed: 7,
-          isOnline: true,
-          offlineStatus: 'Online',
-        ),
-        lastMessage: 'See you next week!',
-        hasRead: false,
-        lastSentTime: DateTime.now().subtract(Duration(days: 2)),
-      ),
-    ];
-  }
+
 }
