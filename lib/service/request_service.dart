@@ -10,7 +10,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
-import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/message.dart';
@@ -426,6 +425,27 @@ class RequestService extends getx.GetxService {
       }
     } catch (error) {
       print('Error sending message: ${error.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> createGroupChat(String chatName, String description, List<int> userIds) async {
+    String endpoint = "http://10.90.50.101/api/v4/chats/createGroupChat";
+    try {
+      String requestBody = json.encode({
+        "chatName": chatName,
+        "description": description.isEmpty ? "" : description,
+        "userIds": userIds,
+      });
+      Response response = await dio.put(endpoint, data: requestBody);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Error creating group. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error creating group: ${error.toString()}');
       return false;
     }
   }
