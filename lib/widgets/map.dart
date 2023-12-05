@@ -35,6 +35,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   String _locationName = "The Earth";
   Map<MarkerId, Marker> staticMarkers = <MarkerId, Marker>{};
   ThemeModeOption prevThemeMode = ThemeModeOption.Automatic;
+  String prevMapStyle = '';
 
   final box = GetStorage();
 
@@ -152,7 +153,10 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
             }
             break;
         }
-        _mapController.future.then((value) => value.setMapStyle(mapStyle));
+        if (prevMapStyle != mapStyle) {
+          prevMapStyle = mapStyle;
+          _mapController.future.then((value) => value.setMapStyle(mapStyle));
+        }
         return Scaffold(
             key: _scaffoldKey,
             body: Get.find<MapService>().getCurrentLocation() == null

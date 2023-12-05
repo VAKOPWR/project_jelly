@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/auth/register_form_avatar.dart';
@@ -45,6 +46,10 @@ class ProjectJelly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return GetBuilder<ThemeController>(
       builder: (themeProvider) {
         ThemeData appTheme = lightTheme;
@@ -70,7 +75,9 @@ class ProjectJelly extends StatelessWidget {
         return GetMaterialApp(
           initialRoute: '/splash',
           theme: appTheme,
-          darkTheme: darkTheme,
+          darkTheme: themeProvider.themeModeOption == ThemeModeOption.Automatic
+              ? darkTheme
+              : appTheme,
           getPages: [
             GetPage(
                 name: '/login',
