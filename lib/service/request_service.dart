@@ -433,9 +433,9 @@ class RequestService extends getx.GetxService {
         "description": description.isEmpty ? "" : description,
       };
 
-      String requestBody = json.encode({
-        "userIds": userIds,
-      });
+      String requestBody = json.encode(userIds);
+      print('Request body: ' + requestBody);
+      print('queryParams: ' + queryParams.toString());
       Response response = await dio.put(endpoint,
           data: requestBody, queryParameters: queryParams);
       if (response.statusCode == 200) {

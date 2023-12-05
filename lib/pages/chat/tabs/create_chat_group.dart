@@ -38,26 +38,32 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   }
 
   Widget _buildRow(Friend friend) {
+    int? friendId = int.tryParse(friend.id);
+    bool isChecked = friendId != null && userIds.contains(friendId);
+
     return ListTile(
+      key: ValueKey(friend.id),
       title: Text(friend.name),
       trailing: Checkbox(
-        value: userIds.contains(friend.id),
-        onChanged: (bool? isChecked) {
+        value: isChecked,
+        onChanged: (bool? newValue) {
           setState(() {
-            int? friendId = int.tryParse(friend.id);
             if (friendId != null) {
-              if (isChecked ?? false) {
-                userIds.add(friendId);
+              if (newValue ?? false) {
+                if (!userIds.contains(friendId)) {
+                  userIds.add(friendId);
+                }
               } else {
-                userIds.remove(friendId);
+                userIds.removeWhere((id) => id == friendId);
               }
             }
-
           });
         },
       ),
     );
   }
+
+
 
   Future<void> _createGroupChat() async {
     bool success = await Get.find<RequestService>()
@@ -114,8 +120,6 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
             ),
           ),
 
-          SizedBox(height: 16),
-
           Expanded(
             child: SearchBarWidget(
               onSearchChanged: _onSearchChanged,
@@ -128,8 +132,6 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
               ),
             ),
           ),
-
-          SizedBox(height: 32),
 
           ElevatedButton(
             onPressed: () {
