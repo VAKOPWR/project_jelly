@@ -78,7 +78,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 icon: Icons.edit,
                 onPressed: _showUsernameEditDialog,
               ),
-              CircularButton(icon: Icons.settings, destinationPath: ''),
+              CircularButton(
+                  icon: Icons.settings, destinationPath: '/settings'),
               CircularButton(
                   icon: Icons.remove_red_eye_outlined,
                   destinationPath: '/ghost_mode'),

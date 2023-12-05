@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 enum ThemeModeOption { Automatic, Light, Dark, Custom }
 
-class ThemeProvider extends ChangeNotifier {
+class ThemeController extends GetxController {
   ThemeData _themeData = ThemeData.light();
   ThemeModeOption _themeModeOption = ThemeModeOption.Automatic;
 
@@ -18,7 +19,6 @@ class ThemeProvider extends ChangeNotifier {
         box.read('theme_mode') ?? ThemeModeOption.Automatic.index;
     _themeModeOption = ThemeModeOption.values[themeModeIndex];
 
-    // Load custom theme if available
     if (_themeModeOption == ThemeModeOption.Custom) {
       final customTheme = box.read<List<int>>('custom_theme');
       if (customTheme != null && customTheme.length == 3) {
@@ -31,8 +31,7 @@ class ThemeProvider extends ChangeNotifier {
         );
       }
     }
-
-    notifyListeners();
+    update();
   }
 
   Future<void> saveThemePreferences() async {
@@ -41,7 +40,6 @@ class ThemeProvider extends ChangeNotifier {
 
     box.write('theme_mode', _themeModeOption.index);
 
-    // Save custom theme if applicable
     if (_themeModeOption == ThemeModeOption.Custom) {
       box.write(
         'custom_theme',
@@ -52,12 +50,13 @@ class ThemeProvider extends ChangeNotifier {
         ],
       );
     }
+    update();
   }
 
   void setThemeMode(ThemeModeOption option) {
     _themeModeOption = option;
     saveThemePreferences();
-    notifyListeners();
+    update();
   }
 
   void setCustomTheme(Color primary, Color secondary, Color canvas) {
@@ -70,6 +69,6 @@ class ThemeProvider extends ChangeNotifier {
     );
     _themeModeOption = ThemeModeOption.Custom;
     saveThemePreferences();
-    notifyListeners();
+    update();
   }
 }

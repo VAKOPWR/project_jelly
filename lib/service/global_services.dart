@@ -12,6 +12,7 @@ import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
 
 import 'package:project_jelly/pages/controller/global_shake_controller.dart';
+import 'package:project_jelly/pages/controller/theme_controller.dart';
 
 class GlobalServices {
   static Future<void> init() async {
@@ -21,6 +22,7 @@ class GlobalServices {
     await Get.putAsync(() async => await StyleService());
     await Get.putAsync(() async => await PermissionsService());
     await Get.putAsync(() async => await SnackbarService());
+    await Get.putAsync(() async => await ThemeController());
     await Get.put(VisibilityService());
     await Get.putAsync(() async => ShakeDetectorService().init());
     Get.put(GlobalShakeController());

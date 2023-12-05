@@ -28,6 +28,9 @@ class RequestService extends getx.GetxService {
           if (isTokenExpired()) {
             idToken = await refreshToken();
           }
+          if (idToken == null || idToken == '') {
+            return;
+          }
           options.headers['Authorization'] = idToken ?? '';
           options.headers['Content-Type'] = 'application/json';
           return handler.next(options);
@@ -41,7 +44,10 @@ class RequestService extends getx.GetxService {
   }
 
   Future<String?> refreshToken() async {
-    String? idToken = await FirebaseAuth.instance.currentUser!.getIdToken(true);
+    String? idToken = null;
+    if (FirebaseAuth.instance.currentUser != null) {
+      idToken = await FirebaseAuth.instance.currentUser!.getIdToken(true);
+    }
     return idToken;
   }
 

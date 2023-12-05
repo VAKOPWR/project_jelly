@@ -145,14 +145,18 @@ class MapService extends GetxService {
       if (lastPositionUpdate == null ||
           now.difference(lastPositionUpdate!) >
               Duration(minutes: nearPointUpdateFrequency)) {
-        Get.find<RequestService>().putUserUpdate(newLocation);
+        if (FirebaseAuth.instance.currentUser != null) {
+          Get.find<RequestService>().putUserUpdate(newLocation);
+        }
         lastPositionUpdate = now;
       }
     } else {
       if (lastPositionUpdate == null ||
           now.difference(lastPositionUpdate!) >
               Duration(seconds: locationPerception)) {
-        Get.find<RequestService>().putUserUpdate(newLocation);
+        if (FirebaseAuth.instance.currentUser != null) {
+          Get.find<RequestService>().putUserUpdate(newLocation);
+        }
         lastPositionUpdate = now;
       }
     }
