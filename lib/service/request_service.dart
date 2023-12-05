@@ -333,21 +333,18 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<List<ChatDTO>> loadChatsRequest() async{
-    String endpoint =
-        'chats/${FirebaseAuth.instance.currentUser?.uid}';
-    try{
+  Future<List<ChatDTO>> loadChatsRequest() async {
+    String endpoint = 'chats/${FirebaseAuth.instance.currentUser?.uid}';
+    try {
       Response response = await dio.get("${ApiPath}${endpoint}");
-      if (response.statusCode == 200){
+      if (response.statusCode == 200) {
         var data = response.data;
         return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
-      }
-      else {
+      } else {
         print('Error loading chats. Status code: ${response.statusCode}');
         return List.empty();
       }
-    }
-    catch (error){
+    } catch (error) {
       print('Error loading chats: ${error.toString()}');
       return List.empty();
     }
@@ -377,7 +374,6 @@ class RequestService extends getx.GetxService {
     }
   }
 
-
   Future<List<Message>> loadMessagesPaged(Long groupId, int page) async {
     String endpoint = '/chats/loadMessagesPaged';
 
@@ -399,7 +395,7 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> sendMessage(Message message) async{
+  Future<bool> sendMessage(Message message) async {
     String endpoint = '/chats/sendMessage';
 
     try {
@@ -417,7 +413,6 @@ class RequestService extends getx.GetxService {
       Response response = await dio.put(url, queryParameters: queryParams);
 
       if (response.statusCode == 200) {
-
         return true;
       } else {
         print('Error sending message. Status code: ${response.statusCode}');
@@ -429,15 +424,20 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> createGroupChat(String chatName, String description, List<int> userIds) async {
-    String endpoint = "http://10.90.50.101/api/v4/chats/createGroupChat";
+  Future<bool> createGroupChat(
+      String chatName, String description, List<int> userIds) async {
+    String endpoint = "${ApiPath}/chats/createGroupChat";
     try {
-      String requestBody = json.encode({
+      Map<String, dynamic> queryParams = {
         "chatName": chatName,
         "description": description.isEmpty ? "" : description,
+      };
+
+      String requestBody = json.encode({
         "userIds": userIds,
       });
-      Response response = await dio.put(endpoint, data: requestBody);
+      Response response = await dio.put(endpoint,
+          data: requestBody, queryParameters: queryParams);
       if (response.statusCode == 200) {
         return true;
       } else {

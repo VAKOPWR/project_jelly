@@ -114,7 +114,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
             ),
           ),
 
-          SizedBox(height: 16), // Added space here
+          SizedBox(height: 16),
 
           Expanded(
             child: SearchBarWidget(
