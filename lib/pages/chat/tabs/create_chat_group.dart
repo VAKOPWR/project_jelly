@@ -69,6 +69,11 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
     bool success = await Get.find<RequestService>()
         .createGroupChat(chatName, description, userIds);
     if (success) {
+      // Prototype TODO finish after updated endpoint on backend side
+      // Get.find<MapService>().chatUsers.putIfAbsent(chatId, () => chatUsersList);
+      // Get.find<MapService>().chats.putIfAbsent(chatId, () => chatName);
+      // Get.find<MapService>().newMessagesBool = true;
+
       Get.snackbar("Congratulations!",
           "Your group was created! ${chatName}",
           icon: Icon(Icons.sentiment_satisfied_alt_outlined,
