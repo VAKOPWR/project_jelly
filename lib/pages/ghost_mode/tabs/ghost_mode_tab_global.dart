@@ -29,44 +29,72 @@ class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: Theme.of(context).canvasColor,
+        color: Theme.of(context).colorScheme.background,
         child: Stack(
           children: [
             Column(
               children: [
                 Divider(
-                  color: Theme.of(context).canvasColor,
+                  color: Theme.of(context).colorScheme.background,
                   height: 20.0,
                 ),
-                Text('Location Precision Visibility'),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 1,
-                      groupValue: locationPrecisionOption,
-                      onChanged: (value) {
-                        setState(() {
-                          locationPrecisionOption = value!;
-                        });
-                      },
-                    ),
-                    Text('Precise'),
-                  ],
+                Text('Location Precision Visibility',
+                    style: TextStyle(fontSize: 20)),
+                SizedBox(
+                  height: 8,
                 ),
-                Row(
-                  children: [
-                    Radio<int>(
-                      value: 2,
-                      groupValue: locationPrecisionOption,
-                      onChanged: (value) {
-                        setState(() {
-                          locationPrecisionOption = value!;
-                        });
-                      },
-                    ),
-                    Text('Hide my location'),
-                  ],
+                RadioListTile(
+                  title: Text('Precise'),
+                  value: 1,
+                  groupValue: locationPrecisionOption,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        locationPrecisionOption = value;
+                      });
+                    }
+                  },
                 ),
+                RadioListTile(
+                  title: Text('Hidden'),
+                  value: 2,
+                  groupValue: locationPrecisionOption,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        locationPrecisionOption = value;
+                      });
+                    }
+                  },
+                ),
+                // Row(
+                //   children: [
+                //     Radio<int>(
+                //       value: 1,
+                //       groupValue: locationPrecisionOption,
+                //       onChanged: (value) {
+                //         setState(() {
+                //           locationPrecisionOption = value!;
+                //         });
+                //       },
+                //     ),
+                //     Text('Precise'),
+                //   ],
+                // ),
+                // Row(
+                //   children: [
+                //     Radio<int>(
+                //       value: 2,
+                //       groupValue: locationPrecisionOption,
+                //       onChanged: (value) {
+                //         setState(() {
+                //           locationPrecisionOption = value!;
+                //         });
+                //       },
+                //     ),
+                //     Text('Hide my location'),
+                //   ],
+                // ),
               ],
             ),
             Positioned(

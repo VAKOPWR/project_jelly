@@ -44,7 +44,7 @@ class _GhostModeTabFriendsState extends State<GhostModeTabFriends> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: Theme.of(context).canvasColor,
+        color: Theme.of(context).colorScheme.background,
         child: SearchBarWidget(
           onSearchChanged: _onSearchChanged,
           content: ListView.separated(
@@ -61,9 +61,10 @@ class _GhostModeTabFriendsState extends State<GhostModeTabFriends> {
     return ListTile(
       leading: CircleAvatar(
         radius: 28,
-        backgroundColor: Theme.of(context).canvasColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         child: Image(
-          image: Get.find<MapService>().imageProviders[MarkerId(friend.id)]!,
+          image: Get.find<MapService>().imageProviders[MarkerId(friend.id)] ??
+              Get.find<MapService>().defaultImageProvider!,
           width: 56,
           height: 56,
           fit: BoxFit.cover, // Adjust the fit as needed

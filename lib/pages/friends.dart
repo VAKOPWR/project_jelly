@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/pages/shake_it.dart';
+import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/service/map_service.dart';
-import 'friend_finding_tab.dart';
-import 'friend_list_tab.dart';
-import 'friend_pending_tab.dart';
+import 'friends/friend_finding_tab.dart';
+import 'friends/friend_list_tab.dart';
+import 'friends/friend_pending_tab.dart';
 
 const int _numberOfTabs = 3;
 String tutorialText = "You can add someone to your friend list if both of you "
@@ -120,13 +120,22 @@ class _FriendsPageState extends State<FriendsPage>
 
   List<Widget> _buildTabsWithBadges() {
     return [
-      const Tab(text: "List"),
-      const Tab(text: "Find"),
+      Tab(
+          child: Text(
+        "List",
+        style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+      )),
+      Tab(
+          child: Text("List",
+              style:
+                  TextStyle(color: Theme.of(context).colorScheme.onPrimary))),
       Tab(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text("Pending"),
+            Text("Pending",
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             Container(
               margin: const EdgeInsets.only(left: 4.0),
               padding: const EdgeInsets.all(4.0),

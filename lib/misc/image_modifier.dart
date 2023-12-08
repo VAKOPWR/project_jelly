@@ -3,13 +3,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-Future<Uint8List> modifyImage(Uint8List imageData, Color borderColor,
-    bool isOnline, String statusText) async {
+Future<Uint8List> modifyImage(
+    Uint8List imageData, bool isOnline, String statusText) async {
   ui.Image originalImage = await decodeImageFromList(imageData);
 
   double circleRadius = originalImage.width / 2.0;
   double canvasSize = circleRadius * 2.3;
   double indicatorRadius = circleRadius / 4;
+  Color borderColor = Color.fromRGBO(248, 70, 85, 1);
 
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(

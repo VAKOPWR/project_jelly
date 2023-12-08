@@ -13,18 +13,18 @@ import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/pages/auth/login.dart';
 import 'package:project_jelly/pages/messages.dart';
-import 'package:project_jelly/pages/profile/profile.dart';
+import 'package:project_jelly/pages/profile.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';
-import 'package:project_jelly/pages/settings_page.dart';
-import 'package:project_jelly/pages/shake_it.dart';
+import 'package:project_jelly/pages/helper/settings_page.dart';
+import 'package:project_jelly/pages/helper/shake_it.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/themes/theme_constants.dart';
-import 'package:project_jelly/pages/controller/theme_controller.dart';
+import 'package:project_jelly/controller/theme_controller.dart';
 
 void main() async {
   await GetStorage.init();
@@ -33,7 +33,7 @@ void main() async {
   if (FirebaseAuth.instance.currentUser != null) {
     Get.find<RequestService>().setupInterceptor('');
   }
-  await Get.find<ThemeController>().loadThemePreferences();
+  Get.find<ThemeController>().loadThemePreferences();
   await Get.find<StyleService>().loadMapStyles();
   await Get.find<MapService>().prepareService();
   await InternetCheckerBanner().initialize(title: "Whoops");
@@ -61,13 +61,7 @@ class ProjectJelly extends StatelessWidget {
             appTheme = darkTheme;
             break;
           case ThemeModeOption.Custom:
-            appTheme = ThemeData.light().copyWith(
-              colorScheme: ColorScheme.light(
-                primary: themeProvider.themeData.colorScheme.primary,
-                secondary: themeProvider.themeData.colorScheme.secondary,
-              ),
-              canvasColor: themeProvider.themeData.canvasColor,
-            );
+            appTheme = themeProvider.themeData;
             break;
           case ThemeModeOption.Automatic:
             break;

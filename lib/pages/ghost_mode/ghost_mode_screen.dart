@@ -41,18 +41,24 @@ class _GhostModeState extends State<GhostMode>
               elevation: 0.0,
             ),
             body: Container(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.primary,
               child: Column(
                 children: [
                   TabBar(
                     controller: _tabController,
                     tabs: [
                       Tab(
-                        text: 'Global',
-                      ),
+                          child: Text("Global",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary))),
                       Tab(
-                        text: 'Friends',
-                      )
+                          child: Text("Personal",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary))),
                     ],
                   ),
                   Expanded(

@@ -37,6 +37,7 @@ class MapService extends GetxService {
       altitudeAccuracy: 0.0,
       headingAccuracy: 0.0);
   Uint8List? defaultAvatar;
+  ImageProvider? defaultImageProvider;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<MarkerId, BitmapDescriptor> staticMarkerIcons =
       <MarkerId, BitmapDescriptor>{};
@@ -75,7 +76,9 @@ class MapService extends GetxService {
     await loadStaticImages();
     await loadDefaultAvatar();
     await loadStaticMarkers();
+    await loadDefaultImageProvider();
     if (FirebaseAuth.instance.currentUser != null) {
+      // TODO: Add ping request verification
       await fetchFriendsData();
       await loadCustomAvatars();
       await loadImageProviders();
@@ -212,6 +215,10 @@ class MapService extends GetxService {
     defaultAvatar = await getBytesFromAsset('assets/no_avatar.png', 150);
   }
 
+  Future<void> loadDefaultImageProvider() async {
+    defaultImageProvider = Uint8ListImageProvider(defaultAvatar!);
+  }
+
   Future<void> loadCustomAvatars() async {
     Map<String, Uint8List?> friendsAvatars =
         await Get.find<RequestService>().getFriendsIcons();
@@ -221,13 +228,11 @@ class MapService extends GetxService {
       if (value != null) {
         avatars[MarkerId(key)] = await modifyImage(
             value,
-            Colors.red,
             friendsData[MarkerId(key)]!.isOnline,
             friendsData[MarkerId(key)]!.offlineStatus);
       } else {
         avatars[MarkerId(key)] = await modifyImage(
             defaultAvatar!,
-            Colors.red,
             friendsData[MarkerId(key)]!.isOnline,
             friendsData[MarkerId(key)]!.offlineStatus);
       }
@@ -243,10 +248,7 @@ class MapService extends GetxService {
     for (MarkerId friendId in friendsData.keys) {
       if (!imageProviders.containsKey(friendId)) {
         imageProviders[friendId] = await Uint8ListImageProvider(
-            await modifyImage(
-                defaultAvatar!,
-                Colors.red,
-                friendsData[friendId]!.isOnline,
+            await modifyImage(defaultAvatar!, friendsData[friendId]!.isOnline,
                 friendsData[friendId]!.offlineStatus));
       }
     }

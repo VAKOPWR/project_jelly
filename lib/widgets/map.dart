@@ -10,7 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/misc/geocoding.dart';
-import 'package:project_jelly/pages/controller/theme_controller.dart';
+import 'package:project_jelly/controller/theme_controller.dart';
 import 'package:project_jelly/pages/helper/loading.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
@@ -142,8 +142,11 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
             mapStyle = GetStorage().read('darkMapStyle');
             break;
           case ThemeModeOption.Custom:
-            //TODO make changable
-            mapStyle = GetStorage().read('darkMapStyle');
+            if (themeController.mapModeOption == MapModeOption.Light) {
+              mapStyle = GetStorage().read('lightMapStyle');
+            } else {
+              mapStyle = GetStorage().read('darkMapStyle');
+            }
             break;
           case ThemeModeOption.Automatic:
             if (Theme.of(context).brightness == Brightness.light) {
@@ -301,11 +304,23 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                         children: <Widget>[
                           Text(
                             _locationName,
-                            style: TextStyle(
-                              fontSize: 32.0,
-                              fontWeight: FontWeight.normal,
-                              decoration: TextDecoration.underline,
-                            ),
+                            // TODO make color adjustable
+                            style: themeController.mapModeOption ==
+                                    MapModeOption.Automatic
+                                ? TextStyle(
+                                    fontSize: 32.0,
+                                    fontWeight: FontWeight.normal,
+                                    decoration: TextDecoration.underline,
+                                  )
+                                : TextStyle(
+                                    color: themeController.mapModeOption ==
+                                            MapModeOption.Light
+                                        ? Colors.black
+                                        : Colors.white,
+                                    fontSize: 32.0,
+                                    fontWeight: FontWeight.normal,
+                                    decoration: TextDecoration.underline,
+                                  ),
                           ),
                         ],
                       ),
@@ -385,7 +400,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                   ),
                   child: Icon(
                     Icons.close,
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.background,
                   ),
                 ),
               ),
@@ -432,7 +447,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
               height: 70.0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey[700]!,
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
               ),
               child: Center(
                 child: Image.memory(

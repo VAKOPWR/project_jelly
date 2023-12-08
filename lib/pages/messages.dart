@@ -9,6 +9,7 @@ class MessagesPage extends StatefulWidget {
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
+// TODO hide keyboard on tab chnage
 class _MessagesPageState extends State<MessagesPage> {
   void getData() {}
 
@@ -20,17 +21,23 @@ class _MessagesPageState extends State<MessagesPage> {
             appBar: AppBar(
                 title: Text('Messages'), centerTitle: true, elevation: 0.0),
             body: Container(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.primary,
               child: Column(
                 children: [
                   TabBar(
                     tabs: [
                       Tab(
-                        text: 'Friends',
-                      ),
+                          child: Text("Friends",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary))),
                       Tab(
-                        text: 'Groups',
-                      )
+                          child: Text("Groups",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary))),
                     ],
                   ),
                   Expanded(

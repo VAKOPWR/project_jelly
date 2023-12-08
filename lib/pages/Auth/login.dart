@@ -30,6 +30,7 @@ class _LogInPageState extends State<LogInPage> {
   bool _isPasswordValid = true;
   bool _isGoogleAuth = false;
 
+  // ignore: unused_element
   void _submitForm() async {
     if (_isGoogleAuth) {
       _submitBtnController.start();
@@ -59,7 +60,6 @@ class _LogInPageState extends State<LogInPage> {
   @override
   Widget build(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
-      print(FirebaseAuth.instance.currentUser);
       Future.delayed(Duration.zero, () {
         Get.off(() => const HomePage(),
             transition: Transition.circularReveal,
@@ -68,6 +68,7 @@ class _LogInPageState extends State<LogInPage> {
     }
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Log In'),
         centerTitle: true,
@@ -198,6 +199,7 @@ class _LogInPageState extends State<LogInPage> {
                               ),
                             ),
                           ),
+                          // TODO : Remove when server auth is ready
                           Padding(
                             padding: const EdgeInsets.all(28.0),
                             child: SizedBox(
@@ -205,7 +207,8 @@ class _LogInPageState extends State<LogInPage> {
                                 height: 50,
                                 child: RoundedLoadingButton(
                                   controller: _submitBtnController,
-                                  onPressed: _submitForm,
+                                  // onPressed: _submitForm,
+                                  onPressed: null,
                                   color: Theme.of(context).colorScheme.primary,
                                   child: const Text(
                                     'Log In',
@@ -252,7 +255,6 @@ class _LogInPageState extends State<LogInPage> {
                                                     await FirebaseAuth
                                                         .instance.currentUser!
                                                         .getIdToken(true);
-                                                print(idToken);
                                                 Get.find<RequestService>()
                                                     .setupInterceptor(idToken);
                                                 await Get.find<RequestService>()
@@ -275,7 +277,7 @@ class _LogInPageState extends State<LogInPage> {
                                                   MainAxisAlignment.center,
                                               children: <Widget>[
                                                 Image.asset(
-                                                    'assets/google.png'), // Google Icon// Loading indicator
+                                                    'assets/google.png'),
                                               ],
                                             ),
                                           ),
