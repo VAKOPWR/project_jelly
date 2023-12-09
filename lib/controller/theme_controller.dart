@@ -36,7 +36,7 @@ class ThemeController extends GetxController {
       if (getContrastColor(Color(customTheme[2])) == Colors.white) {
         basicTheme = ThemeData(
             brightness: Brightness.dark,
-            colorScheme: ColorScheme.dark(background: Colors.grey[900]!));
+            colorScheme: ColorScheme.dark(background: Colors.grey[850]!));
       }
       _themeData = basicTheme.copyWith(
           colorScheme: ColorScheme.light(
@@ -96,7 +96,7 @@ class ThemeController extends GetxController {
     if (getContrastColor(background) == Colors.white) {
       basicTheme = ThemeData(
           brightness: Brightness.dark,
-          colorScheme: ColorScheme.dark(background: Colors.grey[900]!));
+          colorScheme: ColorScheme.dark(background: Colors.grey[850]!));
     }
     _themeData = basicTheme.copyWith(
       colorScheme: ColorScheme.light(
@@ -136,7 +136,7 @@ class ThemeController extends GetxController {
     if (getContrastColor(color) == Colors.white) {
       basicTheme = ThemeData(
           brightness: Brightness.dark,
-          colorScheme: ColorScheme.dark(background: Colors.grey[900]!));
+          colorScheme: ColorScheme.dark(background: Colors.grey[850]!));
     }
     _themeData = basicTheme.copyWith(
         colorScheme: _themeData.colorScheme.copyWith(

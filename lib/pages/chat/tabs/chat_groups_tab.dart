@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/pages/chat/messages/chat_messages_group.dart';
 import 'package:project_jelly/pages/chat/messages/common.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
-
-import '../../../classes/chat.dart';
-import '../../../service/map_service.dart';
 
 class ChatGroupsTab extends StatefulWidget {
   const ChatGroupsTab({Key? key}) : super(key: key);
@@ -29,7 +27,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     fetchAndSortGroupChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool){
+        if (Get.find<MapService>().newMessagesBool) {
           fetchAndSortGroupChats();
         }
       });
@@ -70,7 +68,8 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
 
     setState(() {
       chats = fetchedChats;
-      filteredChats = searchQuery.isEmpty ? chats : filterChats(searchQuery, chats);
+      filteredChats =
+          searchQuery.isEmpty ? chats : filterChats(searchQuery, chats);
     });
   }
 
@@ -78,75 +77,72 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
   Widget build(BuildContext context) {
     return SearchBarWidget(
         onSearchChanged: updateSearchQuery,
-        content: Builder(
-          builder: (BuildContext context){
-            if (filteredChats.isEmpty){
-              //TODO: also style this
-              return Container(
-                child: Center(
-                  child: Text("Ooooops, nothing to see here..."),
-                ),
-              );
-            }
-            else{
-              return Container(
-                child: ListView.separated(
-                  itemCount: filteredChats.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, index) {
-                    final chat = filteredChats[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Get.to(() => ChatMessagesGroup(groupId: chat.chatId));
-                      },
-                      child: ListTile(
-                        leading: Stack(
-                          children: [
-                            CircleAvatar(
-                              backgroundImage:
-                              Get.find<MapService>().imageProviders[chat.picture],
-                            )
-                          ],
-                        ),
-                        title: Row(
-                          children: [
-                            Text(chat.chatName),
-                            if (chat.isPinned)
-                              Icon(Icons.push_pin),
-                            if (chat.isMuted)
-                              Icon(Icons.volume_off)
-                          ],
-                        ),
-                        subtitle: Text(
-                          chat.message?.attachedPhoto != null ? 'Photo' : chat.message?.text ?? '',
-                        ),
-                        trailing: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (chat.message != null)
-                              buildReadStatusIcon(chat.message!.messageStatus),
-                            Text(
-                              chat.message != null ? formatLastSentTime(chat.message!.time) : '',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
+        content: Builder(builder: (BuildContext context) {
+          if (filteredChats.isEmpty) {
+            //TODO: also style this
+            return Container(
+              child: Center(
+                child: Text("Ooooops, nothing to see here..."),
+              ),
+            );
+          } else {
+            return Container(
+              child: ListView.separated(
+                itemCount: filteredChats.length,
+                separatorBuilder: (context, index) => const Divider(),
+                itemBuilder: (context, index) {
+                  final chat = filteredChats[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(() => ChatMessagesGroup(groupId: chat.chatId));
+                    },
+                    child: ListTile(
+                      leading: Stack(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: Get.find<MapService>()
+                                .imageProviders[chat.picture],
+                          )
+                        ],
                       ),
-                    );
-                  },
-                ),
-              );
-            }
+                      title: Row(
+                        children: [
+                          Text(chat.chatName),
+                          if (chat.isPinned) Icon(Icons.push_pin),
+                          if (chat.isMuted) Icon(Icons.volume_off)
+                        ],
+                      ),
+                      subtitle: Text(
+                        chat.message?.attachedPhoto != null
+                            ? 'Photo'
+                            : chat.message?.text ?? '',
+                      ),
+                      trailing: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (chat.message != null)
+                            buildReadStatusIcon(chat.message!.messageStatus),
+                          Text(
+                            chat.message != null
+                                ? formatLastSentTime(chat.message!.time)
+                                : '',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
           }
-        )
-
-    );
+        }));
   }
 
   List<Chat> filterChats(String query, List<Chat> chatList) {
     return chatList
-        .where((chat) =>
-        chat.chatName.toLowerCase().contains(query.toLowerCase()))
+        .where(
+            (chat) => chat.chatName.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 
@@ -161,5 +157,4 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     List<Chat> allChats = Get.find<MapService>().chats.values.toList();
     return allChats.where((chat) => chat.isFriendship == false).toList();
   }
-
 }

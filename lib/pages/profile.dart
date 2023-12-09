@@ -52,8 +52,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     image: DecorationImage(
                       image: NetworkImage(
                           FirebaseAuth.instance.currentUser!.photoURL!),
-                      // image: NetworkImage(
-                      //     'https://jellyimagestore.blob.core.windows.net/avatars/a0377a61-68a9-4a6b-a847-af546428ba42'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -124,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: Implement the logic to update the username
+                  // TODO: Implement logic to update the username
                   Navigator.of(context).pop();
                 },
                 child: Text('Save'),

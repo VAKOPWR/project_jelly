@@ -1,7 +1,5 @@
 import 'dart:ffi';
 
-import 'friend.dart';
-
 class FriendChat {
   final Long friend;
   final String lastMessage;

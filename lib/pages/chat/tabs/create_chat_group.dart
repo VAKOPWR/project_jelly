@@ -75,9 +75,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
       List<ChatUser> chatUsersList =
           groupChatResponse.chatUser.cast<ChatUser>();
 
-      Get.find<MapService>()
-          .chatUsers
-          .putIfAbsent(chatId, () => chatUsersList);
+      Get.find<MapService>().chatUsers.putIfAbsent(chatId, () => chatUsersList);
 
       Chat newChat = Chat(
           chatId: chatId,
@@ -114,11 +112,16 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Group Chat'),
+        title: Text('Create Group Chat',
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
         centerTitle: true,
       ),
       body: Column(
-        children: <Widget>[
+        children: [
           Form(
             key: _formKey,
             child: Padding(
@@ -149,14 +152,31 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                _createGroupChat();
-              }
-            },
-            child: Text('Create Group Chat'),
+          Padding(
+            padding:
+                const EdgeInsets.only(bottom: 40.0), // Add your desired padding
+            child: SizedBox(
+              height: 60,
+              width: 200,
+              child: Container(
+                color: Theme.of(context).colorScheme.background,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                      _createGroupChat();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                  ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(fontSize: 32),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-// import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/service/request_service.dart';
 
 class GlobalShakeController extends GetxController {

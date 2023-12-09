@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -16,7 +17,6 @@ class OwnMessage extends StatelessWidget {
   final String time;
   final MessageStatus messageStatus;
   final String? imageUrl;
-
 
   //TODO: colors here
 

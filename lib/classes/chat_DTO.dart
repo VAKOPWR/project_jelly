@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'chat_user.dart';
 import 'message_status.dart';
 
@@ -58,8 +56,6 @@ class ChatDTO {
     );
   }
 }
-
-
 
 extension MessageStatusExtension on MessageStatus {
   static MessageStatus fromString(String value) {

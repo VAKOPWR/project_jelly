@@ -306,7 +306,7 @@ class ColorPickerTile extends StatelessWidget {
       title: Row(
         children: [
           Text(title),
-          SizedBox(width: 16.0), // Adjust the spacing as needed
+          SizedBox(width: 16.0),
           Container(
             height: 24,
             width: 40,

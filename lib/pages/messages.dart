@@ -12,8 +12,28 @@ class MessagesPage extends StatefulWidget {
 }
 
 // TODO hide keyboard on tab chnage
-class _MessagesPageState extends State<MessagesPage> {
+class _MessagesPageState extends State<MessagesPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   void getData() {}
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        FocusScope.of(context).unfocus();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(() {});
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +64,7 @@ class _MessagesPageState extends State<MessagesPage> {
               child: Column(
                 children: [
                   TabBar(
+                    controller: _tabController,
                     tabs: [
                       Tab(
                           child: Text("Friends",
@@ -61,8 +82,9 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                   Expanded(
                       child: Container(
-                          color: Theme.of(context).canvasColor,
+                          color: Theme.of(context).colorScheme.background,
                           child: TabBarView(
+                            controller: _tabController,
                             children: [ChatFriendsTab(), ChatGroupsTab()],
                           )))
                 ],

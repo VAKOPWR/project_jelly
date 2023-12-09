@@ -67,34 +67,6 @@ class _GhostModeTabGlobalState extends State<GhostModeTabGlobal> {
                     }
                   },
                 ),
-                // Row(
-                //   children: [
-                //     Radio<int>(
-                //       value: 1,
-                //       groupValue: locationPrecisionOption,
-                //       onChanged: (value) {
-                //         setState(() {
-                //           locationPrecisionOption = value!;
-                //         });
-                //       },
-                //     ),
-                //     Text('Precise'),
-                //   ],
-                // ),
-                // Row(
-                //   children: [
-                //     Radio<int>(
-                //       value: 2,
-                //       groupValue: locationPrecisionOption,
-                //       onChanged: (value) {
-                //         setState(() {
-                //           locationPrecisionOption = value!;
-                //         });
-                //       },
-                //     ),
-                //     Text('Hide my location'),
-                //   ],
-                // ),
               ],
             ),
             Positioned(

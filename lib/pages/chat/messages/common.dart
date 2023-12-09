@@ -2,8 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../../../classes/message_status.dart';
+import 'package:project_jelly/classes/message_status.dart';
 
 String formatLastSentTime(DateTime lastSentTime) {
   Duration difference = DateTime.now().difference(lastSentTime);
@@ -22,22 +21,23 @@ Widget buildReadStatusIcon(MessageStatus messageStatus) {
   return Container(
     child: messageStatus == MessageStatus.SEEN
         ? Row(
-      mainAxisSize: MainAxisSize.min,
-      children: const [
-        Icon(Icons.done_all, size: 20.0, color: Colors.green),
-      ],
-    )
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(Icons.done_all, size: 20.0, color: Colors.green),
+            ],
+          )
         : const Icon(Icons.check, size: 20.0, color: Colors.grey),
   );
 }
+
 //TODO: choose colors here
 String formatMessageTime(DateTime messageTime) {
   return ("${messageTime.toLocal().hour}:${messageTime.minute}");
 }
 
-String? handleImagesToText(XFile? image){
+String? handleImagesToText(XFile? image) {
   //some magic
-  if(XFile == null){
+  if (XFile == null) {
     return null;
   }
   return "mocked//url";

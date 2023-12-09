@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
 
 class LoadingPage extends StatelessWidget {
-  final Widget nextScreen; // Define nextScreen as a parameter
+  final Widget nextScreen;
 
   const LoadingPage({Key? key, required this.nextScreen}) : super(key: key);
 

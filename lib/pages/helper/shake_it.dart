@@ -36,17 +36,21 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
         title: Text(
           "Shake IT",
           style: TextStyle(
-            fontSize: 24.0,
-          ),
+              fontSize: 24.0, color: Theme.of(context).colorScheme.onPrimary),
+        ),
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
         centerTitle: true,
         toolbarHeight: 80.0,
-        backgroundColor: Colors.green,
+        // backgroundColor: Colors.green[400]!,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
         titleSpacing: 16.0,
       ),
       body: Container(
-        color: Colors.green,
+        // color: Colors.green,
+        color: Theme.of(context).colorScheme.primary,
         child: Column(
           children: [
             Expanded(
@@ -55,13 +59,11 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   margin: EdgeInsets.all(24.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).canvasColor,
+                    color: Theme.of(context).colorScheme.background,
                     borderRadius: BorderRadius.circular(24.0),
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onBackground, // Set the border color
-                      width: 2.0, // Set the border width
+                      color: Theme.of(context).colorScheme.onBackground,
+                      width: 2.0,
                     ),
                   ),
                   child: Column(
@@ -80,9 +82,7 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
                       Container(
                         height: 1.0,
                         width: 250,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onBackground, // Line color
+                        color: Theme.of(context).colorScheme.onBackground,
                       ),
                       SizedBox(height: 8.0),
                       Expanded(
@@ -91,8 +91,7 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
                           itemCount: usersWhoAreShaking.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
-                              margin: EdgeInsets.only(
-                                  bottom: 8.0), // Adjust the value as needed
+                              margin: EdgeInsets.only(bottom: 8.0),
                               child: _buildFriendRow(usersWhoAreShaking[index]),
                             );
                           },
@@ -106,7 +105,7 @@ class _ShakeItScreenState extends State<ShakeItScreen> {
             Icon(
               Icons.speaker_phone_rounded,
               size: 160.0,
-              color: Theme.of(context).canvasColor,
+              color: Theme.of(context).colorScheme.background,
             ),
             SizedBox(height: 100),
           ],

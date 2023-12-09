@@ -341,7 +341,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                 height: 330.0,
                 padding: EdgeInsets.all(16.0),
                 child: Column(
-                  // crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -354,10 +353,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold),
                           ),
-                          // Positioned(
-                          //   top: 8.0,
-                          //   right: 8.0,
-                          //   child:
                           ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pop();
@@ -372,7 +367,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                               color: Theme.of(context).colorScheme.background,
                             ),
                           ),
-                          // ),
                         ]),
                     SizedBox(height: 16.0),
                     Wrap(
@@ -409,23 +403,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-              // Positioned(
-              //   top: 8.0,
-              //   right: 8.0,
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.of(context).pop();
-              //       Get.find<VisibilityService>().isBottomSheetOpen = false;
-              //     },
-              //     style: ElevatedButton.styleFrom(
-              //       shape: CircleBorder(),
-              //     ),
-              //     child: Icon(
-              //       Icons.close,
-              //       color: Theme.of(context).colorScheme.background,
-              //     ),
-              //   ),
-              // ),
             ],
           );
         },
