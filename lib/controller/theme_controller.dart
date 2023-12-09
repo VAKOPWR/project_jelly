@@ -46,11 +46,13 @@ class ThemeController extends GetxController {
               onPrimary: getContrastColor(Color(customTheme[0])),
               onSecondary: getContrastColor(Color(customTheme[1])),
               onBackground: getContrastColor(Color(customTheme[2]))));
-      _mapModeOption = MapModeOption.values[customTheme[3]];
+      if (_themeModeOption == ThemeModeOption.Custom) {
+        _mapModeOption = MapModeOption.values[customTheme[3]];
+      }
     } else {
       _themeData = ThemeData(
           brightness: Brightness.light, colorScheme: ColorScheme.light());
-      _mapModeOption = MapModeOption.Light;
+      _mapModeOption = MapModeOption.Automatic;
     }
     update();
   }

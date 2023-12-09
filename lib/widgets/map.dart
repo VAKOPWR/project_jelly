@@ -194,8 +194,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                             .union(staticMarkers.values.toSet()),
                         onCameraMove: _onCameraMove),
                     AnimatedContainer(
-                        duration:
-                            Duration(milliseconds: 300), // Animation duration
+                        duration: Duration(milliseconds: 300),
                         height: Get.find<VisibilityService>().isInfoSheetVisible
                             ? MediaQuery.of(context).size.height * 0.78
                             : 0,
@@ -342,15 +341,39 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                 height: 330.0,
                 padding: EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Mark your places",
-                      style: GoogleFonts.roboto(
-                          color: Theme.of(context).colorScheme.onBackground,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold),
-                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Mark your places",
+                            style: GoogleFonts.roboto(
+                                color:
+                                    Theme.of(context).colorScheme.onBackground,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          // Positioned(
+                          //   top: 8.0,
+                          //   right: 8.0,
+                          //   child:
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Get.find<VisibilityService>().isBottomSheetOpen =
+                                  false;
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Theme.of(context).colorScheme.background,
+                            ),
+                          ),
+                          // ),
+                        ]),
                     SizedBox(height: 16.0),
                     Wrap(
                       spacing: 16.0,
@@ -386,23 +409,23 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-              Positioned(
-                top: 8.0,
-                right: 8.0,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Get.find<VisibilityService>().isBottomSheetOpen = false;
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: Theme.of(context).colorScheme.background,
-                  ),
-                ),
-              ),
+              // Positioned(
+              //   top: 8.0,
+              //   right: 8.0,
+              //   child: ElevatedButton(
+              //     onPressed: () {
+              //       Navigator.of(context).pop();
+              //       Get.find<VisibilityService>().isBottomSheetOpen = false;
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       shape: CircleBorder(),
+              //     ),
+              //     child: Icon(
+              //       Icons.close,
+              //       color: Theme.of(context).colorScheme.background,
+              //     ),
+              //   ),
+              // ),
             ],
           );
         },

@@ -22,7 +22,10 @@ class SettingsPage extends StatelessWidget {
             color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
-        body: Container(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        body: SingleChildScrollView(
+            // Wrap with SingleChildScrollView
+            child: Container(
           color: Theme.of(context).colorScheme.background,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -239,7 +242,7 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-        ));
+        )));
   }
 }
 
