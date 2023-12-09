@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ChatMessagesGroup extends StatefulWidget{
-  const ChatMessagesGroup ({Key? key}) : super(key: key);
+  final groupId;
+
+  const ChatMessagesGroup ({Key? key, required this.groupId}) : super(key: key);
 
   @override
   State<ChatMessagesGroup> createState() => _ChatMessagesGroupState();

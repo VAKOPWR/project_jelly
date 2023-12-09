@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../../classes/message_status.dart';
 
 String formatLastSentTime(DateTime lastSentTime) {
   Duration difference = DateTime.now().difference(lastSentTime);
@@ -13,9 +18,9 @@ String formatLastSentTime(DateTime lastSentTime) {
   }
 }
 
-Widget buildReadStatusIcon(bool hasRead) {
+Widget buildReadStatusIcon(MessageStatus messageStatus) {
   return Container(
-    child: hasRead
+    child: messageStatus == MessageStatus.SEEN
         ? Row(
       mainAxisSize: MainAxisSize.min,
       children: const [
@@ -24,4 +29,25 @@ Widget buildReadStatusIcon(bool hasRead) {
     )
         : const Icon(Icons.check, size: 20.0, color: Colors.grey),
   );
+}
+//TODO: choose colors here
+String formatMessageTime(DateTime messageTime) {
+  return ("${messageTime.toLocal().hour}:${messageTime.minute}");
+}
+
+String? handleImagesToText(XFile? image){
+  //some magic
+  if(XFile == null){
+    return null;
+  }
+  return "mocked//url";
+}
+
+ImageProvider<Object> handleTextToImages(String? imageUrl) {
+  //more magic
+  if (imageUrl == null) {
+    return FileImage(File('assets/default_image.jpg'));
+  } else {
+    return FileImage(File('assets/mock_image.png'));
+  }
 }
