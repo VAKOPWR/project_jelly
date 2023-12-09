@@ -304,7 +304,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                         children: <Widget>[
                           Text(
                             _locationName,
-                            // TODO make color adjustable
                             style: themeController.mapModeOption ==
                                     MapModeOption.Automatic
                                 ? TextStyle(

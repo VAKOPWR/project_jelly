@@ -19,7 +19,16 @@ class _MessagesPageState extends State<MessagesPage> {
         length: 2,
         child: Scaffold(
             appBar: AppBar(
-                title: Text('Messages'), centerTitle: true, elevation: 0.0),
+              title: Text('Messages',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary)),
+              centerTitle: true,
+              elevation: 0.0,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              iconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
             body: Container(
               color: Theme.of(context).colorScheme.primary,
               child: Column(

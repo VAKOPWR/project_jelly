@@ -7,7 +7,8 @@ enum ThemeModeOption { Automatic, Light, Dark, Custom }
 enum MapModeOption { Automatic, Light, Dark }
 
 class ThemeController extends GetxController {
-  ThemeData _themeData = ThemeData.light();
+  ThemeData _themeData =
+      ThemeData(brightness: Brightness.light, colorScheme: ColorScheme.light());
   ThemeModeOption _themeModeOption = ThemeModeOption.Automatic;
   MapModeOption _mapModeOption = MapModeOption.Automatic;
 
@@ -30,7 +31,14 @@ class ThemeController extends GetxController {
   void loadCustomTheme() {
     List? customTheme = box.read('custom_theme');
     if (customTheme != null && customTheme.length == 4) {
-      _themeData = ThemeData.light().copyWith(
+      ThemeData basicTheme = ThemeData(
+          brightness: Brightness.light, colorScheme: ColorScheme.light());
+      if (getContrastColor(Color(customTheme[2])) == Colors.white) {
+        basicTheme = ThemeData(
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.dark(background: Colors.grey[900]!));
+      }
+      _themeData = basicTheme.copyWith(
           colorScheme: ColorScheme.light(
               primary: Color(customTheme[0]),
               secondary: Color(customTheme[1]),
@@ -40,10 +48,18 @@ class ThemeController extends GetxController {
               onBackground: getContrastColor(Color(customTheme[2]))));
       _mapModeOption = MapModeOption.values[customTheme[3]];
     } else {
-      _themeData = ThemeData.light();
+      _themeData = ThemeData(
+          brightness: Brightness.light, colorScheme: ColorScheme.light());
       _mapModeOption = MapModeOption.Light;
     }
     update();
+  }
+
+  void resetCustomTheme() {
+    _themeData = ThemeData(
+        brightness: Brightness.light, colorScheme: ColorScheme.light());
+    _mapModeOption = MapModeOption.Light;
+    saveCustomTheme();
   }
 
   void saveThemePreferences() {
@@ -62,14 +78,25 @@ class ThemeController extends GetxController {
     );
   }
 
-  void setThemeMode(ThemeModeOption option) {
+  void setThemeMode(ThemeModeOption option, MapModeOption mapModeOption) {
     _themeModeOption = option;
+    _mapModeOption = mapModeOption;
     saveThemePreferences();
+    if (option == ThemeModeOption.Custom) {
+      saveCustomTheme();
+    }
     update();
   }
 
   void setCustomTheme(Color primary, Color secondary, Color background) {
-    _themeData = ThemeData.light().copyWith(
+    ThemeData basicTheme = ThemeData(
+        brightness: Brightness.light, colorScheme: ColorScheme.light());
+    if (getContrastColor(background) == Colors.white) {
+      basicTheme = ThemeData(
+          brightness: Brightness.dark,
+          colorScheme: ColorScheme.dark(background: Colors.grey[900]!));
+    }
+    _themeData = basicTheme.copyWith(
       colorScheme: ColorScheme.light(
           primary: primary,
           secondary: secondary,
@@ -102,7 +129,14 @@ class ThemeController extends GetxController {
   }
 
   void setCustomBackgroundColor(Color color) {
-    _themeData = _themeData.copyWith(
+    ThemeData basicTheme = ThemeData(
+        brightness: Brightness.light, colorScheme: ColorScheme.light());
+    if (getContrastColor(color) == Colors.white) {
+      basicTheme = ThemeData(
+          brightness: Brightness.dark,
+          colorScheme: ColorScheme.dark(background: Colors.grey[900]!));
+    }
+    _themeData = basicTheme.copyWith(
         colorScheme: _themeData.colorScheme.copyWith(
             background: color, onBackground: getContrastColor(color)));
     saveCustomTheme();

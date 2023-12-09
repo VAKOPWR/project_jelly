@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/controller/theme_controller.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -10,10 +11,16 @@ class SettingsPage extends StatelessWidget {
     Color primaryColor = themeProvider.themeData.colorScheme.primary;
     Color secondaryColor = themeProvider.themeData.colorScheme.secondary;
     Color backgroundColor = themeProvider.themeData.colorScheme.background;
+    final box = GetStorage();
 
     return Scaffold(
         appBar: AppBar(
-          title: Text('Settings'),
+          title: Text('Settings',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          iconTheme: IconThemeData(
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
         ),
         body: Container(
           color: Theme.of(context).colorScheme.background,
@@ -37,7 +44,8 @@ class SettingsPage extends StatelessWidget {
                           onChanged: (ThemeModeOption? value) {
                             if (value != null) {
                               setState(() {
-                                themeProvider.setThemeMode(value);
+                                themeProvider.setThemeMode(
+                                    value, MapModeOption.Automatic);
                               });
                             }
                           },
@@ -49,7 +57,8 @@ class SettingsPage extends StatelessWidget {
                           onChanged: (ThemeModeOption? value) {
                             if (value != null) {
                               setState(() {
-                                themeProvider.setThemeMode(value);
+                                themeProvider.setThemeMode(
+                                    value, MapModeOption.Light);
                               });
                             }
                           },
@@ -61,19 +70,69 @@ class SettingsPage extends StatelessWidget {
                           onChanged: (ThemeModeOption? value) {
                             if (value != null) {
                               setState(() {
-                                themeProvider.setThemeMode(value);
+                                themeProvider.setThemeMode(
+                                    value, MapModeOption.Dark);
                               });
                             }
                           },
                         ),
                         RadioListTile<ThemeModeOption>(
-                          title: Text('Custom'),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Custom'),
+                              themeProvider.themeModeOption ==
+                                      ThemeModeOption.Custom
+                                  ? ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          themeProvider.resetCustomTheme();
+                                          primaryColor = themeProvider
+                                              .themeData.colorScheme.primary;
+                                          secondaryColor = themeProvider
+                                              .themeData.colorScheme.secondary;
+                                          backgroundColor = themeProvider
+                                              .themeData.colorScheme.background;
+                                          themeProvider.setThemeMode(
+                                              ThemeModeOption.Custom,
+                                              MapModeOption.Light);
+                                        });
+                                      },
+                                      child: Text(
+                                        'Reset',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        side: BorderSide(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox.shrink(),
+                            ],
+                          ),
                           value: ThemeModeOption.Custom,
                           groupValue: themeProvider.themeModeOption,
                           onChanged: (ThemeModeOption? value) {
                             if (value != null) {
                               setState(() {
-                                themeProvider.setThemeMode(value);
+                                themeProvider.setThemeMode(
+                                    value,
+                                    box.read('custom_theme') != null
+                                        ? MapModeOption
+                                            .values[box.read('custom_theme')[3]]
+                                        : MapModeOption.Light);
                                 themeProvider.loadCustomTheme();
                               });
                             }
@@ -169,7 +228,7 @@ class SettingsPage extends StatelessWidget {
                                     ],
                                   ),
                                 ]),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -211,7 +270,6 @@ Widget _buildMapStyleOption(
         Text(
           styleName,
           style: TextStyle(
-            fontWeight: FontWeight.bold,
             color: onBackground,
           ),
         ),

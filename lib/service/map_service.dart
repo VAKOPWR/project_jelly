@@ -18,7 +18,6 @@ import 'package:project_jelly/misc/uint8list_image.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
 
-// TODO: Add optimization logic
 class MapService extends GetxService {
   Position? _currentLocation;
   DateTime? lastPositionUpdate;
@@ -131,7 +130,6 @@ class MapService extends GetxService {
   }
 
   void updateCurrentLocation(Position newLocation) async {
-    _currentLocation = newLocation;
     DateTime now = DateTime.now();
 
     bool nearAnyPoint = targetPoints.entries.any((targetPoint) {
@@ -157,10 +155,19 @@ class MapService extends GetxService {
       if (lastPositionUpdate == null ||
           now.difference(lastPositionUpdate!) >
               Duration(seconds: locationPerception)) {
-        if (FirebaseAuth.instance.currentUser != null) {
-          Get.find<RequestService>().putUserUpdate(newLocation);
+        if (_currentLocation == null ||
+            calculateDistance(
+                    _currentLocation!.latitude,
+                    _currentLocation!.longitude,
+                    newLocation.latitude,
+                    newLocation.longitude) >=
+                4) {
+          if (FirebaseAuth.instance.currentUser != null) {
+            Get.find<RequestService>().putUserUpdate(newLocation);
+          }
+          lastPositionUpdate = now;
+          _currentLocation = newLocation;
         }
-        lastPositionUpdate = now;
       }
     }
   }

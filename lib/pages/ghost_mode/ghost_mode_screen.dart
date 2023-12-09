@@ -36,9 +36,15 @@ class _GhostModeState extends State<GhostMode>
         length: 2,
         child: Scaffold(
             appBar: AppBar(
-              title: Text('Ghost Mode'),
+              title: Text('Ghost Mode',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary)),
               centerTitle: true,
               elevation: 0.0,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              iconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
             body: Container(
               color: Theme.of(context).colorScheme.primary,

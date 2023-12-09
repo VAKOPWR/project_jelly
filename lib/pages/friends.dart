@@ -109,11 +109,16 @@ class _FriendsPageState extends State<FriendsPage>
 
   AppBar _buildAppBar() {
     return AppBar(
-      title: const Text("Friends"),
+      title: Text("Friends",
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       centerTitle: true,
       bottom: TabBar(
         controller: _tabController,
         tabs: _buildTabsWithBadges(),
+      ),
+      iconTheme: IconThemeData(
+        color: Theme.of(context).colorScheme.onPrimary,
       ),
     );
   }

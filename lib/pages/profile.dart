@@ -21,8 +21,14 @@ class _ProfilePageState extends State<ProfilePage> {
           preferredSize: const Size.fromHeight(250),
           child: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
-            title: const Text("Profile",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            title: Text("Profile",
+                style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimary)),
             centerTitle: true,
             actions: [
               IconButton(
