@@ -3,6 +3,7 @@ import 'dart:core';
 // ignore: unused_import
 import 'dart:developer';
 import 'dart:ffi';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,13 +19,11 @@ import 'package:project_jelly/misc/image_modifier.dart';
 import 'package:project_jelly/misc/uint8list_image.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
-
 import '../classes/chat.dart';
 import '../classes/chat_DTO.dart';
 import '../classes/chat_user.dart';
 import '../classes/message.dart';
 
-// TODO: Add optimization logic
 class MapService extends GetxService {
   Position? _currentLocation;
   DateTime? lastPositionUpdate;
@@ -43,6 +42,7 @@ class MapService extends GetxService {
       altitudeAccuracy: 0.0,
       headingAccuracy: 0.0);
   Uint8List? defaultAvatar;
+  ImageProvider? defaultImageProvider;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<MarkerId, BitmapDescriptor> staticMarkerIcons =
       <MarkerId, BitmapDescriptor>{};
@@ -58,9 +58,12 @@ class MapService extends GetxService {
   Map<int, List<Message>> newMessages = <int, List<Message>>{};
   Map<int, List<ChatUser>> chatUsers = <int, List<ChatUser>>{};
   bool newMessagesBool = false;
+  Map<MarkerId, LatLng> targetPoints = <MarkerId, LatLng>{};
   final box = GetStorage();
   bool requestSent = false;
   int locationPerception = 2;
+  int nearPointThreshold = 50;
+  int nearPointUpdateFrequency = 30;
 
   @override
   Future<void> onInit() async {
@@ -83,7 +86,9 @@ class MapService extends GetxService {
     await loadStaticImages();
     await loadDefaultAvatar();
     await loadStaticMarkers();
+    await loadDefaultImageProvider();
     if (FirebaseAuth.instance.currentUser != null) {
+      // TODO: Add ping request verification
       await fetchFriendsData();
       await loadCustomAvatars();
       await loadImageProviders();
@@ -103,9 +108,10 @@ class MapService extends GetxService {
 
     Timer.periodic(Duration(seconds: 5), (timer) async {
       if ((FirebaseAuth.instance.currentUser != null) && !chats.isEmpty) {
-        List<Message> newMessagesFetched = await Get.find<RequestService>().loadNewMessages();
-        if (!newMessagesFetched.isEmpty){
-          for (Message message in newMessagesFetched){
+        List<Message> newMessagesFetched =
+            await Get.find<RequestService>().loadNewMessages();
+        if (!newMessagesFetched.isEmpty) {
+          for (Message message in newMessagesFetched) {
             chats[message.chatId]?.message = message;
             if (!newMessages.containsKey(message.chatId)) {
               newMessages[message.chatId] = [message];
@@ -117,33 +123,35 @@ class MapService extends GetxService {
         }
         messagesLastChecked = DateTime.now();
       }
-
     });
   }
 
-  Future<void> loadChats() async{
-    List<ChatDTO> listedChats = await Get.find<RequestService>().loadChatsRequest();
-    for (ChatDTO chat in listedChats){
+  Future<void> loadChats() async {
+    List<ChatDTO> listedChats =
+        await Get.find<RequestService>().loadChatsRequest();
+    for (ChatDTO chat in listedChats) {
       Message? message = null;
-      if (chat.lastMessageSenderId!=null){
-        message = Message(chatId: chat.groupId,
+      if (chat.lastMessageSenderId != null) {
+        message = Message(
+            chatId: chat.groupId,
             senderId: chat.lastMessageSenderId!,
             text: chat.lastMessageText!,
             time: chat.lastMessageTimeSent!,
             messageStatus: chat.lastMessageMessagesStatus!,
             attachedPhoto: chat.lastMessageAttachedPhoto);
       }
-      chats.putIfAbsent(chat.groupId, () => new Chat(
-          isFriendship: chat.friendship,
-          chatName: chat.groupName,
-          friendId: chat.friendId,
-          chatId: chat.groupId,
-          picture: chat.picture,
-          isMuted: chat.muted,
-          isPinned: chat.pinned,
-          message: message
-      ));
-      if (chat.groupUsers!=null){
+      chats.putIfAbsent(
+          chat.groupId,
+          () => new Chat(
+              isFriendship: chat.friendship,
+              chatName: chat.groupName,
+              friendId: chat.friendId,
+              chatId: chat.groupId,
+              picture: chat.picture,
+              isMuted: chat.muted,
+              isPinned: chat.pinned,
+              message: message));
+      if (chat.groupUsers != null) {
         chatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
       }
     }
@@ -186,14 +194,62 @@ class MapService extends GetxService {
   }
 
   void updateCurrentLocation(Position newLocation) async {
-    _currentLocation = newLocation;
     DateTime now = DateTime.now();
-    if (lastPositionUpdate == null ||
-        now.difference(lastPositionUpdate!) >
-            Duration(seconds: locationPerception)) {
-      Get.find<RequestService>().putUserUpdate(newLocation);
-      lastPositionUpdate = now;
+
+    bool nearAnyPoint = targetPoints.entries.any((targetPoint) {
+      double distanceToTarget = calculateDistance(
+        newLocation.latitude,
+        newLocation.longitude,
+        targetPoint.value.latitude,
+        targetPoint.value.longitude,
+      );
+      return distanceToTarget <= nearPointThreshold;
+    });
+
+    if (nearAnyPoint) {
+      if (lastPositionUpdate == null ||
+          now.difference(lastPositionUpdate!) >
+              Duration(minutes: nearPointUpdateFrequency)) {
+        if (FirebaseAuth.instance.currentUser != null) {
+          Get.find<RequestService>().putUserUpdate(newLocation);
+        }
+        lastPositionUpdate = now;
+      }
+    } else {
+      if (lastPositionUpdate == null ||
+          now.difference(lastPositionUpdate!) >
+              Duration(seconds: locationPerception)) {
+        if (_currentLocation == null ||
+            calculateDistance(
+                    _currentLocation!.latitude,
+                    _currentLocation!.longitude,
+                    newLocation.latitude,
+                    newLocation.longitude) >=
+                4) {
+          if (FirebaseAuth.instance.currentUser != null) {
+            Get.find<RequestService>().putUserUpdate(newLocation);
+          }
+          lastPositionUpdate = now;
+          _currentLocation = newLocation;
+        }
+      }
     }
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const int earthRadius = 6371000;
+
+    double dLat = (lat2 - lat1) * (3.141592653589793 / 180);
+    double dLon = (lon2 - lon1) * (3.141592653589793 / 180);
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * (3.141592653589793 / 180)) *
+            cos(lat2 * (3.141592653589793 / 180)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = earthRadius * c;
+
+    return distance;
   }
 
   Future<void> loadStaticImages() async {
@@ -230,6 +286,10 @@ class MapService extends GetxService {
     defaultAvatar = await getBytesFromAsset('assets/no_avatar.png', 150);
   }
 
+  Future<void> loadDefaultImageProvider() async {
+    defaultImageProvider = Uint8ListImageProvider(defaultAvatar!);
+  }
+
   Future<void> loadCustomAvatars() async {
     Map<String, Uint8List?> friendsAvatars =
         await Get.find<RequestService>().getFriendsIcons();
@@ -239,13 +299,11 @@ class MapService extends GetxService {
       if (value != null) {
         avatars[MarkerId(key)] = await modifyImage(
             value,
-            Colors.red,
             friendsData[MarkerId(key)]!.isOnline,
             friendsData[MarkerId(key)]!.offlineStatus);
       } else {
         avatars[MarkerId(key)] = await modifyImage(
             defaultAvatar!,
-            Colors.red,
             friendsData[MarkerId(key)]!.isOnline,
             friendsData[MarkerId(key)]!.offlineStatus);
       }
@@ -261,10 +319,7 @@ class MapService extends GetxService {
     for (MarkerId friendId in friendsData.keys) {
       if (!imageProviders.containsKey(friendId)) {
         imageProviders[friendId] = await Uint8ListImageProvider(
-            await modifyImage(
-                defaultAvatar!,
-                Colors.red,
-                friendsData[friendId]!.isOnline,
+            await modifyImage(defaultAvatar!, friendsData[friendId]!.isOnline,
                 friendsData[friendId]!.offlineStatus));
       }
     }
@@ -357,6 +412,16 @@ class MapService extends GetxService {
     String _markers = markersToJson(staticMarkers);
     box.write('staticMarkers', _markers);
     box.write('staticMarkerTypeId', staticMarkerTypeId);
+  }
+
+  void addStaticPoint(Marker newPoint) {
+    targetPoints[newPoint.markerId] = newPoint.position;
+  }
+
+  void deleteStaticPoint(MarkerId markerId) {
+    if (targetPoints.containsKey(markerId)) {
+      targetPoints.remove(markerId);
+    }
   }
 
   void readStaticMarkersData() {

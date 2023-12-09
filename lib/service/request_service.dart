@@ -34,6 +34,9 @@ class RequestService extends getx.GetxService {
           if (isTokenExpired()) {
             idToken = await refreshToken();
           }
+          if (idToken == null || idToken == '') {
+            return;
+          }
           options.headers['Authorization'] = idToken ?? '';
           options.headers['Content-Type'] = 'application/json';
           return handler.next(options);
@@ -47,7 +50,10 @@ class RequestService extends getx.GetxService {
   }
 
   Future<String?> refreshToken() async {
-    String? idToken = await FirebaseAuth.instance.currentUser!.getIdToken(true);
+    String? idToken = null;
+    if (FirebaseAuth.instance.currentUser != null) {
+      idToken = await FirebaseAuth.instance.currentUser!.getIdToken(true);
+    }
     return idToken;
   }
 
@@ -116,7 +122,7 @@ class RequestService extends getx.GetxService {
       }
       return List.empty();
     } catch (error) {
-      print('Error: $error');
+      print(error.toString());
       return List.empty();
     }
   }
@@ -175,11 +181,10 @@ class RequestService extends getx.GetxService {
         var data = response.data;
         return (data as List).map((item) => BasicUser.fromJson(item)).toList();
       } else {
-        print('Failed to load friends from $endpoint');
         return List.empty();
       }
     } catch (error) {
-      print('Error fetching friends from $endpoint: ${error.toString()}');
+      print(error.toString());
       return List.empty();
     }
   }
@@ -191,11 +196,10 @@ class RequestService extends getx.GetxService {
         var data = response.data;
         return (data as List).map((item) => BasicUser.fromJson(item)).toList();
       } else {
-        print('Failed to search friends with query $query');
         return List.empty();
       }
     } catch (error) {
-      print('Error searching friends with query $query: ${error.toString()}');
+      print(error.toString());
       return List.empty();
     }
   }
@@ -207,15 +211,12 @@ class RequestService extends getx.GetxService {
       Response response = await dio.put("${ApiPath}${url}");
 
       if (response.statusCode == 200) {
-        print('Friend request accepted');
         return true;
       } else {
-        print(
-            'Failed to accept friend request. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print('Error accepting friend request: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }
@@ -227,14 +228,12 @@ class RequestService extends getx.GetxService {
       Response response = await dio.delete("${ApiPath}${url}");
 
       if (response.statusCode == 200) {
-        print('Friend was successfully deleted');
         return true;
       } else {
-        print('Failed to delete friend. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print('Error deleting friend: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }
@@ -246,15 +245,12 @@ class RequestService extends getx.GetxService {
       Response response = await dio.delete("${ApiPath}${url}");
 
       if (response.statusCode == 200) {
-        print('Friend request accepted');
         return true;
       } else {
-        print(
-            'Failed to accept friend request. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print('Error accepting friend request: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }
@@ -267,12 +263,10 @@ class RequestService extends getx.GetxService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print(
-            'Failed to send friend request. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print('Error sending friend request: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }
@@ -284,12 +278,10 @@ class RequestService extends getx.GetxService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print(
-            'Failed to update the shaking status. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print('Error updating shaking status: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }
@@ -302,13 +294,10 @@ class RequestService extends getx.GetxService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print(
-            'Failed to update the steath choice status on user level. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print(
-          'Error updating steath choice status on user level: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }
@@ -323,13 +312,10 @@ class RequestService extends getx.GetxService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print(
-            'Failed to update the steath choice status on relationship level. Status code: ${response.statusCode}');
         return false;
       }
     } catch (error) {
-      print(
-          'Error updating steath choice status on relationship level: ${error.toString()}');
+      print(error.toString());
       return false;
     }
   }

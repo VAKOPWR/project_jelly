@@ -74,7 +74,8 @@ class _FriendFindingTabState extends State<FriendFindingTab> {
         style: TextStyle(fontSize: 18.0),
       ),
       trailing: IconButton(
-        icon: Icon(Icons.person_add_alt_1),
+        icon: Icon(Icons.person_add_alt_1,
+            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8)),
         onPressed: () async {
           bool success =
               await Get.find<RequestService>().sendFriendRequest(basicUser.id);

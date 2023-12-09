@@ -12,27 +12,42 @@ class SearchBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            onChanged: onSearchChanged,
-            decoration: InputDecoration(
-              hintStyle: TextStyle(color: Theme.of(context).hintColor),
-              hintText: "Search",
-              filled: true,
-              fillColor: Theme.of(context).dialogBackgroundColor,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide.none,
+    return Container(
+        color: Theme.of(context).colorScheme.background,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                onChanged: onSearchChanged,
+                decoration: InputDecoration(
+                  hintStyle: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onBackground
+                          .withOpacity(0.6)),
+                  hintText: "Search",
+                  filled: true,
+                  fillColor: Theme.of(context)
+                      .colorScheme
+                      .onBackground
+                      .withOpacity(0.1),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onBackground
+                        .withOpacity(0.6),
+                  ),
+                ),
               ),
-              prefixIcon: Icon(Icons.search),
             ),
-          ),
-        ),
-        Expanded(child: content),
-      ],
-    );
+            Expanded(child: content),
+          ],
+        ));
   }
 }

@@ -11,6 +11,7 @@ class MessagesPage extends StatefulWidget {
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
+// TODO hide keyboard on tab chnage
 class _MessagesPageState extends State<MessagesPage> {
   void getData() {}
 
@@ -20,9 +21,15 @@ class _MessagesPageState extends State<MessagesPage> {
         length: 2,
         child: Scaffold(
             appBar: AppBar(
-              title: Text('Messages'),
+              title: Text('Messages',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary)),
               centerTitle: true,
               elevation: 0.0,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              iconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
               actions: <Widget>[
                 IconButton(
                   icon: Icon(Icons.add),
@@ -33,17 +40,23 @@ class _MessagesPageState extends State<MessagesPage> {
               ],
             ),
             body: Container(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.primary,
               child: Column(
                 children: [
                   TabBar(
                     tabs: [
                       Tab(
-                        text: 'Friends',
-                      ),
+                          child: Text("Friends",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary))),
                       Tab(
-                        text: 'Groups',
-                      )
+                          child: Text("Groups",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary))),
                     ],
                   ),
                   Expanded(

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 // import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/service/request_service.dart';
@@ -23,8 +24,10 @@ class GlobalShakeController extends GetxController {
 
   void showShakingPopup() {
     if (isShaking.isTrue) {
-      if (Get.currentRoute != '/shake') {
-        Get.toNamed('/shake');
+      if (FirebaseAuth.instance.currentUser != null) {
+        if (Get.currentRoute != '/shake') {
+          Get.toNamed('/shake');
+        }
       }
     }
   }

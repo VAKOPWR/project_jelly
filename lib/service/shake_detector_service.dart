@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:get/get.dart';
-import 'package:project_jelly/pages/controller/global_shake_controller.dart';
+import 'package:project_jelly/controller/global_shake_controller.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 class ShakeDetectorService extends GetxService {

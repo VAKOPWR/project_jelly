@@ -5,14 +5,12 @@ class ForgotPasswordPage extends StatelessWidget {
 
   ForgotPasswordPage({super.key});
 
-  void resetPassword() {
-    String email = emailController.text;
-    print("Password reset request for email: $email");
-  }
+  void resetPassword() {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text("Forgot Password"),
       ),

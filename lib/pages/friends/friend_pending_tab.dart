@@ -71,11 +71,19 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(
+              Icons.add,
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+            ),
             onPressed: () => _acceptFriendRequest(friend.id),
           ),
           IconButton(
-            icon: Icon(Icons.close),
+            icon: Icon(
+              Icons.close,
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+            ),
             onPressed: () => _declineFriendRequest(friend.id),
           ),
         ],
