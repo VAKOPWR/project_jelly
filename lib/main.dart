@@ -40,7 +40,7 @@ void main() async {
   await Firebase.initializeApp();
   await GlobalServices.init();
   if (FirebaseAuth.instance.currentUser != null) {
-    Get.find<RequestService>().setupInterceptor('');
+    Get.find<RequestService>().setupInterceptor();
   }
   Get.find<ThemeController>().loadThemePreferences();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

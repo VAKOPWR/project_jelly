@@ -18,6 +18,7 @@ import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/misc/image_modifier.dart';
 import 'package:project_jelly/misc/uint8list_image.dart';
+import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
 import '../classes/chat.dart';
@@ -56,9 +57,15 @@ class MapService extends GetxService {
   List<BasicUser> pendingFriends = <BasicUser>[];
   Map<int, Chat> chats = <int, Chat>{};
   late DateTime messagesLastChecked;
+  late DateTime chatsLastChecked;
   Map<int, List<Message>> newMessages = <int, List<Message>>{};
   Map<int, List<ChatUser>> chatUsers = <int, List<ChatUser>>{};
+  Map<int, Map<int, ChatUser>> groupChatUsers = <int, Map<int, ChatUser>>{};
+  Map<int, int> friendChatMapping = {};
+  late int currUserId;
   bool newMessagesBool = false;
+  bool newFriendChatsBool = false;
+  bool newGroupChatsBool = false;
   Map<MarkerId, LatLng> targetPoints = <MarkerId, LatLng>{};
   final box = GetStorage();
   bool requestSent = false;
@@ -89,13 +96,13 @@ class MapService extends GetxService {
     await loadStaticMarkers();
     await loadDefaultImageProvider();
     if (FirebaseAuth.instance.currentUser != null) {
-      // TODO: Add ping request verification
       await fetchFriendsData();
       await loadCustomAvatars();
       await loadImageProviders();
       await updateMarkers();
       await fetchPendingFriends();
       await loadChats();
+      await getCurrUserId();
       messagesLastChecked = DateTime.now();
     }
     Timer.periodic(Duration(minutes: 30), (timer) async {
@@ -125,6 +132,43 @@ class MapService extends GetxService {
         messagesLastChecked = DateTime.now();
       }
     });
+
+    Timer.periodic(Duration(seconds: 3), (timer) async {
+      List<ChatDTO> newChats = await Get.find<RequestService>().fetchNewChats();
+      if (!newChats.isEmpty) {
+        for (ChatDTO chat in newChats) {
+          Message? message = null;
+          if (chat.lastMessageSenderId != null) {
+            message = Message(
+                chatId: chat.groupId,
+                senderId: chat.lastMessageSenderId!,
+                text: chat.lastMessageText!,
+                time: formatMessageTime(chat.lastMessageTimeSent!),
+                messageStatus: chat.lastMessageMessagesStatus!,
+                attachedPhoto: chat.lastMessageAttachedPhoto);
+          }
+          chats.putIfAbsent(
+              chat.groupId,
+              () => new Chat(
+                  isFriendship: chat.friendship,
+                  chatName: chat.groupName,
+                  friendId: chat.friendId,
+                  chatId: chat.groupId,
+                  picture: chat.picture,
+                  isMuted: chat.muted,
+                  isPinned: chat.pinned,
+                  message: message));
+          if (chat.groupUsers != null) {
+            groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+            newGroupChatsBool = true;
+          }
+          if (chat.friendship) {
+            friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
+            newFriendChatsBool = true;
+          }
+        }
+      }
+    });
   }
 
   Future<void> loadChats() async {
@@ -137,7 +181,7 @@ class MapService extends GetxService {
             chatId: chat.groupId,
             senderId: chat.lastMessageSenderId!,
             text: chat.lastMessageText!,
-            time: chat.lastMessageTimeSent!,
+            time: formatMessageTime(chat.lastMessageTimeSent!),
             messageStatus: chat.lastMessageMessagesStatus!,
             attachedPhoto: chat.lastMessageAttachedPhoto);
       }
@@ -153,7 +197,10 @@ class MapService extends GetxService {
               isPinned: chat.pinned,
               message: message));
       if (chat.groupUsers != null) {
-        chatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+        groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+      }
+      if (chat.friendship) {
+        friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
       }
     }
     messagesLastChecked = DateTime.now();
@@ -284,7 +331,8 @@ class MapService extends GetxService {
   }
 
   Future<void> loadDefaultAvatar() async {
-    defaultAvatar = await getBytesFromAsset('assets/no_avatar.png', 150);
+    defaultAvatar = await modifyImage(
+        await getBytesFromAsset('assets/no_avatar.png', 150), false, '');
   }
 
   Future<void> loadDefaultImageProvider() async {
@@ -444,5 +492,21 @@ class MapService extends GetxService {
     if (_ghostedFriends != null) {
       ghostedFriends = _ghostedFriends.cast<String, bool>();
     }
+  }
+
+  Future<void> getCurrUserId() async {
+    int? userId = await Get.find<RequestService>().getCurrUserIdRequest();
+    if (userId != null) {
+      currUserId = userId;
+    }
+  }
+
+  int? getChatKeyByFriendId(int friendId) {
+    for (var entry in chats.entries) {
+      if (entry.value.friendId == friendId) {
+        return entry.key;
+      }
+    }
+    return null;
   }
 }

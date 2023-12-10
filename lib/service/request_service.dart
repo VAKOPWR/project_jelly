@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:battery/battery.dart';
@@ -7,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/basic_user.dart';
@@ -25,27 +26,26 @@ class RequestService extends getx.GetxService {
   Battery battery = Battery();
   int batteryLevel = 100;
 
-  void setupInterceptor(String? idToken) {
+  void setupInterceptor() {
+    String? idToken = GetStorage().read('firebase_key');
     dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest:
-            (RequestOptions options, RequestInterceptorHandler handler) async {
-          if (isTokenExpired()) {
-            idToken = await refreshToken();
-          }
-          if (idToken == null || idToken == '') {
-            return;
-          }
-          options.headers['Authorization'] = idToken ?? '';
-          options.headers['Content-Type'] = 'application/json';
-          return handler.next(options);
-        },
-      ),
+      InterceptorsWrapper(onRequest:
+          (RequestOptions options, RequestInterceptorHandler handler) async {
+        options.headers['Authorization'] = idToken ?? '';
+        options.headers['Content-Type'] = 'application/json';
+        return handler.next(options);
+      }, onError: (error, handler) async {
+        if (error.response?.statusCode == 500 ||
+            error.response?.statusCode == 403) {
+          idToken = await refreshToken();
+          GetStorage().write('firebase_key', idToken);
+          dio.options.headers['Authorization'] = idToken ?? '';
+          dio.options.headers['Content-Type'] = 'application/json';
+          return handler.resolve(await dio.fetch(error.requestOptions));
+        }
+        return handler.next(error);
+      }),
     );
-  }
-
-  bool isTokenExpired() {
-    return true;
   }
 
   Future<String?> refreshToken() async {
@@ -243,8 +243,6 @@ class RequestService extends getx.GetxService {
 
       Response response = await dio.delete("${ApiPath}${url}");
 
-      print(response.statusCode);
-
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -274,13 +272,9 @@ class RequestService extends getx.GetxService {
   }
 
   Future<bool> sendFriendRequest(String identifier) async {
-    print('method called');
     try {
       String url = '/friend/invite/$identifier';
-      print(url);
       Response response = await dio.post("${ApiPath}${url}");
-
-      print(response.statusCode);
 
       if (response.statusCode == 200) {
         return true;
@@ -343,7 +337,8 @@ class RequestService extends getx.GetxService {
   }
 
   Future<List<ChatDTO>> loadChatsRequest() async {
-    String endpoint = 'chats/${FirebaseAuth.instance.currentUser?.uid}';
+    String endpoint = '/chats';
+
     try {
       Response response = await dio.get("${ApiPath}${endpoint}");
       if (response.statusCode == 200) {
@@ -360,16 +355,12 @@ class RequestService extends getx.GetxService {
   }
 
   Future<List<Message>> loadNewMessages() async {
-    String endpoint = 'chats/loadMessagesNew';
+    String endpoint = '/chats/message/new/';
 
     try {
-      Response response = await dio.put(
-        "${ApiPath}${endpoint}?lastChecked=${getx.Get.find<MapService>().messagesLastChecked.toIso8601String()}",
-        data: {
-          'groupIds': getx.Get.find<MapService>().chats.keys.toList(),
-        },
-      );
-
+      Response response = await dio.post(
+          "${ApiPath}${endpoint}${Get.find<MapService>().currUserId}",
+          data: Get.find<MapService>().chats.keys.toList());
       if (response.statusCode == 200) {
         var data = response.data;
         return (data as List).map((item) => Message.fromJson(item)).toList();
@@ -383,11 +374,11 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<List<Message>> loadMessagesPaged(Long groupId, int page) async {
-    String endpoint = '/chats/loadMessagesPaged';
+  Future<List<Message>> loadMessagesPaged(int groupId, int page) async {
+    String endpoint = '/chats/message/${groupId}';
 
     try {
-      String url = "${ApiPath}${endpoint}?groupId=${groupId}&page=${page}";
+      String url = "${ApiPath}${endpoint}?pageToLoad=${page}";
 
       Response response = await dio.get(url);
 
@@ -404,46 +395,81 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> sendMessage(Message message) async {
-    String endpoint = '/chats/sendMessage';
+  Future<String> sendMessage(int chatId, String text) async {
+    String endpoint = '/chats/message';
 
     try {
       String url = "${ApiPath}${endpoint}";
 
-      Map<String, dynamic> queryParams = {
-        'groupId': message.chatId,
-        'senderId': message.senderId,
-        'text': message.text,
-        'timeSent': message.time.toIso8601String(),
-        'messageStatus': message.messageStatus.toString(),
-        'attachedPhoto': message.attachedPhoto ?? '',
+      Map<String, dynamic> queryData = {
+        'groupId': chatId,
+        'senderId': Get.find<MapService>().currUserId,
+        'text': text,
       };
 
-      Response response = await dio.put(url, queryParameters: queryParams);
+      Response response = await dio.post(url, data: queryData);
 
       if (response.statusCode == 200) {
-        return true;
+        return response.data;
       } else {
         print('Error sending message. Status code: ${response.statusCode}');
-        return false;
+        return "";
       }
     } catch (error) {
       print('Error sending message: ${error.toString()}');
-      return false;
+      return "";
+    }
+  }
+
+  Future<int?> getCurrUserIdRequest() async {
+    String endpoint = '/user/getId/${FirebaseAuth.instance.currentUser!.email}';
+
+    try {
+      String url = "${ApiPath}${endpoint}";
+
+      Response response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+        return response.data as int;
+      } else {
+        print('Error getting user id. Status code: ${response.statusCode}');
+        return null;
+      }
+    } catch (error) {
+      print('Error getting user id: ${error.toString()}');
+      return null;
+    }
+  }
+
+  Future<List<ChatDTO>> fetchNewChats() async {
+    String endpoint = '/chats/new';
+
+    try {
+      Response response = await dio.post("${ApiPath}${endpoint}",
+          data: Get.find<MapService>().chats.keys.toList());
+      if (response.statusCode == 200) {
+        var data = response.data;
+        return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
+      } else {
+        print('Error loading new chats. Status code: ${response.statusCode}');
+        return List.empty();
+      }
+    } catch (error) {
+      print('Error loading new chats: ${error.toString()}');
+      return List.empty();
     }
   }
 
   Future<GroupChatResponse?> createGroupChat(
       String chatName, String description, List<int> userIds) async {
-    String endpoint = "${ApiPath}/chats/createGroupChat";
+    String endpoint = "${ApiPath}/group/create";
     try {
       String requestBody = json.encode({
-        "chatName": chatName,
+        "name": chatName,
         "description": description,
         "userIds": userIds,
       });
-      print(requestBody);
-      Response response = await dio.put(endpoint, data: requestBody);
+      Response response = await dio.post(endpoint, data: requestBody);
       if (response.statusCode == 200) {
         return GroupChatResponse.fromJson(response.data);
       } else {
@@ -453,6 +479,38 @@ class RequestService extends getx.GetxService {
     } catch (error) {
       print('Error creating group: ${error.toString()}');
       return null;
+    }
+  }
+
+  Future<bool> changeUsername(String newUsername) async {
+    String endpoint = "${ApiPath}/user/nickname/${newUsername}";
+    try {
+      Response response = await dio.put(endpoint);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Error creating group. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error creating group: ${error.toString()}');
+      return false;
+    }
+  }
+
+  Future<String> getUsername() async {
+    try {
+      Response response = await dio.get(
+        "${ApiPath}/user",
+      );
+      if (response.statusCode == 200) {
+        var responseData = response.data;
+        return responseData;
+      }
+      return 'You';
+    } catch (error) {
+      print(error.toString());
+      return 'You';
     }
   }
 }

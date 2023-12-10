@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/map_service.dart';
@@ -16,7 +17,7 @@ class ChatFriendsTab extends StatefulWidget {
 }
 
 class _ChatFriendsTabState extends State<ChatFriendsTab> {
-  late final List<Chat> chats;
+  List<Chat> chats = [];
   List<Chat> filteredChats = [];
   String searchQuery = "";
   late Timer _stateTimer;
@@ -27,8 +28,11 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
     fetchAndSortFriendChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool) {
+        if (Get.find<MapService>().newMessagesBool ||
+            Get.find<MapService>().newFriendChatsBool) {
           fetchAndSortFriendChats();
+          Get.find<MapService>().newMessagesBool = false;
+          Get.find<MapService>().newFriendChatsBool = false;
         }
       });
     });
@@ -79,7 +83,6 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
         onSearchChanged: updateSearchQuery,
         content: Builder(builder: (BuildContext context) {
           if (filteredChats.isEmpty) {
-            //TODO: also style this
             return Container(
               child: Center(
                 child: Text("Ooooops, nothing to see here..."),
@@ -97,15 +100,18 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                       Get.to(() => ChatMessagesFriend(chatId: chat.chatId));
                     },
                     child: ListTile(
-                      leading: Stack(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: handleTextToImages(chat.picture),
-                          )
-                          // CircleAvatar(
-                          //   backgroundImage: handleTextToImages(chat.picture),
-                          // )
-                        ],
+                      leading: CircleAvatar(
+                        radius: 28,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.background,
+                        child: Image(
+                          image: Get.find<MapService>().imageProviders[
+                                  MarkerId(chat.friendId.toString())] ??
+                              Get.find<MapService>().defaultImageProvider!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       title: Row(
                         children: [
@@ -115,10 +121,11 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                         ],
                       ),
                       subtitle: Text(
-                        chat.message?.attachedPhoto != null
-                            ? 'Photo'
-                            : chat.message?.text ?? '',
-                      ),
+                          chat.message?.attachedPhoto != null &&
+                                  chat.message?.attachedPhoto != ''
+                              ? 'Photo'
+                              : chat.message?.text ?? '',
+                          overflow: TextOverflow.ellipsis),
                       trailing: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -126,7 +133,7 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                             buildReadStatusIcon(chat.message!.messageStatus),
                           Text(
                             chat.message != null
-                                ? formatLastSentTime(chat.message!.time)
+                                ? formatMessageTimeStr(chat.message!.time)
                                 : '',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),

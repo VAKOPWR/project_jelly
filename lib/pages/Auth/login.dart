@@ -257,8 +257,10 @@ class _LogInPageState extends State<LogInPage> {
                                                     await FirebaseAuth
                                                         .instance.currentUser!
                                                         .getIdToken(true);
-                                                Get.find<RequestService>()
-                                                    .setupInterceptor(idToken);
+                                                print(idToken);
+                                                GetStorage().write(
+                                                    'firebase_key', idToken);
+                                                Get.find<RequestService>().setupInterceptor(idToken);
                                                 if (Platform.isAndroid) {
                                                   await Get.find<RequestService>()
                                                       .createUser().then((value) async => await Get.find<RequestService>().updateFcmToken());
@@ -267,6 +269,8 @@ class _LogInPageState extends State<LogInPage> {
                                                   await Get.find<RequestService>()
                                                       .createUser();
                                                 }
+                                                await Get.find<MapService>()
+                                                    .getCurrUserId();
                                                 _submitBtnController.success();
                                                 Get.off(() => const HomePage(),
                                                     transition: Transition
