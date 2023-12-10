@@ -1,7 +1,5 @@
-
 import 'dart:async';
 import 'dart:core';
-
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,10 +17,10 @@ import '../../../widgets/own_message.dart';
 import '../../../widgets/reply_message_group.dart';
 import 'common.dart';
 
-class ChatMessagesGroup extends StatefulWidget{
+class ChatMessagesGroup extends StatefulWidget {
   final chatId;
 
-  const ChatMessagesGroup ({Key? key, this.chatId}) : super(key: key);
+  const ChatMessagesGroup({Key? key, this.chatId}) : super(key: key);
 
   @override
   State<ChatMessagesGroup> createState() => _ChatMessagesGroupState();
@@ -54,7 +52,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
     loadMessagesInit();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool){
+        if (Get.find<MapService>().newMessagesBool) {
           fetchNewMessage();
         }
       });
@@ -111,7 +109,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                     controller: _scrollController,
                     itemCount: messages.isEmpty ? 1 : messages.length,
                     itemBuilder: (context, index) {
-                      if (messages.isEmpty){
+                      if (messages.isEmpty) {
                         return Center(
                           child: Text(
                             "This chat seems to be empty... try writing something",
@@ -119,22 +117,24 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                           ),
                         );
                       }
-                      if (messages[index].senderId==Get.find<MapService>().currUserId){
+                      if (messages[index].senderId ==
+                          Get.find<MapService>().currUserId) {
                         return OwnMessage(
                           message: messages[index].text,
                           time: formatMessageTimeStr(messages[index].time),
                           messageStatus: messages[index].messageStatus,
                           imageUrl: messages[index].attachedPhoto,
                         );
-                      }
-                      else {
+                      } else {
                         return ReplyMessageGroup(
                           message: messages[index].text,
                           time: formatMessageTimeStr(messages[index].time),
-                          messageStatus: messages[index].messageStatus,
                           imageUrl: messages[index].attachedPhoto,
-                          senderNickname: chatUsers[messages[index].senderId]!.nickname,
-                          profilePictureUrl: chatUsers[messages[index].senderId]!.profilePicture,
+                          senderNickname:
+                              chatUsers[messages[index].senderId]!.nickname,
+                          profilePictureUrl:
+                              chatUsers[messages[index].senderId]!
+                                  .profilePicture,
                         );
                       }
                     },
@@ -154,11 +154,13 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                               children: [
                                 Icon(Icons.image),
                                 SizedBox(width: 8),
-                                Text("Attached Image: ${_pickedImage!.name}",
+                                Text(
+                                  "Attached Image: ${_pickedImage!.name}",
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                                 IconButton(
-                                    onPressed: (){
+                                    onPressed: () {
                                       setState(() {
                                         _pickedImage = null;
                                       });
@@ -174,8 +176,8 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                               child: Container(
                                 width: MediaQuery.of(context).size.width - 65,
                                 child: Card(
-                                  margin:
-                                  EdgeInsets.only(left: 3, right: 3, bottom: 8),
+                                  margin: EdgeInsets.only(
+                                      left: 3, right: 3, bottom: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(25),
                                   ),
@@ -190,24 +192,26 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                                         keyboardType: TextInputType.multiline,
                                         maxLines: 3,
                                         minLines: 1,
-                                        textAlignVertical: TextAlignVertical
-                                            .center,
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Type a message",
-                                          hintStyle: TextStyle(color: Colors.grey),
-                                          alignLabelWithHint:
-                                          true,
+                                          hintStyle:
+                                              TextStyle(color: Colors.grey),
+                                          alignLabelWithHint: true,
                                           prefixIcon: IconButton(
                                             icon: Icon(
                                               emojiShowing
                                                   ? Icons.keyboard
-                                                  : Icons.emoji_emotions_outlined,
+                                                  : Icons
+                                                      .emoji_emotions_outlined,
                                             ),
                                             onPressed: () {
                                               if (!emojiShowing) {
                                                 focusNode.unfocus();
-                                                focusNode.canRequestFocus = false;
+                                                focusNode.canRequestFocus =
+                                                    false;
                                                 setState(() {
                                                   emojiShowing = !emojiShowing;
                                                 });
@@ -217,7 +221,8 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                                             },
                                           ),
                                           suffixIcon: IconButton(
-                                            icon: Icon(Icons.attach_file_outlined),
+                                            icon: Icon(
+                                                Icons.attach_file_outlined),
                                             onPressed: () {
                                               _pickImage();
                                             },
@@ -306,7 +311,8 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                           replaceEmojiOnLimitExceed: false,
                           noRecents: const Text(
                             'No Recents',
-                            style: TextStyle(fontSize: 20, color: Colors.black26),
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black26),
                             textAlign: TextAlign.center,
                           ),
                           loadingIndicator: const SizedBox.shrink(),
@@ -341,11 +347,14 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   }
 
   Future<void> fetchNewMessage() async {
-    if (Get.find<MapService>().newMessagesBool && Get.find<MapService>().newMessages.containsKey(widget.chatId)){
+    if (Get.find<MapService>().newMessagesBool &&
+        Get.find<MapService>().newMessages.containsKey(widget.chatId)) {
       setState(() {
         messages.addAll(
-          Get.find<MapService>().newMessages[widget.chatId]!
-              .where((message) => message.senderId == Get.find<MapService>().currUserId)
+          Get.find<MapService>()
+              .newMessages[widget.chatId]!
+              .where((message) =>
+                  message.senderId == Get.find<MapService>().currUserId)
               .toList(),
         );
         sortMessages();
@@ -355,7 +364,8 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   }
 
   Future<void> loadMessages() async {
-    List<Message> messagePage = await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    List<Message> messagePage =
+        await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
     setState(() {
       messages.addAll(messagePage);
       page++;

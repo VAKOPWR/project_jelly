@@ -255,6 +255,8 @@ class _LogInPageState extends State<LogInPage> {
                                                     .setupInterceptor();
                                                 await Get.find<RequestService>()
                                                     .createUser();
+                                                await Get.find<MapService>()
+                                                    .getCurrUserId();
                                                 _submitBtnController.success();
                                                 Get.off(() => const HomePage(),
                                                     transition: Transition

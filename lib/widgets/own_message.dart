@@ -17,9 +17,6 @@ class OwnMessage extends StatelessWidget {
   final MessageStatus messageStatus;
   final String? imageUrl;
 
-
-  //TODO: colors here
-
   @override
   Widget build(BuildContext context) {
     IconData iconData;
@@ -38,12 +35,18 @@ class OwnMessage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.7,
-          minWidth: 70.0,
+          minWidth: 120.0,
         ),
         child: Card(
           elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: Colors.green[300],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
+            ),
+          ),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
           margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           child: Stack(
             children: [
@@ -53,19 +56,20 @@ class OwnMessage extends StatelessWidget {
                   width: double.infinity,
                   height: 150,
                   fit: BoxFit.cover,
+                  alignment: Alignment.topLeft,
                 ),
               Padding(
                 padding: const EdgeInsets.only(
                   left: 10,
                   right: 30,
                   top: 5,
-                  bottom: 20,
+                  bottom: 22,
                 ),
                 child: Text(
                   message,
                   style: TextStyle(
-                    fontSize: 16,
-                  ),
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
               Positioned(
@@ -77,13 +81,20 @@ class OwnMessage extends StatelessWidget {
                       time,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimary
+                            .withOpacity(0.5),
                       ),
                     ),
-                    SizedBox(
-                      width: 5,
+                    SizedBox(width: 5),
+                    Icon(
+                      iconData,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withOpacity(0.5),
                     ),
-                    Icon(iconData),
                   ],
                 ),
               ),
@@ -93,5 +104,4 @@ class OwnMessage extends StatelessWidget {
       ),
     );
   }
-
 }
