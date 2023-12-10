@@ -120,7 +120,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                       if (messages[index].senderId==Get.find<MapService>().currUserId){
                         return OwnMessage(
                           message: messages[index].text,
-                          time: formatMessageTime(messages[index].time),
+                          time: formatMessageTimeStr(messages[index].time),
                           messageStatus: messages[index].messageStatus,
                           imageUrl: messages[index].attachedPhoto,
                         );
@@ -128,7 +128,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                       else {
                         return ReplyMessageGroup(
                           message: messages[index].text,
-                          time: formatMessageTime(messages[index].time),
+                          time: formatMessageTimeStr(messages[index].time),
                           messageStatus: messages[index].messageStatus,
                           imageUrl: messages[index].attachedPhoto,
                           senderNickname: chatUsers[messages[index].senderId]!.nickname,
@@ -251,7 +251,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                                     String messageText = _controller.text;
                                     messages.add(Message(
                                         text: messageText,
-                                        time: DateTime.now().toLocal(),
+                                        time: formatMessageTime(DateTime.now().toLocal()),
                                         chatId: widget.chatId,
                                         senderId: Get.find<MapService>().currUserId,
                                         messageStatus: MessageStatus.SENT));

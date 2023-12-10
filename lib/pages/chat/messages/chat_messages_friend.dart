@@ -46,7 +46,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         });
       }
     });
-    Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+
+    loadMessagesInit();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
         if (Get.find<MapService>().newMessagesBool){
@@ -128,7 +129,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                   if (messages[index].senderId==Get.find<MapService>().currUserId){
                     return OwnMessage(
                       message: messages[index].text,
-                      time: formatMessageTime(messages[index].time),
+                      time: formatMessageTimeStr(messages[index].time),
                       messageStatus: messages[index].messageStatus,
                       imageUrl: messages[index].attachedPhoto,
                     );
@@ -136,7 +137,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                   else {
                     return ReplyMessage(
                       message: messages[index].text,
-                      time: formatMessageTime(messages[index].time),
+                      time: formatMessageTimeStr(messages[index].time),
                       messageStatus: messages[index].messageStatus,
                       imageUrl: messages[index].attachedPhoto,
                     );
@@ -257,7 +258,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                 String messageText = _controller.text;
                                 messages.add(Message(
                                     text: messageText,
-                                    time: DateTime.now().toLocal(),
+                                    time: formatMessageTime(DateTime.now().toLocal()),
                                     chatId: widget.chatId,
                                     senderId: Get.find<MapService>().currUserId,
                                     messageStatus: MessageStatus.SENT));
@@ -360,6 +361,14 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
       messages.addAll(messagePage);
       page++;
       _scrollController.jumpTo(_scrollPosition);
+    });
+  }
+
+  Future<void> loadMessagesInit() async{
+    List<Message> messagesPaged = await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+
+    setState(() {
+      messages.addAll(messagesPaged);
     });
   }
 }

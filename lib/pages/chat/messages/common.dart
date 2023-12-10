@@ -31,8 +31,19 @@ Widget buildReadStatusIcon(MessageStatus messageStatus) {
   );
 }
 //TODO: choose colors here
+
 String formatMessageTime(DateTime messageTime) {
   return ("${messageTime.toLocal().hour}:${messageTime.minute}");
+}
+String formatMessageTimeStr(String isoTimeString) {
+  RegExp regex = RegExp(r'\d{2}:\d{2}');
+  RegExpMatch? match = regex.firstMatch(isoTimeString);
+
+  if (match != null) {
+    return match.group(0)!;
+  } else {
+    return "Invalid Time String";
+  }
 }
 
 String? handleImagesToText(XFile? image){
