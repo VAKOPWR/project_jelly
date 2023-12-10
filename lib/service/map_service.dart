@@ -55,8 +55,11 @@ class MapService extends GetxService {
   List<BasicUser> pendingFriends = <BasicUser>[];
   Map<int, Chat> chats = <int, Chat>{};
   late DateTime messagesLastChecked;
+  late DateTime chatsLastChecked;
   Map<int, List<Message>> newMessages = <int, List<Message>>{};
-  Map<int, List<ChatUser>> chatUsers = <int, List<ChatUser>>{};
+  Map<int, Map<int, ChatUser>> groupChatUsers = <int,  Map<int, ChatUser>>{};
+  Map<int, int> friendChatMapping = {};
+  late int currUserId;
   bool newMessagesBool = false;
   final box = GetStorage();
   bool requestSent = false;
@@ -90,6 +93,7 @@ class MapService extends GetxService {
       await updateMarkers();
       await fetchPendingFriends();
       await loadChats();
+      await getCurrUserId();
       messagesLastChecked = DateTime.now();
     }
     Timer.periodic(Duration(minutes: 30), (timer) async {
@@ -119,6 +123,39 @@ class MapService extends GetxService {
       }
 
     });
+
+    Timer.periodic(Duration(seconds: 3), (timer) async{
+      List<ChatDTO> newChats = await Get.find<RequestService>().fetchNewChats();
+      if (!newChats.isEmpty){
+        for (ChatDTO chat in newChats){
+          Message? message = null;
+          if (chat.lastMessageSenderId!=null){
+            message = Message(chatId: chat.groupId,
+                senderId: chat.lastMessageSenderId!,
+                text: chat.lastMessageText!,
+                time: chat.lastMessageTimeSent!,
+                messageStatus: chat.lastMessageMessagesStatus!,
+                attachedPhoto: chat.lastMessageAttachedPhoto);
+          }
+          chats.putIfAbsent(chat.groupId, () => new Chat(
+              isFriendship: chat.friendship,
+              chatName: chat.groupName,
+              friendId: chat.friendId,
+              chatId: chat.groupId,
+              picture: chat.picture,
+              isMuted: chat.muted,
+              isPinned: chat.pinned,
+              message: message
+          ));
+          if (chat.groupUsers!=null){
+            groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+          }
+          if (chat.friendship){
+            friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
+          }
+        }
+      }
+    });
   }
 
   Future<void> loadChats() async{
@@ -144,7 +181,10 @@ class MapService extends GetxService {
           message: message
       ));
       if (chat.groupUsers!=null){
-        chatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+        groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+      }
+      if (chat.friendship){
+        friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
       }
     }
     messagesLastChecked = DateTime.now();
@@ -377,6 +417,13 @@ class MapService extends GetxService {
     Map<String, dynamic>? _ghostedFriends = box.read('ghostedFriends');
     if (_ghostedFriends != null) {
       ghostedFriends = _ghostedFriends.cast<String, bool>();
+    }
+  }
+
+  Future<void> getCurrUserId() async {
+    int? userId = await Get.find<RequestService>().getCurrUserIdRequest();
+    if (userId!=null){
+      currUserId = userId;
     }
   }
 }

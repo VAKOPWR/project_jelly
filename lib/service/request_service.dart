@@ -335,12 +335,14 @@ class RequestService extends getx.GetxService {
   }
 
   Future<List<ChatDTO>> loadChatsRequest() async{
-    String endpoint =
-        'chats/${FirebaseAuth.instance.currentUser?.uid}';
+    String endpoint = '/chats';
+    print("${ApiPath}${endpoint}");
+
     try{
       Response response = await dio.get("${ApiPath}${endpoint}");
       if (response.statusCode == 200){
         var data = response.data;
+        print(data);
         return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
       }
       else {
@@ -355,16 +357,17 @@ class RequestService extends getx.GetxService {
   }
 
   Future<List<Message>> loadNewMessages() async {
-    String endpoint = 'chats/loadMessagesNew';
+    String endpoint = '/chats/message/new/';
 
+    print(Get.find<MapService>().messagesLastChecked.toIso8601String());
+    print(Get.find<MapService>().chats.keys.toList());
     try {
-      Response response = await dio.put(
-        "${ApiPath}${endpoint}?lastChecked=${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
+      Response response = await dio.get(
+        "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
         data: {
           'groupIds': Get.find<MapService>().chats.keys.toList(),
         },
       );
-
       if (response.statusCode == 200) {
         var data = response.data;
         return (data as List).map((item) => Message.fromJson(item)).toList();
@@ -400,23 +403,25 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> sendMessage(Message message) async{
-    String endpoint = '/chats/sendMessage';
+  Future<bool> sendMessage(int chatId, String text) async{
+    String endpoint = '/chats/message';
 
     try {
       String url = "${ApiPath}${endpoint}";
 
-      Map<String, dynamic> queryParams = {
-        'groupId': message.chatId,
-        'senderId': message.senderId,
-        'text': message.text,
-        'timeSent': message.time.toIso8601String(),
-        'messageStatus': message.messageStatus.toString(),
-        'attachedPhoto': message.attachedPhoto ?? '',
+      print(url);
+
+      Map<String, dynamic> queryData = {
+        'groupId': chatId,
+        'senderId': Get.find<MapService>().currUserId,
+        'text': text,
       };
 
-      Response response = await dio.put(url, queryParameters: queryParams);
+      print(queryData);
 
+      Response response = await dio.post(url, data: queryData);
+
+      print(response.statusCode);
       if (response.statusCode == 200) {
 
         return true;
@@ -429,4 +434,57 @@ class RequestService extends getx.GetxService {
       return false;
     }
   }
-}
+
+  Future<int?> getCurrUserIdRequest() async {
+    String endpoint = '/user/getId/${FirebaseAuth.instance.currentUser!.email}';
+
+    try{
+      String url = "${ApiPath}${endpoint}";
+
+      Response response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+
+        return response.data as int;
+      } else {
+        print('Error getting user id. Status code: ${response.statusCode}');
+        return null;
+      }
+    } catch (error) {
+      print('Error getting user id: ${error.toString()}');
+      return null;
+    }
+    }
+
+  Future<List<ChatDTO>> fetchNewChats() async {
+    String endpoint = '/chats/new';
+
+    Map<String, dynamic> queryData = {
+      'groupIds': Get.find<MapService>().chats.keys.toSet(),
+    };
+    print(queryData);
+    try {
+      Response response = await dio.get(
+        "${ApiPath}${endpoint}",
+        data: {
+          'groupIds': queryData,
+        },
+      );
+
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
+        var data = response.data;
+        print(response.data);
+        return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
+      } else {
+        print('Error loading new chats. Status code: ${response.statusCode}');
+        return List.empty();
+      }
+    } catch (error) {
+      print('Error loading new chats: ${error.toString()}');
+      return List.empty();
+    }
+  }
+  }
+

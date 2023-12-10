@@ -18,7 +18,7 @@ class ChatGroupsTab extends StatefulWidget {
 }
 
 class _ChatGroupsTabState extends State<ChatGroupsTab> {
-  late final List<Chat> chats;
+  List<Chat> chats = [];
   List<Chat> filteredChats = [];
   String searchQuery = "";
   late Timer _stateTimer;
@@ -97,7 +97,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
                     final chat = filteredChats[index];
                     return GestureDetector(
                       onTap: () {
-                        Get.to(() => ChatMessagesGroup(groupId: chat.chatId));
+                        Get.to(() => ChatMessagesGroup(chatId: chat.chatId));
                       },
                       child: ListTile(
                         leading: Stack(

@@ -18,7 +18,7 @@ class ChatFriendsTab extends StatefulWidget {
 }
 
 class _ChatFriendsTabState extends State<ChatFriendsTab> {
-  late final List<Chat> chats;
+  List<Chat> chats = [];
   List<Chat> filteredChats = [];
   String searchQuery = "";
   late Timer _stateTimer;
@@ -108,9 +108,6 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                         backgroundImage:
                         handleTextToImages(chat.picture),
                       )
-                      // CircleAvatar(
-                      //   backgroundImage: handleTextToImages(chat.picture),
-                      // )
                     ],
                   ),
                   title: Row(

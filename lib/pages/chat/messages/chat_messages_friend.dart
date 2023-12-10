@@ -85,7 +85,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         title: Text(Get.find<MapService>().chats[widget.chatId]!.chatName),
         centerTitle: true,
       ),
-      body: NotificationListener<ScrollNotification>(
+      body:
+      NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
           if (scrollInfo.metrics.pixels == 0) {
             _scrollPosition = _scrollController.position.pixels;
@@ -100,11 +101,18 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
+              child: messages.isEmpty
+                  ? Center(
+                child: Text(
+                  "This chat seems to be empty... try writing something",
+                  style: TextStyle(fontSize: 18),
+                ),
+              )
+                  : ListView.builder(
                 controller: _scrollController,
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  if (messages[index].senderId==FirebaseAuth.instance.currentUser!.uid){
+                  if (messages[index].senderId==Get.find<MapService>().currUserId){
                     return OwnMessage(
                       message: messages[index].text,
                       time: formatMessageTime(messages[index].time),
@@ -238,7 +246,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                     text: messageText,
                                     time: DateTime.now().toLocal(),
                                     chatId: widget.chatId,
-                                    senderId: int.parse(FirebaseAuth.instance.currentUser!.uid),
+                                    senderId: Get.find<MapService>().currUserId,
                                     messageStatus: MessageStatus.SENT));
                                 _controller.clear();
                                 _scrollController.animateTo(
@@ -299,7 +307,9 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
           ],
         ),
       ),
-    ));
+    )
+
+    );
   }
 
   Future<void> _pickImage() async {
@@ -313,14 +323,9 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   }
 
   Future<void> _sendMessage() async{
-    bool response = await Get.find<RequestService>().sendMessage(Message(
-        text: _controller.text, time: DateTime.now().toLocal(),
-        chatId: widget.chatId,
-        senderId: int.parse(FirebaseAuth.instance.currentUser!.uid),
-        messageStatus: MessageStatus.SENT,
-        attachedPhoto: handleImagesToText(_pickedImage)
-    )
-    );
+    bool response = await Get.find<RequestService>().sendMessage(
+        widget.chatId, _controller.text);
+    //TODO: handle images
   }
 
   Future<void> fetchNewMessage() async {
