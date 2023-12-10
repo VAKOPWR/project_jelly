@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:get/get.dart';
@@ -50,8 +49,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
       setState(() {
         if (Get.find<MapService>().newMessagesBool) {
           fetchNewMessage();
-          print(messages);
-          print(Get.find<MapService>().newMessages[widget.chatId]);
         }
       });
     });
@@ -287,6 +284,31 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                   },
                                 ),
                               ),
+                              onPressed: () async {
+                                if (_controller.text!=""||(_controller.isBlank ?? false)){
+                                  String timeahaha = await _sendMessage();
+                                  _scrollController.animateTo(
+                                      _scrollController.position.maxScrollExtent,
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
+                                  String messageText = _controller.text;
+                                  messages.add(Message(
+                                      text: messageText,
+                                      time: formatMessageTimeStr(timeahaha),
+                                      chatId: widget.chatId,
+                                      senderId: Get.find<MapService>().currUserId,
+                                      messageStatus: MessageStatus.SENT));
+                                  _controller.clear();
+                                  _scrollController.animateTo(
+                                    _scrollController.position.maxScrollExtent,
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
+                                  setState(() {
+                                    sortMessages();
+                                  });
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -354,8 +376,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     }
   }
 
-  Future<void> _sendMessage() async {
-    bool response = await Get.find<RequestService>()
+  Future<String> _sendMessage() async {
+    return await Get.find<RequestService>()
         .sendMessage(widget.chatId, _controller.text);
     //TODO: handle images
   }

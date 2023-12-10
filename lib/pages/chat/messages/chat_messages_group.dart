@@ -47,8 +47,9 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
           emojiShowing = false;
         });
       }
-      chatUsers = Get.find<MapService>().groupChatUsers[widget.chatId]!;
     });
+
+    loadMessagesInit();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
         if (Get.find<MapService>().newMessagesBool) {
@@ -75,28 +76,29 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          leading: Row(
+          title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.arrow_back),
-              // SizedBox(width: 10),
-              CircleAvatar(
-                radius: 10,
-              )
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: CircleAvatar(
+                  radius: 17,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 300),
+                  child: Text(
+                    Get.find<MapService>().chats[widget.chatId]!.chatName,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
             ],
           ),
-          title: Text(Get.find<MapService>().chats[widget.chatId]!.chatName),
-          centerTitle: true,
         ),
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (scrollInfo.metrics.pixels == 0) {
-              _scrollPosition = _scrollController.position.pixels;
-              loadMessages();
-            }
-            return false;
-          },
-          child: Container(
+        body: Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             color: Colors.grey[700],
@@ -247,30 +249,30 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                                     Icons.send,
                                     color: Colors.white,
                                   ),
-                                  onPressed: () {
-                                    _sendMessage();
-                                    _scrollController.animateTo(
-                                        _scrollController
-                                            .position.maxScrollExtent,
+                                  onPressed: () async {
+                                    if (_controller.text!=""||(_controller.isBlank ?? false)){
+                                      String timeahaha = await _sendMessage();
+                                      _scrollController.animateTo(
+                                          _scrollController.position.maxScrollExtent,
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeOut);
+                                      String messageText = _controller.text;
+                                      messages.add(Message(
+                                          text: messageText,
+                                          time: formatMessageTimeStr(timeahaha),
+                                          chatId: widget.chatId,
+                                          senderId: Get.find<MapService>().currUserId,
+                                          messageStatus: MessageStatus.SENT));
+                                      _controller.clear();
+                                      _scrollController.animateTo(
+                                        _scrollController.position.maxScrollExtent,
                                         duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeOut);
-                                    String messageText = _controller.text;
-                                    messages.add(Message(
-                                        text: messageText,
-                                        time: formatMessageTime(
-                                            DateTime.now().toLocal()),
-                                        chatId: widget.chatId,
-                                        senderId:
-                                            Get.find<MapService>().currUserId,
-                                        messageStatus: MessageStatus.SENT));
-                                    _controller.clear();
-                                    _scrollController.animateTo(
-                                      _scrollController
-                                          .position.maxScrollExtent,
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                    );
-                                    setState(() {});
+                                        curve: Curves.easeOut,
+                                      );
+                                      setState(() {
+                                        sortMessages();
+                                      });
+                                    }
                                   },
                                 ),
                               ),
@@ -324,7 +326,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
               ],
             ),
           ),
-        ));
+        );
   }
 
   Future<void> _pickImage() async {
@@ -338,9 +340,9 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
     }
   }
 
-  Future<void> _sendMessage() async {
-    bool response = await Get.find<RequestService>()
-        .sendMessage(widget.chatId, _controller.text);
+  Future<String> _sendMessage() async {
+    return await Get.find<RequestService>().sendMessage(
+        widget.chatId, _controller.text);
     //TODO: handle images
   }
 
@@ -355,6 +357,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                   message.senderId == Get.find<MapService>().currUserId)
               .toList(),
         );
+        sortMessages();
         Get.find<MapService>().newMessages.remove(widget.chatId);
       });
     }
@@ -367,6 +370,24 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
       messages.addAll(messagePage);
       page++;
       _scrollController.jumpTo(_scrollPosition);
+    });
+  }
+
+  Future<void> loadMessagesInit() async {
+    List<Message> messagesPaged =
+    await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    messages.addAll(messagesPaged);
+
+    setState(() {
+      sortMessages();
+    });
+  }
+
+  void sortMessages() {
+    messages.sort((a, b) {
+      DateTime dateTimeA = DateTime.parse(a.time);
+      DateTime dateTimeB = DateTime.parse(b.time);
+      return dateTimeA.compareTo(dateTimeB);
     });
   }
 }

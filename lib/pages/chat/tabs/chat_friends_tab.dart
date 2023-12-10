@@ -128,7 +128,7 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                             buildReadStatusIcon(chat.message!.messageStatus),
                           Text(
                             chat.message != null
-                                ? chat.message!.time
+                                ? formatMessageTimeStr(chat.message!.time)
                                 : '',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
