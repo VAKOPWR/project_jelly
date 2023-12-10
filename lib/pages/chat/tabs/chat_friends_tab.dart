@@ -117,10 +117,10 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                         ],
                       ),
                       subtitle: Text(
-                        chat.message?.attachedPhoto != null
-                            ? 'Photo'
-                            : chat.message?.text ?? '',
-                      ),
+                          chat.message?.attachedPhoto != null
+                              ? 'Photo'
+                              : chat.message?.text ?? '',
+                          overflow: TextOverflow.ellipsis),
                       trailing: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
