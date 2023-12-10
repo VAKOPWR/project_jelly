@@ -61,6 +61,8 @@ class MapService extends GetxService {
   Map<int, int> friendChatMapping = {};
   late int currUserId;
   bool newMessagesBool = false;
+  bool newFriendChatsBool = false;
+  bool newGroupChatsBool = false;
   final box = GetStorage();
   bool requestSent = false;
   int locationPerception = 2;
@@ -105,24 +107,24 @@ class MapService extends GetxService {
     readStaticMarkersData();
     readGhostedFriends();
 
-    // Timer.periodic(Duration(seconds: 5), (timer) async {
-    //   if ((FirebaseAuth.instance.currentUser != null) && !chats.isEmpty) {
-    //     List<Message> newMessagesFetched =
-    //         await Get.find<RequestService>().loadNewMessages();
-    //     if (!newMessagesFetched.isEmpty) {
-    //       for (Message message in newMessagesFetched) {
-    //         chats[message.chatId]?.message = message;
-    //         if (!newMessages.containsKey(message.chatId)) {
-    //           newMessages[message.chatId] = [message];
-    //         } else {
-    //           newMessages[message.chatId]!.add(message);
-    //         }
-    //       }
-    //       newMessagesBool = true;
-    //     }
-    //     messagesLastChecked = DateTime.now();
-    //   }
-    // });
+    Timer.periodic(Duration(seconds: 5), (timer) async {
+      if ((FirebaseAuth.instance.currentUser != null) && !chats.isEmpty) {
+        List<Message> newMessagesFetched =
+            await Get.find<RequestService>().loadNewMessages();
+        if (!newMessagesFetched.isEmpty) {
+          for (Message message in newMessagesFetched) {
+            chats[message.chatId]?.message = message;
+            if (!newMessages.containsKey(message.chatId)) {
+              newMessages[message.chatId] = [message];
+            } else {
+              newMessages[message.chatId]!.add(message);
+            }
+          }
+          newMessagesBool = true;
+        }
+        messagesLastChecked = DateTime.now();
+      }
+    });
 
     Timer.periodic(Duration(seconds: 3), (timer) async {
       List<ChatDTO> newChats = await Get.find<RequestService>().fetchNewChats();
@@ -151,11 +153,14 @@ class MapService extends GetxService {
                   message: message));
           if (chat.groupUsers != null) {
             groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+            newGroupChatsBool = true;
           }
           if (chat.friendship) {
             friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
+            newFriendChatsBool = true;
           }
         }
+
       }
     });
   }
