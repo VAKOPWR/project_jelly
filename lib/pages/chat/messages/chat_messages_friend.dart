@@ -15,7 +15,6 @@ import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/own_message.dart';
 import 'package:project_jelly/widgets/reply_message.dart';
 
-
 class ChatMessagesFriend extends StatefulWidget {
   final chatId;
 
@@ -50,7 +49,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     loadMessagesInit();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool){
+        if (Get.find<MapService>().newMessagesBool) {
           fetchNewMessage();
           print(messages);
           print(Get.find<MapService>().newMessages[widget.chatId]);
@@ -75,39 +74,30 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: CircleAvatar(
-                  radius: 17,
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: CircleAvatar(
+                radius: 17,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 300),
+                child: Text(
+                  Get.find<MapService>().chats[widget.chatId]!.chatName,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Container(
-                  constraints: BoxConstraints(maxWidth: 300),
-                  child: Text(
-                    Get.find<MapService>().chats[widget.chatId]!.chatName,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      body:
-      NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo.metrics.pixels == 0) {
-            _scrollPosition = _scrollController.position.pixels;
-        loadMessages();
-      }
-      return false;
-    },
-      child: Container(
+      ),
+      body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         color: Colors.grey[700],
@@ -118,7 +108,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                 controller: _scrollController,
                 itemCount: messages.isEmpty ? 1 : messages.length,
                 itemBuilder: (context, index) {
-                  if (messages.isEmpty){
+                  if (messages.isEmpty) {
                     return Center(
                       child: Text(
                         "This chat seems to be empty... try writing something",
@@ -126,15 +116,15 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                       ),
                     );
                   }
-                  if (messages[index].senderId==Get.find<MapService>().currUserId){
+                  if (messages[index].senderId ==
+                      Get.find<MapService>().currUserId) {
                     return OwnMessage(
                       message: messages[index].text,
                       time: formatMessageTimeStr(messages[index].time),
                       messageStatus: messages[index].messageStatus,
                       imageUrl: messages[index].attachedPhoto,
                     );
-                  }
-                  else {
+                  } else {
                     return ReplyMessage(
                       message: messages[index].text,
                       time: formatMessageTimeStr(messages[index].time),
@@ -159,11 +149,13 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                           children: [
                             Icon(Icons.image),
                             SizedBox(width: 8),
-                            Text("Attached Image: ${_pickedImage!.name}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,),
+                            Text(
+                              "Attached Image: ${_pickedImage!.name}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             IconButton(
-                                onPressed: (){
+                                onPressed: () {
                                   setState(() {
                                     _pickedImage = null;
                                   });
@@ -180,29 +172,27 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                             width: MediaQuery.of(context).size.width - 65,
                             child: Card(
                               margin:
-                                  EdgeInsets.only(left: 3, right: 3, bottom: 8),
+                              EdgeInsets.only(left: 3, right: 3, bottom: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
                               ),
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8),
+                                  padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                                   child: TextField(
                                     focusNode: focusNode,
                                     controller: _controller,
                                     keyboardType: TextInputType.multiline,
                                     maxLines: 3,
                                     minLines: 1,
-                                    textAlignVertical: TextAlignVertical
-                                        .center,
+                                    textAlignVertical: TextAlignVertical.center,
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "Type a message",
                                       hintStyle: TextStyle(color: Colors.grey),
-                                      alignLabelWithHint:
-                                          true,
+                                      alignLabelWithHint: true,
                                       prefixIcon: IconButton(
                                         icon: Icon(
                                           emojiShowing
@@ -258,7 +248,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                 String messageText = _controller.text;
                                 messages.add(Message(
                                     text: messageText,
-                                    time: formatMessageTime(DateTime.now().toLocal()),
+                                    time: formatMessageTime(
+                                        DateTime.now().toLocal()),
                                     chatId: widget.chatId,
                                     senderId: Get.find<MapService>().currUserId,
                                     messageStatus: MessageStatus.SENT));
@@ -268,7 +259,9 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                   duration: Duration(milliseconds: 300),
                                   curve: Curves.easeOut,
                                 );
-                                setState(() {});
+                                setState(() {
+                                  sortMessages();
+                                });
                               },
                             ),
                           ),
@@ -321,8 +314,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
           ],
         ),
       ),
-    )
-
     );
   }
 
@@ -333,42 +324,58 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     if (image != null) {
       setState(() {
         _pickedImage = image;
-      });    }
+      });
+    }
   }
 
-  Future<void> _sendMessage() async{
-    bool response = await Get.find<RequestService>().sendMessage(
-        widget.chatId, _controller.text);
+  Future<void> _sendMessage() async {
+    bool response = await Get.find<RequestService>()
+        .sendMessage(widget.chatId, _controller.text);
     //TODO: handle images
   }
 
   Future<void> fetchNewMessage() async {
-    if (Get.find<MapService>().newMessagesBool && Get.find<MapService>().newMessages.containsKey(widget.chatId)){
+    if (Get.find<MapService>().newMessagesBool &&
+        Get.find<MapService>().newMessages.containsKey(widget.chatId)) {
       setState(() {
         messages.addAll(
-          Get.find<MapService>().newMessages[widget.chatId]!
-              .where((message) => message.senderId != Get.find<MapService>().currUserId)
+          Get.find<MapService>()
+              .newMessages[widget.chatId]!
+              .where((message) =>
+          message.senderId != Get.find<MapService>().currUserId)
               .toList(),
         );
+        sortMessages();
         Get.find<MapService>().newMessages.remove(widget.chatId);
       });
     }
   }
 
   Future<void> loadMessages() async {
-    List<Message> messagePage = await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    List<Message> messagePage =
+    await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    messages.addAll(messagePage);
+    page++;
     setState(() {
-      messages.addAll(messagePage);
-      page++;
-      _scrollController.jumpTo(_scrollPosition);
+      sortMessages();
     });
   }
 
-  Future<void> loadMessagesInit() async{
-    List<Message> messagesPaged = await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+  Future<void> loadMessagesInit() async {
+    List<Message> messagesPaged =
+    await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    messages.addAll(messagesPaged);
 
     setState(() {
-      messages.addAll(messagesPaged);
+      sortMessages();
+    });
+  }
+
+  void sortMessages() {
+    messages.sort((a, b) {
+      DateTime dateTimeA = DateTime.parse(a.time);
+      DateTime dateTimeB = DateTime.parse(b.time);
+      return dateTimeA.compareTo(dateTimeB);
     });
   }
 }
