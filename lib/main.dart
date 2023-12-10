@@ -29,7 +29,7 @@ void main() async {
   await Firebase.initializeApp();
   await GlobalServices.init();
   if (FirebaseAuth.instance.currentUser != null) {
-    Get.find<RequestService>().setupInterceptor('');
+    Get.find<RequestService>().setupInterceptor();
   }
   await Get.find<StyleService>().loadMapStyles();
   await Get.find<MapService>().prepareService();
