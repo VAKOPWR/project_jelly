@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
@@ -19,6 +20,7 @@ import 'package:get/get.dart';
 import 'package:project_jelly/pages/helper/splash_screen.dart';
 import 'package:project_jelly/pages/helper/settings_page.dart';
 import 'package:project_jelly/pages/helper/shake_it.dart';
+import 'package:project_jelly/service/fcm_service.dart';
 import 'package:project_jelly/service/global_services.dart';
 import 'package:project_jelly/service/internet_service.dart';
 import 'package:project_jelly/service/map_service.dart';
@@ -26,6 +28,12 @@ import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/themes/theme_constants.dart';
 import 'package:project_jelly/controller/theme_controller.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+
+  print("Handling a background message: ${message}");
+}
 
 void main() async {
   await GetStorage.init();
@@ -35,11 +43,28 @@ void main() async {
     Get.find<RequestService>().setupInterceptor('');
   }
   Get.find<ThemeController>().loadThemePreferences();
+  await registerMessageHandlers();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await Get.find<FCMService>().initNotifications();
   await Get.find<StyleService>().loadMapStyles();
+  await Get.find<FCMService>().setupInteractedMessage();
   await Get.find<MapService>().prepareService();
   await InternetCheckerBanner().initialize(title: "Whoops");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProjectJelly());
+}
+
+Future<void> registerMessageHandlers() async {
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+    }
+  });
+
+
 }
 
 class ProjectJelly extends StatelessWidget {

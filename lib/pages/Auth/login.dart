@@ -7,6 +7,7 @@ import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/service/auth_service.dart';
+import 'package:project_jelly/service/fcm_service.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -258,7 +259,8 @@ class _LogInPageState extends State<LogInPage> {
                                                 Get.find<RequestService>()
                                                     .setupInterceptor(idToken);
                                                 await Get.find<RequestService>()
-                                                    .createUser();
+                                                    .createUser().then((value) async => await Get.find<RequestService>().updateFcmToken());
+
                                                 _submitBtnController.success();
                                                 Get.off(() => const HomePage(),
                                                     transition: Transition

@@ -4,10 +4,10 @@ import 'dart:typed_data';
 
 import 'package:battery/battery.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/basic_user.dart';
@@ -16,6 +16,8 @@ import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
+
+import 'fcm_service.dart';
 
 import '../classes/chat_DTO.dart';
 
@@ -70,6 +72,23 @@ class RequestService extends getx.GetxService {
       print(error.toString());
     }
   }
+
+  Future<dynamic> updateFcmToken() async {
+    String token = await Get.find<FCMService>().getFCMToken();
+    try {
+      Response response = await dio.put(
+        "${ApiPath}/user/fcm/update/${token}",
+        options: Options(
+          receiveTimeout: Duration(seconds: 5),
+        ),
+      );
+      return response.statusCode;
+    } catch (error) {
+      print(error.toString());
+    }
+  }
+
+
 
   Future<Uint8List> getUint8ListFromImageUrl(String imageUrl) async {
     final http.Response response = await http.get(Uri.parse(imageUrl));
