@@ -260,13 +260,19 @@ class _LogInPageState extends State<LogInPage> {
                                                 print(idToken);
                                                 GetStorage().write(
                                                     'firebase_key', idToken);
-                                                Get.find<RequestService>().setupInterceptor(idToken);
+                                                Get.find<RequestService>()
+                                                    .setupInterceptor();
                                                 if (Platform.isAndroid) {
-                                                  await Get.find<RequestService>()
-                                                      .createUser().then((value) async => await Get.find<RequestService>().updateFcmToken());
-                                                }
-                                                else {
-                                                  await Get.find<RequestService>()
+                                                  await Get.find<
+                                                          RequestService>()
+                                                      .createUser()
+                                                      .then((value) async =>
+                                                          await Get.find<
+                                                                  RequestService>()
+                                                              .updateFcmToken());
+                                                } else {
+                                                  await Get.find<
+                                                          RequestService>()
                                                       .createUser();
                                                 }
                                                 await Get.find<MapService>()
