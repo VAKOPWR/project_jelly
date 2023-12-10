@@ -24,7 +24,6 @@ class SettingsPage extends StatelessWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.background,
         body: SingleChildScrollView(
-            // Wrap with SingleChildScrollView
             child: Container(
           color: Theme.of(context).colorScheme.background,
           child: Padding(

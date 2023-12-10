@@ -227,6 +227,8 @@ class RequestService extends getx.GetxService {
 
       Response response = await dio.delete("${ApiPath}${url}");
 
+      print(response.statusCode);
+
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -256,9 +258,13 @@ class RequestService extends getx.GetxService {
   }
 
   Future<bool> sendFriendRequest(String identifier) async {
+    print('method called');
     try {
       String url = '/friend/invite/$identifier';
+      print(url);
       Response response = await dio.post("${ApiPath}${url}");
+
+      print(response.statusCode);
 
       if (response.statusCode == 200) {
         return true;
@@ -421,8 +427,7 @@ class RequestService extends getx.GetxService {
         "userIds": userIds,
       });
       print(requestBody);
-      Response response = await dio.put(endpoint,
-          data: requestBody);
+      Response response = await dio.put(endpoint, data: requestBody);
       if (response.statusCode == 200) {
         return GroupChatResponse.fromJson(response.data);
       } else {
