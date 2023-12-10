@@ -29,8 +29,10 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     fetchAndSortGroupChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool){
+        if (Get.find<MapService>().newMessagesBool||Get.find<MapService>().newGroupChatsBool){
           fetchAndSortGroupChats();
+          Get.find<MapService>().newMessagesBool = false;
+          Get.find<MapService>().newGroupChatsBool = false;
         }
       });
     });

@@ -28,17 +28,20 @@ class RequestService extends getx.GetxService {
 
   void setupInterceptor(String? idToken) {
     dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest:
-            (RequestOptions options, RequestInterceptorHandler handler) async {
-          if (isTokenExpired()) {
-            idToken = await refreshToken();
-          }
-          options.headers['Authorization'] = idToken ?? '';
-          options.headers['Content-Type'] = 'application/json';
-          return handler.next(options);
-        },
-      ),
+      InterceptorsWrapper(onRequest:
+          (RequestOptions options, RequestInterceptorHandler handler) async {
+        options.headers['Authorization'] = idToken ?? '';
+        options.headers['Content-Type'] = 'application/json';
+        return handler.next(options);
+      }, onError: (error, handler) async {
+        if (error.response?.statusCode == 500) {
+          idToken = await refreshToken();
+          dio.options.headers['Authorization'] = idToken ?? '';
+          dio.options.headers['Content-Type'] = 'application/json';
+          return handler.resolve(await dio.fetch(error.requestOptions));
+        }
+        return handler.next(error);
+      }),
     );
   }
 

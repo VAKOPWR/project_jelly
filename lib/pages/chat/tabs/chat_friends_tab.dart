@@ -29,8 +29,10 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
     fetchAndSortFriendChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool){
+        if (Get.find<MapService>().newMessagesBool||Get.find<MapService>().newFriendChatsBool){
           fetchAndSortFriendChats();
+          Get.find<MapService>().newMessagesBool = false;
+          Get.find<MapService>().newFriendChatsBool = false;
         }
       });
     });
