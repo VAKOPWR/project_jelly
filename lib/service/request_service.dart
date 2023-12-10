@@ -35,6 +35,9 @@ class RequestService extends getx.GetxService {
         options.headers['Content-Type'] = 'application/json';
         return handler.next(options);
       }, onError: (error, handler) async {
+        print(error);
+        print(error.response);
+        print('setup interceptor status code ${error.response?.statusCode}');
         if (error.response?.statusCode == 500) {
           idToken = await refreshToken();
           GetStorage().write('firebase_key', idToken);
@@ -364,16 +367,9 @@ class RequestService extends getx.GetxService {
           .keys
           .map((key) => key.toString())
           .toList());
-      print(
-          "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}");
       Response response = await dio.post(
-        "${ApiPath}${endpoint}${Get.find<MapService>().currUserId}",
-        data: Get.find<MapService>()
-            .chats
-            .keys
-            .map((key) => key.toString())
-            .toList(),
-      );
+          "${ApiPath}${endpoint}${Get.find<MapService>().currUserId}",
+          data: Get.find<MapService>().chats.keys.toList());
       if (response.statusCode == 200) {
         var data = response.data;
         print("new messages: ${response.data}");
@@ -465,15 +461,8 @@ class RequestService extends getx.GetxService {
     String endpoint = '/chats/new';
 
     try {
-      Response response = await dio.post(
-        "${ApiPath}${endpoint}",
-        data: Get.find<MapService>()
-            .chats
-            .keys
-            .toList()
-            .map((id) => id.toString())
-            .toList(),
-      );
+      Response response = await dio.post("${ApiPath}${endpoint}",
+          data: Get.find<MapService>().chats.keys.toList());
       if (response.statusCode == 200) {
         var data = response.data;
         print(response.data);
