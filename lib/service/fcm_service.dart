@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 
@@ -6,6 +8,7 @@ class FCMService {
 
 
   Future<void> initNotifications() async{
+    if (Platform.isIOS) return;
     await _firebaseMessaging.requestPermission();
 
     initPushNotifications();
@@ -18,6 +21,7 @@ class FCMService {
   }
 
   Future<void> setupInteractedMessage() async {
+    if (Platform.isIOS) return;
     RemoteMessage? initialMessage =
     await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {

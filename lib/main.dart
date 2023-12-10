@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -44,10 +43,8 @@ void main() async {
     Get.find<RequestService>().setupInterceptor('');
   }
   Get.find<ThemeController>().loadThemePreferences();
-  if (Platform.isAndroid) {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await Get.find<FCMService>().initNotifications();
-  }
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await Get.find<FCMService>().initNotifications();
   await Get.find<StyleService>().loadMapStyles();
   await Get.find<FCMService>().setupInteractedMessage();
   await Get.find<MapService>().prepareService();
