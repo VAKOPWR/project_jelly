@@ -252,63 +252,39 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                     color:
                                         Theme.of(context).colorScheme.onPrimary,
                                   ),
-                                  onPressed: () {
-                                    _sendMessage();
-                                    FocusScope.of(context).unfocus();
-                                    _scrollController.animateTo(
+                                  onPressed: () async {
+                                    if (_controller.text != "" ||
+                                        (_controller.isBlank ?? false)) {
+                                      String timeahaha = await _sendMessage();
+                                      _scrollController.animateTo(
+                                          _scrollController
+                                                  .position.maxScrollExtent +
+                                              60,
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeOut);
+                                      String messageText = _controller.text;
+                                      messages.add(Message(
+                                          text: messageText,
+                                          time: formatMessageTimeStr(timeahaha),
+                                          chatId: widget.chatId,
+                                          senderId:
+                                              Get.find<MapService>().currUserId,
+                                          messageStatus: MessageStatus.SENT));
+                                      _controller.clear();
+                                      _scrollController.animateTo(
                                         _scrollController
                                                 .position.maxScrollExtent +
                                             60,
                                         duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeOut);
-                                    String messageText = _controller.text;
-                                    messages.add(Message(
-                                        text: messageText,
-                                        time: formatMessageTime(
-                                            DateTime.now().toLocal()),
-                                        chatId: widget.chatId,
-                                        senderId:
-                                            Get.find<MapService>().currUserId,
-                                        messageStatus: MessageStatus.SENT));
-                                    _controller.clear();
-                                    _scrollController.animateTo(
-                                      _scrollController
-                                              .position.maxScrollExtent +
-                                          60,
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                    );
-                                    setState(() {
-                                      sortMessages();
-                                    });
+                                        curve: Curves.easeOut,
+                                      );
+                                      setState(() {
+                                        sortMessages();
+                                      });
+                                    }
                                   },
                                 ),
                               ),
-                              onPressed: () async {
-                                if (_controller.text!=""||(_controller.isBlank ?? false)){
-                                  String timeahaha = await _sendMessage();
-                                  _scrollController.animateTo(
-                                      _scrollController.position.maxScrollExtent,
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                  String messageText = _controller.text;
-                                  messages.add(Message(
-                                      text: messageText,
-                                      time: formatMessageTimeStr(timeahaha),
-                                      chatId: widget.chatId,
-                                      senderId: Get.find<MapService>().currUserId,
-                                      messageStatus: MessageStatus.SENT));
-                                  _controller.clear();
-                                  _scrollController.animateTo(
-                                    _scrollController.position.maxScrollExtent,
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                  setState(() {
-                                    sortMessages();
-                                  });
-                                }
-                              },
                             ),
                           ],
                         ),
