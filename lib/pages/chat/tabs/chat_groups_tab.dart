@@ -16,7 +16,7 @@ class ChatGroupsTab extends StatefulWidget {
 }
 
 class _ChatGroupsTabState extends State<ChatGroupsTab> {
-  late final List<Chat> chats;
+  List<Chat> chats = [];
   List<Chat> filteredChats = [];
   String searchQuery = "";
   late Timer _stateTimer;
@@ -27,8 +27,11 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
     fetchAndSortGroupChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool) {
+        if (Get.find<MapService>().newMessagesBool ||
+            Get.find<MapService>().newGroupChatsBool) {
           fetchAndSortGroupChats();
+          Get.find<MapService>().newMessagesBool = false;
+          Get.find<MapService>().newGroupChatsBool = false;
         }
       });
     });
@@ -94,7 +97,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
                   final chat = filteredChats[index];
                   return GestureDetector(
                     onTap: () {
-                      Get.to(() => ChatMessagesGroup(groupId: chat.chatId));
+                      Get.to(() => ChatMessagesGroup(chatId: chat.chatId));
                     },
                     child: ListTile(
                       leading: Stack(
@@ -113,19 +116,17 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
                         ],
                       ),
                       subtitle: Text(
-                        chat.message?.attachedPhoto != null
-                            ? 'Photo'
-                            : chat.message?.text ?? '',
-                      ),
+                          chat.message?.attachedPhoto != null
+                              ? 'Photo'
+                              : chat.message?.text ?? '',
+                          overflow: TextOverflow.ellipsis),
                       trailing: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (chat.message != null)
                             buildReadStatusIcon(chat.message!.messageStatus),
                           Text(
-                            chat.message != null
-                                ? formatLastSentTime(chat.message!.time)
-                                : '',
+                            chat.message != null ? chat.message!.time : '',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],

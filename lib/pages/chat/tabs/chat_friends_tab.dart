@@ -16,7 +16,7 @@ class ChatFriendsTab extends StatefulWidget {
 }
 
 class _ChatFriendsTabState extends State<ChatFriendsTab> {
-  late final List<Chat> chats;
+  List<Chat> chats = [];
   List<Chat> filteredChats = [];
   String searchQuery = "";
   late Timer _stateTimer;
@@ -27,8 +27,11 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
     fetchAndSortFriendChats();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
-        if (Get.find<MapService>().newMessagesBool) {
+        if (Get.find<MapService>().newMessagesBool ||
+            Get.find<MapService>().newFriendChatsBool) {
           fetchAndSortFriendChats();
+          Get.find<MapService>().newMessagesBool = false;
+          Get.find<MapService>().newFriendChatsBool = false;
         }
       });
     });
@@ -102,9 +105,6 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                           CircleAvatar(
                             backgroundImage: handleTextToImages(chat.picture),
                           )
-                          // CircleAvatar(
-                          //   backgroundImage: handleTextToImages(chat.picture),
-                          // )
                         ],
                       ),
                       title: Row(
@@ -115,10 +115,10 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                         ],
                       ),
                       subtitle: Text(
-                        chat.message?.attachedPhoto != null
-                            ? 'Photo'
-                            : chat.message?.text ?? '',
-                      ),
+                          chat.message?.attachedPhoto != null
+                              ? 'Photo'
+                              : chat.message?.text ?? '',
+                          overflow: TextOverflow.ellipsis),
                       trailing: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -126,7 +126,7 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                             buildReadStatusIcon(chat.message!.messageStatus),
                           Text(
                             chat.message != null
-                                ? formatLastSentTime(chat.message!.time)
+                                ? formatMessageTimeStr(chat.message!.time)
                                 : '',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),

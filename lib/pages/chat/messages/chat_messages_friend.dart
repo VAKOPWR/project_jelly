@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:ffi';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -30,7 +32,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   XFile? _pickedImage;
   late Timer _stateTimer;
   int page = 0;
-  double _scrollPosition = 0.0;
 
   @override
   void initState() {
@@ -42,6 +43,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         });
       }
     });
+
+    loadMessagesInit();
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
         if (Get.find<MapService>().newMessagesBool) {
@@ -66,53 +69,70 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          leading: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.arrow_back),
-              // SizedBox(width: 10),
-              CircleAvatar(
-                radius: 10,
-              )
-            ],
+    return GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(width: 8),
+                      Container(
+                        constraints: BoxConstraints(maxWidth: 300),
+                        child: Text(
+                          Get.find<MapService>().chats[widget.chatId]!.chatName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: CircleAvatar(
+                    radius: 17,
+                  ),
+                ),
+              ],
+            ),
           ),
-          title: Text(Get.find<MapService>().chats[widget.chatId]!.chatName),
-          centerTitle: true,
-        ),
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (scrollInfo.metrics.pixels == 0) {
-              _scrollPosition = _scrollController.position.pixels;
-              loadMessages();
-            }
-            return false;
-          },
-          child: Container(
+          body: Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            color: Colors.grey[700],
+            color: Theme.of(context).colorScheme.background,
             child: Column(
               children: [
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: messages.length,
+                    itemCount: messages.isEmpty ? 1 : messages.length,
                     itemBuilder: (context, index) {
+                      if (messages.isEmpty) {
+                        return Center(
+                          child: Text(
+                            "This chat seems to be empty... try writing something",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        );
+                      }
                       if (messages[index].senderId ==
-                          FirebaseAuth.instance.currentUser!.uid) {
+                          Get.find<MapService>().currUserId) {
                         return OwnMessage(
                           message: messages[index].text,
-                          time: formatMessageTime(messages[index].time),
+                          time: formatMessageTimeStr(messages[index].time),
                           messageStatus: messages[index].messageStatus,
                           imageUrl: messages[index].attachedPhoto,
                         );
                       } else {
                         return ReplyMessage(
                           message: messages[index].text,
-                          time: formatMessageTime(messages[index].time),
-                          messageStatus: messages[index].messageStatus,
+                          time: formatMessageTimeStr(messages[index].time),
                           imageUrl: messages[index].attachedPhoto,
                         );
                       }
@@ -122,7 +142,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    height: 70,
+                    height: 80,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -151,7 +171,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                         Row(
                           children: [
                             Padding(
-                              padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              padding: EdgeInsets.fromLTRB(5, 0, 0, 15),
                               child: Container(
                                 width: MediaQuery.of(context).size.width - 65,
                                 child: Card(
@@ -174,6 +194,9 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                         textAlignVertical:
                                             TextAlignVertical.center,
                                         decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal:
+                                                  16), // Adjust padding as needed
                                           border: InputBorder.none,
                                           hintText: "Type a message",
                                           hintStyle:
@@ -206,7 +229,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                               _pickImage();
                                             },
                                           ),
-                                          contentPadding: EdgeInsets.zero,
                                         ),
                                       ),
                                     ),
@@ -216,41 +238,50 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                             ),
                             Padding(
                               padding: const EdgeInsets.only(
-                                bottom: 8,
+                                bottom: 15,
                                 right: 3,
                                 left: 3,
                               ),
                               child: CircleAvatar(
                                 radius: 25,
-                                backgroundColor: Colors.green[600],
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
                                 child: IconButton(
                                   icon: Icon(
                                     Icons.send,
-                                    color: Colors.white,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                   ),
-                                  onPressed: () {
-                                    _sendMessage();
-                                    _scrollController.animateTo(
+                                  onPressed: () async {
+                                    if (_controller.text != "" ||
+                                        (_controller.isBlank ?? false)) {
+                                      String timeahaha = await _sendMessage();
+                                      _scrollController.animateTo(
+                                          _scrollController
+                                                  .position.maxScrollExtent +
+                                              60,
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeOut);
+                                      String messageText = _controller.text;
+                                      messages.add(Message(
+                                          text: messageText,
+                                          time: formatMessageTimeStr(timeahaha),
+                                          chatId: widget.chatId,
+                                          senderId:
+                                              Get.find<MapService>().currUserId,
+                                          messageStatus: MessageStatus.SENT));
+                                      _controller.clear();
+                                      _scrollController.animateTo(
                                         _scrollController
-                                            .position.maxScrollExtent,
+                                                .position.maxScrollExtent +
+                                            60,
                                         duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeOut);
-                                    String messageText = _controller.text;
-                                    messages.add(Message(
-                                        text: messageText,
-                                        time: DateTime.now().toLocal(),
-                                        chatId: widget.chatId,
-                                        senderId: int.parse(FirebaseAuth
-                                            .instance.currentUser!.uid),
-                                        messageStatus: MessageStatus.SENT));
-                                    _controller.clear();
-                                    _scrollController.animateTo(
-                                      _scrollController
-                                          .position.maxScrollExtent,
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                    );
-                                    setState(() {});
+                                        curve: Curves.easeOut,
+                                      );
+                                      setState(() {
+                                        sortMessages();
+                                      });
+                                    }
                                   },
                                 ),
                               ),
@@ -276,13 +307,16 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                           horizontalSpacing: 0,
                           gridPadding: EdgeInsets.zero,
                           initCategory: Category.RECENT,
-                          bgColor: const Color(0xFFF2F2F2),
-                          indicatorColor: Colors.blue,
-                          iconColor: Colors.grey,
-                          iconColorSelected: Colors.blue,
-                          backspaceColor: Colors.blue,
-                          skinToneDialogBgColor: Colors.white,
-                          skinToneIndicatorColor: Colors.grey,
+                          bgColor: Theme.of(context).colorScheme.background,
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          iconColor: Theme.of(context).colorScheme.onBackground,
+                          iconColorSelected:
+                              Theme.of(context).colorScheme.primary,
+                          backspaceColor: Theme.of(context).colorScheme.primary,
+                          skinToneDialogBgColor:
+                              Theme.of(context).colorScheme.onBackground,
+                          skinToneIndicatorColor:
+                              Theme.of(context).colorScheme.onBackground,
                           enableSkinTones: true,
                           recentTabBehavior: RecentTabBehavior.RECENT,
                           recentsLimit: 28,
@@ -318,21 +352,24 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     }
   }
 
-  Future<void> _sendMessage() async {
-    bool response = await Get.find<RequestService>().sendMessage(Message(
-        text: _controller.text,
-        time: DateTime.now().toLocal(),
-        chatId: widget.chatId,
-        senderId: int.parse(FirebaseAuth.instance.currentUser!.uid),
-        messageStatus: MessageStatus.SENT,
-        attachedPhoto: handleImagesToText(_pickedImage)));
+  Future<String> _sendMessage() async {
+    return await Get.find<RequestService>()
+        .sendMessage(widget.chatId, _controller.text);
+    //TODO: handle images
   }
 
   Future<void> fetchNewMessage() async {
     if (Get.find<MapService>().newMessagesBool &&
         Get.find<MapService>().newMessages.containsKey(widget.chatId)) {
       setState(() {
-        messages.addAll(Get.find<MapService>().newMessages[widget.chatId]!);
+        messages.addAll(
+          Get.find<MapService>()
+              .newMessages[widget.chatId]!
+              .where((message) =>
+                  message.senderId != Get.find<MapService>().currUserId)
+              .toList(),
+        );
+        sortMessages();
         Get.find<MapService>().newMessages.remove(widget.chatId);
       });
     }
@@ -341,10 +378,31 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   Future<void> loadMessages() async {
     List<Message> messagePage =
         await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    messages.addAll(messagePage);
+    page++;
     setState(() {
-      messages.addAll(messagePage);
-      page++;
-      _scrollController.jumpTo(_scrollPosition);
+      sortMessages();
+    });
+  }
+
+  Future<void> loadMessagesInit() async {
+    List<Message> messagesPaged =
+        await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    messages.addAll(messagesPaged);
+    setState(() {
+      sortMessages();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 60);
+      });
+    });
+  }
+
+  void sortMessages() {
+    messages.sort((a, b) {
+      DateTime dateTimeA = DateTime.parse(a.time);
+      DateTime dateTimeB = DateTime.parse(b.time);
+      return dateTimeA.compareTo(dateTimeB);
     });
   }
 }

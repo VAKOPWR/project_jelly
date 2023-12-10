@@ -255,10 +255,15 @@ class _LogInPageState extends State<LogInPage> {
                                                     await FirebaseAuth
                                                         .instance.currentUser!
                                                         .getIdToken(true);
+                                                print(idToken);
+                                                GetStorage().write(
+                                                    'firebase_key', idToken);
                                                 Get.find<RequestService>()
-                                                    .setupInterceptor(idToken);
+                                                    .setupInterceptor();
                                                 await Get.find<RequestService>()
                                                     .createUser();
+                                                await Get.find<MapService>()
+                                                    .getCurrUserId();
                                                 _submitBtnController.success();
                                                 Get.off(() => const HomePage(),
                                                     transition: Transition
