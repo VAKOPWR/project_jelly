@@ -10,7 +10,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
-import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/message.dart';
@@ -43,10 +42,6 @@ class RequestService extends getx.GetxService {
         return handler.next(error);
       }),
     );
-  }
-
-  bool isTokenExpired() {
-    return true;
   }
 
   Future<String?> refreshToken() async {
