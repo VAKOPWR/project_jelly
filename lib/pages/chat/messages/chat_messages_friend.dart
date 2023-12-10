@@ -239,8 +239,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                 Icons.send,
                                 color: Colors.white,
                               ),
-                              onPressed: () {
-                                _sendMessage();
+                              onPressed: () async {
+                                String timeahaha = await _sendMessage();
                                 _scrollController.animateTo(
                                     _scrollController.position.maxScrollExtent,
                                     duration: Duration(milliseconds: 300),
@@ -248,8 +248,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                 String messageText = _controller.text;
                                 messages.add(Message(
                                     text: messageText,
-                                    time: formatMessageTime(
-                                        DateTime.now().toLocal()),
+                                    time: formatMessageTimeStr(timeahaha),
                                     chatId: widget.chatId,
                                     senderId: Get.find<MapService>().currUserId,
                                     messageStatus: MessageStatus.SENT));
@@ -328,8 +327,8 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     }
   }
 
-  Future<void> _sendMessage() async {
-    bool response = await Get.find<RequestService>()
+  Future<String> _sendMessage() async {
+    return await Get.find<RequestService>()
         .sendMessage(widget.chatId, _controller.text);
     //TODO: handle images
   }

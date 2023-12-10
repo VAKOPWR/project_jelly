@@ -328,7 +328,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   }
 
   Future<void> _sendMessage() async{
-    bool response = await Get.find<RequestService>().sendMessage(
+    String response = await Get.find<RequestService>().sendMessage(
         widget.chatId, _controller.text);
     //TODO: handle images
   }

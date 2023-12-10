@@ -406,7 +406,7 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> sendMessage(int chatId, String text) async {
+  Future<String> sendMessage(int chatId, String text) async {
     String endpoint = '/chats/message';
 
     try {
@@ -426,14 +426,15 @@ class RequestService extends getx.GetxService {
 
       print(response.statusCode);
       if (response.statusCode == 200) {
-        return true;
+        print(response.data);
+        return response.data;
       } else {
         print('Error sending message. Status code: ${response.statusCode}');
-        return false;
+        return "";
       }
     } catch (error) {
       print('Error sending message: ${error.toString()}');
-      return false;
+      return "";
     }
   }
 

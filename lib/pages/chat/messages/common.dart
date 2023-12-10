@@ -33,7 +33,7 @@ Widget buildReadStatusIcon(MessageStatus messageStatus) {
 //TODO: choose colors here
 
 String formatMessageTime(DateTime messageTime) {
-  return ("${messageTime.toLocal().hour}:${messageTime.minute}");
+  return messageTime.toIso8601String();
 }
 String formatMessageTimeStr(String isoTimeString) {
   RegExp regex = RegExp(r'\d{2}:\d{2}');
