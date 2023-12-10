@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_jelly/pages/friends/friends.dart';
+import 'package:project_jelly/pages/friends.dart';
 
 class NavButtons extends StatelessWidget {
   final Function(LatLng) moveMapToPosition;

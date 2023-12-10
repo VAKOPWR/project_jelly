@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:ffi';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/classes/message_status.dart';
@@ -389,7 +389,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     List<Message> messagesPaged =
         await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
     messages.addAll(messagesPaged);
-
     setState(() {
       sortMessages();
       WidgetsBinding.instance.addPostFrameCallback((_) {

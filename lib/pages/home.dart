@@ -31,12 +31,9 @@ class _HomePageState extends State<HomePage> {
       } else {
         return Scaffold(
           appBar: PreferredSize(
-            preferredSize:
-                Size.fromHeight(0), // Setting the height to 0 hides the app bar
+            preferredSize: Size.fromHeight(0),
             child: AppBar(
-              backgroundColor: Theme.of(context)
-                  .colorScheme
-                  .primary, // Set the color of the app bar
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           ),
           body: Stack(

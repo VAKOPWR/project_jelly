@@ -1,0 +1,5 @@
+./widgets/own_message.dart:  //TODO: colors here
+./widgets/own_message.dart:          color: Colors.green[300],
+./widgets/own_message.dart:                        color: Colors.grey[600],
+./widgets/reply_message.dart:  //TODO: colors here
+./widgets/reply_message.dart:                    color: Colors.grey[600],

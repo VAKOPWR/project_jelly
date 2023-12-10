@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/misc/geocoding.dart';
+import 'package:project_jelly/controller/theme_controller.dart';
 import 'package:project_jelly/pages/helper/loading.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/snackbar_service.dart';
@@ -33,6 +34,9 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
   MapType _mapType = MapType.normal;
   String _locationName = "The Earth";
   Map<MarkerId, Marker> staticMarkers = <MarkerId, Marker>{};
+  ThemeModeOption prevThemeMode = ThemeModeOption.Automatic;
+  String prevMapStyle = '';
+
   final box = GetStorage();
 
   @override
@@ -67,19 +71,19 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     }
   }
 
-  @override
-  void didChangePlatformBrightness() {
-    super.didChangePlatformBrightness();
-    Brightness brightness =
-        View.of(context).platformDispatcher.platformBrightness;
-    if (brightness == Brightness.light) {
-      _mapController.future.then(
-          (value) => value.setMapStyle(GetStorage().read('lightMapStyle')));
-    } else {
-      _mapController.future.then(
-          (value) => value.setMapStyle(GetStorage().read('darkMapStyle')));
-    }
-  }
+  // @override
+  // void didChangePlatformBrightness() {
+  //   super.didChangePlatformBrightness();
+  //   Brightness brightness =
+  //       View.of(context).platformDispatcher.platformBrightness;
+  //   if (brightness == Brightness.light) {
+  //     _mapController.future.then(
+  //         (value) => value.setMapStyle(GetStorage().read('lightMapStyle')));
+  //   } else {
+  //     _mapController.future.then(
+  //         (value) => value.setMapStyle(GetStorage().read('darkMapStyle')));
+  //   }
+  // }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -126,51 +130,80 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        key: _scaffoldKey,
-        body: Get.find<MapService>().getCurrentLocation() == null
-            ? BasicLoadingPage()
-            : Stack(children: [
-                GoogleMap(
-                    compassEnabled: false,
-                    rotateGesturesEnabled: false,
-                    tiltGesturesEnabled: false,
-                    onTap: hideBottomSheet,
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(
-                        Get.find<MapService>().getCurrentLocation()!.latitude,
-                        Get.find<MapService>().getCurrentLocation()!.longitude,
-                      ),
-                      zoom: 13,
-                    ),
-                    onMapCreated: (mapController) {
-                      if (Theme.of(context).brightness == Brightness.light) {
-                        mapController
-                            .setMapStyle(GetStorage().read('lightMapStyle'));
-                      } else {
-                        mapController
-                            .setMapStyle(GetStorage().read('darkMapStyle'));
-                      }
-                      _mapController.complete(mapController);
-                    },
-                    myLocationButtonEnabled: true,
-                    myLocationEnabled: true,
-                    padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
-                    mapType: _mapType,
-                    markers: Set<Marker>.from(
-                            Get.find<MapService>().markers.values.toSet())
-                        .union(staticMarkers.values.toSet()),
-                    onCameraMove: _onCameraMove),
-                AnimatedContainer(
-                    duration: Duration(milliseconds: 300), // Animation duration
-                    height: Get.find<VisibilityService>().isInfoSheetVisible
-                        ? MediaQuery.of(context).size.height * 0.78
-                        : 0,
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    margin: EdgeInsets.fromLTRB(
-                        MediaQuery.of(context).size.width * 0.05, 0, 0, 0),
-                    child:
-                        Get.find<VisibilityService>().highlightedMarker != null
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        String mapStyle;
+        prevThemeMode = themeController.themeModeOption;
+        switch (themeController.themeModeOption) {
+          case ThemeModeOption.Light:
+            mapStyle = GetStorage().read('lightMapStyle');
+            break;
+          case ThemeModeOption.Dark:
+            mapStyle = GetStorage().read('darkMapStyle');
+            break;
+          case ThemeModeOption.Custom:
+            if (themeController.mapModeOption == MapModeOption.Light) {
+              mapStyle = GetStorage().read('lightMapStyle');
+            } else {
+              mapStyle = GetStorage().read('darkMapStyle');
+            }
+            break;
+          case ThemeModeOption.Automatic:
+            if (Theme.of(context).brightness == Brightness.light) {
+              mapStyle = GetStorage().read('lightMapStyle');
+            } else {
+              mapStyle = GetStorage().read('darkMapStyle');
+            }
+            break;
+        }
+        if (prevMapStyle != mapStyle) {
+          prevMapStyle = mapStyle;
+          _mapController.future.then((value) => value.setMapStyle(mapStyle));
+        }
+        return Scaffold(
+            key: _scaffoldKey,
+            body: Get.find<MapService>().getCurrentLocation() == null
+                ? BasicLoadingPage()
+                : Stack(children: [
+                    GoogleMap(
+                        compassEnabled: false,
+                        rotateGesturesEnabled: false,
+                        tiltGesturesEnabled: false,
+                        onTap: hideBottomSheet,
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(
+                            Get.find<MapService>()
+                                .getCurrentLocation()!
+                                .latitude,
+                            Get.find<MapService>()
+                                .getCurrentLocation()!
+                                .longitude,
+                          ),
+                          zoom: 13,
+                        ),
+                        onMapCreated: (mapController) {
+                          mapController.setMapStyle(mapStyle);
+                          _mapController.complete(mapController);
+                        },
+                        myLocationButtonEnabled: true,
+                        myLocationEnabled: true,
+                        padding: EdgeInsets.only(bottom: 100, left: 0, top: 40),
+                        mapType: _mapType,
+                        markers: Set<Marker>.from(
+                                Get.find<MapService>().markers.values.toSet())
+                            .union(staticMarkers.values.toSet()),
+                        onCameraMove: _onCameraMove),
+                    AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        height: Get.find<VisibilityService>().isInfoSheetVisible
+                            ? MediaQuery.of(context).size.height * 0.78
+                            : 0,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        margin: EdgeInsets.fromLTRB(
+                            MediaQuery.of(context).size.width * 0.05, 0, 0, 0),
+                        child: Get.find<VisibilityService>()
+                                    .highlightedMarker !=
+                                null
                             ? MarkerInfoBox(
                                 deleteStaticMarker: deleteStaticMarker,
                                 isStaticMarker: Get.find<VisibilityService>()
@@ -182,104 +215,117 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                                     .highlightedMarkerType,
                               )
                             : null),
-                Platform.isIOS
-                    ? Positioned(
-                        top: 50.0,
-                        right: 10.0,
-                        child: FloatingActionButton(
-                            onPressed: () {
-                              setState(() {
-                                _mapType = getNextMap(_mapType);
-                              });
-                            },
-                            child: Icon(
-                              Icons.map_rounded,
-                              color: Colors.grey[700],
-                            ),
-                            backgroundColor: Colors.grey[50]),
-                      )
-                    : Positioned(
-                        top: 100.0,
-                        right: 12.0,
-                        child: SizedBox(
-                          height: 38,
-                          width: 38,
-                          child: FloatingActionButton(
-                            heroTag: 'mapTypeButton',
-                            onPressed: () {
-                              setState(() {
-                                _mapType = getNextMap(_mapType);
-                              });
-                            },
-                            child: Icon(
-                              Icons.map_rounded,
-                              color: Colors.grey[700],
-                            ),
-                            backgroundColor: Colors.white.withOpacity(0.8),
-                            elevation: 2.0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(0)),
-                            ),
+                    Platform.isIOS
+                        ? Positioned(
+                            top: 50.0,
+                            right: 10.0,
+                            child: FloatingActionButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _mapType = getNextMap(_mapType);
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.map_rounded,
+                                  color: Colors.grey[700],
+                                ),
+                                backgroundColor: Colors.grey[50]),
+                          )
+                        : Positioned(
+                            top: 100.0,
+                            right: 12.0,
+                            child: SizedBox(
+                              height: 38,
+                              width: 38,
+                              child: FloatingActionButton(
+                                heroTag: 'mapTypeButton',
+                                onPressed: () {
+                                  setState(() {
+                                    _mapType = getNextMap(_mapType);
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.map_rounded,
+                                  color: Colors.grey[700],
+                                ),
+                                backgroundColor: Colors.white.withOpacity(0.8),
+                                elevation: 2.0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(0)),
+                                ),
+                              ),
+                            )),
+                    NavButtons(moveMapToPosition: moveMapToPosition),
+                    Platform.isIOS
+                        ? Positioned(
+                            top: 120.0,
+                            right: 10.0,
+                            child: FloatingActionButton(
+                                heroTag: 'placeIconButton',
+                                onPressed: () {
+                                  _showMarkerListBottomSheet();
+                                },
+                                child: Icon(
+                                  Icons.place_rounded,
+                                  color: Colors.grey[700],
+                                ),
+                                backgroundColor: Colors.grey[50]),
+                          )
+                        : Positioned(
+                            top: 150.0,
+                            right: 12.0,
+                            child: SizedBox(
+                              height: 38,
+                              width: 38,
+                              child: FloatingActionButton(
+                                heroTag: 'staticIconButton',
+                                onPressed: () {
+                                  _showMarkerListBottomSheet();
+                                },
+                                child: Icon(
+                                  Icons.place_rounded,
+                                  color: Colors.grey[700],
+                                ),
+                                backgroundColor: Colors.white.withOpacity(0.8),
+                                elevation: 2.0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(0)),
+                                ),
+                              ),
+                            )),
+                    Positioned(
+                      top: 60.0,
+                      left: 25.0,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            _locationName,
+                            style: themeController.mapModeOption ==
+                                    MapModeOption.Automatic
+                                ? TextStyle(
+                                    fontSize: 32.0,
+                                    fontWeight: FontWeight.normal,
+                                    decoration: TextDecoration.underline,
+                                  )
+                                : TextStyle(
+                                    color: themeController.mapModeOption ==
+                                            MapModeOption.Light
+                                        ? Colors.black
+                                        : Colors.white,
+                                    fontSize: 32.0,
+                                    fontWeight: FontWeight.normal,
+                                    decoration: TextDecoration.underline,
+                                  ),
                           ),
-                        )),
-                NavButtons(moveMapToPosition: moveMapToPosition),
-                Platform.isIOS
-                    ? Positioned(
-                        top: 120.0,
-                        right: 10.0,
-                        child: FloatingActionButton(
-                            heroTag: 'placeIconButton',
-                            onPressed: () {
-                              _showMarkerListBottomSheet();
-                            },
-                            child: Icon(
-                              Icons.place_rounded,
-                              color: Colors.grey[700],
-                            ),
-                            backgroundColor: Colors.grey[50]),
-                      )
-                    : Positioned(
-                        top: 150.0,
-                        right: 12.0,
-                        child: SizedBox(
-                          height: 38,
-                          width: 38,
-                          child: FloatingActionButton(
-                            heroTag: 'staticIconButton',
-                            onPressed: () {
-                              _showMarkerListBottomSheet();
-                            },
-                            child: Icon(
-                              Icons.place_rounded,
-                              color: Colors.grey[700],
-                            ),
-                            backgroundColor: Colors.white.withOpacity(0.8),
-                            elevation: 2.0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(0)),
-                            ),
-                          ),
-                        )),
-                Positioned(
-                  top: 60.0,
-                  left: 25.0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        _locationName,
-                        style: TextStyle(
-                          fontSize: 32.0,
-                          fontWeight: FontWeight.normal,
-                          decoration: TextDecoration.underline,
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
-              ]));
+                    )
+                  ]));
+      },
+    );
   }
 
   void _showMarkerListBottomSheet() {
@@ -295,15 +341,33 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                 height: 330.0,
                 padding: EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Mark your places",
-                      style: GoogleFonts.roboto(
-                          color: Theme.of(context).colorScheme.onBackground,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold),
-                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Mark your places",
+                            style: GoogleFonts.roboto(
+                                color:
+                                    Theme.of(context).colorScheme.onBackground,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Get.find<VisibilityService>().isBottomSheetOpen =
+                                  false;
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Theme.of(context).colorScheme.background,
+                            ),
+                          ),
+                        ]),
                     SizedBox(height: 16.0),
                     Wrap(
                       spacing: 16.0,
@@ -337,23 +401,6 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
                     ),
                     SizedBox(height: 16.0),
                   ],
-                ),
-              ),
-              Positioned(
-                top: 8.0,
-                right: 8.0,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Get.find<VisibilityService>().isBottomSheetOpen = false;
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: Colors.black,
-                  ),
                 ),
               ),
             ],
@@ -399,7 +446,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
               height: 70.0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey[700]!,
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
               ),
               child: Center(
                 child: Image.memory(
@@ -438,8 +485,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     markerId = MarkerId(newMarkerName);
     Marker marker = createMarker(markerId, center, markerType);
     setState(() {
-      addStaticMarker(marker);
-      Get.find<MapService>().addStaticMarkerTypeId(markerType, newMarkerName);
+      addStaticMarker(marker, markerType, newMarkerName);
     });
   }
 
@@ -448,13 +494,13 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     if (markerData != null) {
       List<Map<String, dynamic>> data =
           List<Map<String, dynamic>>.from(json.decode(markerData));
-
       for (Map<String, dynamic> marker in data) {
         String markerType = marker["id"].toString().split(' ')[0];
         MarkerId markerId = MarkerId(marker["id"].toString());
         LatLng markerPosition = LatLng(marker["latitude"], marker["longitude"]);
-        staticMarkers[markerId] =
-            createMarker(markerId, markerPosition, markerType);
+        Marker newMarker = createMarker(markerId, markerPosition, markerType);
+        staticMarkers[markerId] = newMarker;
+        Get.find<MapService>().addStaticPoint(newMarker);
         Get.find<MapService>()
             .addStaticMarkerTypeId(markerType, marker["id"].toString());
       }
@@ -481,16 +527,20 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
       },
       onDragEnd: (LatLng newPosition) {
         staticMarkers.remove(markerId);
-        staticMarkers[markerId] =
-            createMarker(markerId, newPosition, markerType);
+        Get.find<MapService>().deleteStaticPoint(markerId);
+        Marker newMarker = createMarker(markerId, newPosition, markerType);
+        staticMarkers[markerId] = newMarker;
+        Get.find<MapService>().addStaticPoint(newMarker);
         Get.find<MapService>().writeStaticMarkersData(staticMarkers);
       },
     );
   }
 
-  void addStaticMarker(Marker marker) {
+  void addStaticMarker(Marker marker, String markerType, String newMarkerName) {
     staticMarkers[marker.markerId] = marker;
+    Get.find<MapService>().addStaticPoint(marker);
     Get.find<MapService>().writeStaticMarkersData(staticMarkers);
+    Get.find<MapService>().addStaticMarkerTypeId(markerType, newMarkerName);
   }
 
   void deleteStaticMarker(String markerType, MarkerId markerId) {
@@ -504,6 +554,7 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
             .remove(markerToDelete.markerId.value);
       }
     }
+    Get.find<MapService>().deleteStaticPoint(markerId);
     Get.find<MapService>().writeStaticMarkersData(staticMarkers);
   }
 
@@ -511,8 +562,8 @@ class _MapWidgetState extends State<MapWidget> with WidgetsBindingObserver {
     GoogleMapController controller = await _mapController.future;
     controller.animateCamera(
       CameraUpdate.newLatLngZoom(
-        newCameraPosition, // New York City coordinates
-        15, // Zoom level
+        newCameraPosition,
+        15,
       ),
     );
   }

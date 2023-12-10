@@ -43,7 +43,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
   Widget _buildDynamicDescription() {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.9),
+        color: Theme.of(context).colorScheme.background.withOpacity(0.95),
         borderRadius: BorderRadius.all(
           Radius.circular(10.0),
         ),
@@ -65,7 +65,8 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                     height: 5,
                   ),
                   CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.background.withOpacity(0),
                     radius: 50,
                     backgroundImage:
                         Get.find<MapService>().imageProviders[widget.id],
@@ -188,7 +189,6 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
       text = text.substring(0, maxCharacters - 3) + '...';
     }
 
-    // Return a single column with the text
     return Text(
       text,
       style: GoogleFonts.bebasNeue(
@@ -203,7 +203,7 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
   Widget _buildStaticDescription() {
     return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.background.withOpacity(0.95),
           borderRadius: BorderRadius.all(
             Radius.circular(10.0),
           ),
@@ -263,7 +263,10 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
                                 Icon(
                                   Icons.delete_outline_rounded,
                                   size: 50.0,
-                                  color: Theme.of(context).primaryColor,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground
+                                      .withOpacity(0.9),
                                 ),
                               ],
                             ),

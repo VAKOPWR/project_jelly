@@ -18,7 +18,6 @@ class FriendPendingTab extends StatefulWidget {
 
 class _FriendPendingTabState extends State<FriendPendingTab> {
   List<BasicUser> filteredFriends = [];
-  // late Timer _stateTimer;
 
   @override
   void initState() {
@@ -28,7 +27,6 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
 
   @override
   void dispose() {
-    // _stateTimer.cancel();
     super.dispose();
   }
 
@@ -61,7 +59,7 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
       leading: CircleAvatar(
         backgroundImage: NetworkImage(friend.avatar!),
         radius: 29,
-        backgroundColor: Theme.of(context).canvasColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
       ),
       title: Text(
         friend.name,
@@ -71,11 +69,19 @@ class _FriendPendingTabState extends State<FriendPendingTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(
+              Icons.add,
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+            ),
             onPressed: () => _acceptFriendRequest(friend.id),
           ),
           IconButton(
-            icon: Icon(Icons.close),
+            icon: Icon(
+              Icons.close,
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+            ),
             onPressed: () => _declineFriendRequest(friend.id),
           ),
         ],

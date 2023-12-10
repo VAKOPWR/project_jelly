@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/pages/chat/messages/chat_messages_group.dart';
 import 'package:project_jelly/pages/chat/messages/common.dart';
+import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
-
-import '../../../classes/chat.dart';
-import '../../../service/map_service.dart';
 
 class ChatGroupsTab extends StatefulWidget {
   const ChatGroupsTab({Key? key}) : super(key: key);

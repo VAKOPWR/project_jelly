@@ -73,12 +73,13 @@ class _FriendListTabState extends State<FriendListTab> {
     return ListTile(
       leading: CircleAvatar(
         radius: 28,
-        backgroundColor: Theme.of(context).canvasColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         child: Image(
-          image: Get.find<MapService>().imageProviders[MarkerId(friend.id)]!,
+          image: Get.find<MapService>().imageProviders[MarkerId(friend.id)] ??
+              Get.find<MapService>().defaultImageProvider!,
           width: 56,
           height: 56,
-          fit: BoxFit.cover, // Adjust the fit as needed
+          fit: BoxFit.cover,
         ),
       ),
       title: Text(
@@ -89,7 +90,11 @@ class _FriendListTabState extends State<FriendListTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(Icons.location_searching_rounded),
+            icon: Icon(
+              Icons.location_searching_rounded,
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+            ),
             onPressed: () {
               if (Get.find<MapService>()
                           .friendsData[MarkerId(friend.id)]!
@@ -124,7 +129,11 @@ class _FriendListTabState extends State<FriendListTab> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: Icon(
+              Icons.delete,
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+            ),
             onPressed: () async {
               bool success = false;
               int? friendId = int.tryParse(friend.id);
