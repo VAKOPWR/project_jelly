@@ -336,7 +336,11 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   Future<void> fetchNewMessage() async {
     if (Get.find<MapService>().newMessagesBool && Get.find<MapService>().newMessages.containsKey(widget.chatId)){
       setState(() {
-        messages.addAll(Get.find<MapService>().newMessages[widget.chatId]!);
+        messages.addAll(
+          Get.find<MapService>().newMessages[widget.chatId]!
+              .where((message) => message.senderId == Get.find<MapService>().currUserId)
+              .toList(),
+        );
         Get.find<MapService>().newMessages.remove(widget.chatId);
       });
     }

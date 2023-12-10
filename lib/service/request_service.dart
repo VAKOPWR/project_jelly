@@ -344,7 +344,6 @@ class RequestService extends getx.GetxService {
       Response response = await dio.get("${ApiPath}${endpoint}");
       if (response.statusCode == 200) {
         var data = response.data;
-        print(data);
         return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
       } else {
         print('Error loading chats. Status code: ${response.statusCode}');
@@ -368,7 +367,7 @@ class RequestService extends getx.GetxService {
       print(
           "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}");
       Response response = await dio.post(
-        "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
+        "${ApiPath}${endpoint}${Get.find<MapService>().currUserId}",
         data: Get.find<MapService>()
             .chats
             .keys
@@ -389,17 +388,17 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<List<Message>> loadMessagesPaged(Long groupId, int page) async {
-    String endpoint = '/chats/loadMessagesPaged';
+  Future<List<Message>> loadMessagesPaged(int groupId, int page) async {
+    String endpoint = '/chats/message/${groupId}';
 
     try {
-      String url = "${ApiPath}${endpoint}?groupId=${groupId}&page=${page}";
+      String url = "${ApiPath}${endpoint}?pageToLoad=${page}";
 
       Response response = await dio.get(url);
 
       if (response.statusCode == 200) {
         var data = response.data;
-        print(response.data);
+        print("messages paged: ${data}");
         return (data as List).map((item) => Message.fromJson(item)).toList();
       } else {
         print('Error loading messages. Status code: ${response.statusCode}');
