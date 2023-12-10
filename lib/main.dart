@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -29,9 +30,9 @@ import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/themes/theme_constants.dart';
 import 'package:project_jelly/controller/theme_controller.dart';
 
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-
   print("Handling a background message: ${message}");
 }
 
@@ -43,28 +44,16 @@ void main() async {
     Get.find<RequestService>().setupInterceptor('');
   }
   Get.find<ThemeController>().loadThemePreferences();
-  await registerMessageHandlers();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await Get.find<FCMService>().initNotifications();
+  if (Platform.isAndroid) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await Get.find<FCMService>().initNotifications();
+  }
   await Get.find<StyleService>().loadMapStyles();
   await Get.find<FCMService>().setupInteractedMessage();
   await Get.find<MapService>().prepareService();
   await InternetCheckerBanner().initialize(title: "Whoops");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProjectJelly());
-}
-
-Future<void> registerMessageHandlers() async {
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
-
-    if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification}');
-    }
-  });
-
-
 }
 
 class ProjectJelly extends StatelessWidget {
