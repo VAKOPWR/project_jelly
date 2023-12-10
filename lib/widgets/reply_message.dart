@@ -30,7 +30,7 @@ class ReplyMessage extends StatelessWidget {
               bottomRight: Radius.circular(8),
             ),
           ),
-          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+          color: Color.fromRGBO(30, 30, 30, 1),
           margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           child: Stack(
             children: [
@@ -50,9 +50,7 @@ class ReplyMessage extends StatelessWidget {
                 ),
                 child: Text(
                   message,
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onPrimary),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
               Positioned(
@@ -62,10 +60,7 @@ class ReplyMessage extends StatelessWidget {
                   time,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.5),
+                    color: Colors.grey[300],
                   ),
                 ),
               ),

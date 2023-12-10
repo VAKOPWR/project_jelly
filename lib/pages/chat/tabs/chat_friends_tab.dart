@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/map_service.dart';
@@ -82,7 +83,6 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
         onSearchChanged: updateSearchQuery,
         content: Builder(builder: (BuildContext context) {
           if (filteredChats.isEmpty) {
-            //TODO: also style this
             return Container(
               child: Center(
                 child: Text("Ooooops, nothing to see here..."),
@@ -100,12 +100,18 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                       Get.to(() => ChatMessagesFriend(chatId: chat.chatId));
                     },
                     child: ListTile(
-                      leading: Stack(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: handleTextToImages(chat.picture),
-                          )
-                        ],
+                      leading: CircleAvatar(
+                        radius: 28,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.background,
+                        child: Image(
+                          image: Get.find<MapService>().imageProviders[
+                                  MarkerId(chat.friendId.toString())] ??
+                              Get.find<MapService>().defaultImageProvider!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       title: Row(
                         children: [
@@ -115,7 +121,8 @@ class _ChatFriendsTabState extends State<ChatFriendsTab> {
                         ],
                       ),
                       subtitle: Text(
-                          chat.message?.attachedPhoto != null
+                          chat.message?.attachedPhoto != null &&
+                                  chat.message?.attachedPhoto != ''
                               ? 'Photo'
                               : chat.message?.text ?? '',
                           overflow: TextOverflow.ellipsis),

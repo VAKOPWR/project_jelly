@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/login.dart';
+import 'package:project_jelly/service/request_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -13,9 +14,24 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   TextEditingController _usernameController = TextEditingController();
+  // String userName = FirebaseAuth.instance.currentUser!.displayName!;
+  String userName = '';
+
+  @override
+  void initState() {
+    loadUsername();
+    super.initState();
+  }
+
+  Future<void> loadUsername() async {
+    String newUsername = await Get.find<RequestService>().getUsername();
+    setState(() {
+      userName = newUsername;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    var userName = FirebaseAuth.instance.currentUser!.displayName!;
     return Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(250),
@@ -121,9 +137,34 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text('Cancel'),
               ),
               TextButton(
-                onPressed: () {
-                  // TODO: Implement logic to update the username
+                onPressed: () async {
+                  bool usernameChangeSuccess = await Get.find<RequestService>()
+                      .changeUsername(_usernameController.text);
                   Navigator.of(context).pop();
+                  if (usernameChangeSuccess) {
+                    loadUsername();
+                    Get.snackbar(
+                        "Congratulations", "Username was successfully changed",
+                        icon: Icon(Icons.sentiment_satisfied_alt_outlined,
+                            color: Colors.white, size: 35),
+                        snackPosition: SnackPosition.TOP,
+                        isDismissible: false,
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.green[400],
+                        margin: EdgeInsets.zero,
+                        snackStyle: SnackStyle.GROUNDED);
+                  } else {
+                    Get.snackbar(
+                        "Oooooops...", "Something went wrong, please try again",
+                        icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+                            color: Colors.white, size: 35),
+                        snackPosition: SnackPosition.TOP,
+                        isDismissible: false,
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.red[400],
+                        margin: EdgeInsets.zero,
+                        snackStyle: SnackStyle.GROUNDED);
+                  }
                 },
                 child: Text('Save'),
               ),

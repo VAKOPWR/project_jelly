@@ -59,6 +59,7 @@ class MapService extends GetxService {
   late DateTime messagesLastChecked;
   late DateTime chatsLastChecked;
   Map<int, List<Message>> newMessages = <int, List<Message>>{};
+  Map<int, List<ChatUser>> chatUsers = <int, List<ChatUser>>{};
   Map<int, Map<int, ChatUser>> groupChatUsers = <int, Map<int, ChatUser>>{};
   Map<int, int> friendChatMapping = {};
   late int currUserId;
@@ -95,7 +96,6 @@ class MapService extends GetxService {
     await loadStaticMarkers();
     await loadDefaultImageProvider();
     if (FirebaseAuth.instance.currentUser != null) {
-      // TODO: Add ping request verification
       await fetchFriendsData();
       await loadCustomAvatars();
       await loadImageProviders();
@@ -167,7 +167,6 @@ class MapService extends GetxService {
             newFriendChatsBool = true;
           }
         }
-
       }
     });
   }
@@ -332,7 +331,8 @@ class MapService extends GetxService {
   }
 
   Future<void> loadDefaultAvatar() async {
-    defaultAvatar = await getBytesFromAsset('assets/no_avatar.png', 150);
+    defaultAvatar = await modifyImage(
+        await getBytesFromAsset('assets/no_avatar.png', 150), false, '');
   }
 
   Future<void> loadDefaultImageProvider() async {
@@ -499,5 +499,14 @@ class MapService extends GetxService {
     if (userId != null) {
       currUserId = userId;
     }
+  }
+
+  int? getChatKeyByFriendId(int friendId) {
+    for (var entry in chats.entries) {
+      if (entry.value.friendId == friendId) {
+        return entry.key;
+      }
+    }
+    return null;
   }
 }

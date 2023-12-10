@@ -9,7 +9,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/auth/reset_password.dart';
-import 'package:project_jelly/pages/chat/messages/chat_messages_friend.dart';
 import 'package:project_jelly/pages/messages.dart';
 import 'package:project_jelly/pages/chat/tabs/create_chat_group.dart';
 import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';

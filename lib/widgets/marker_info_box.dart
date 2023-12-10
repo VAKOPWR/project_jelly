@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_jelly/pages/chat/messages/chat_messages_friend.dart';
 import 'package:project_jelly/service/map_service.dart';
 
 class MarkerInfoBox extends StatefulWidget {
@@ -123,7 +124,9 @@ class _MarkerInfoBoxState extends State<MarkerInfoBox> {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: Open chat
+                  Get.to(() => ChatMessagesFriend(
+                      chatId: Get.find<MapService>()
+                          .getChatKeyByFriendId(int.parse(widget.id.value))));
                 },
                 style: TextButton.styleFrom(
                   padding:
