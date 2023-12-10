@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -258,10 +260,15 @@ class _LogInPageState extends State<LogInPage> {
                                                 print(idToken);
                                                 GetStorage().write(
                                                     'firebase_key', idToken);
-                                                Get.find<RequestService>()
-                                                    .setupInterceptor();
-                                                await Get.find<RequestService>()
-                                                    .createUser();
+                                                Get.find<RequestService>().setupInterceptor(idToken);
+                                                if (Platform.isAndroid) {
+                                                  await Get.find<RequestService>()
+                                                      .createUser().then((value) async => await Get.find<RequestService>().updateFcmToken());
+                                                }
+                                                else {
+                                                  await Get.find<RequestService>()
+                                                      .createUser();
+                                                }
                                                 await Get.find<MapService>()
                                                     .getCurrUserId();
                                                 _submitBtnController.success();
