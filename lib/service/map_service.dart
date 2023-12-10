@@ -57,7 +57,7 @@ class MapService extends GetxService {
   late DateTime messagesLastChecked;
   late DateTime chatsLastChecked;
   Map<int, List<Message>> newMessages = <int, List<Message>>{};
-  Map<int, Map<int, ChatUser>> groupChatUsers = <int,  Map<int, ChatUser>>{};
+  Map<int, Map<int, ChatUser>> groupChatUsers = <int, Map<int, ChatUser>>{};
   Map<int, int> friendChatMapping = {};
   late int currUserId;
   bool newMessagesBool = false;
@@ -105,52 +105,54 @@ class MapService extends GetxService {
     readStaticMarkersData();
     readGhostedFriends();
 
-    Timer.periodic(Duration(seconds: 5), (timer) async {
-      if ((FirebaseAuth.instance.currentUser != null) && !chats.isEmpty) {
-        List<Message> newMessagesFetched = await Get.find<RequestService>().loadNewMessages();
-        if (!newMessagesFetched.isEmpty){
-          for (Message message in newMessagesFetched){
-            chats[message.chatId]?.message = message;
-            if (!newMessages.containsKey(message.chatId)) {
-              newMessages[message.chatId] = [message];
-            } else {
-              newMessages[message.chatId]!.add(message);
-            }
-          }
-          newMessagesBool = true;
-        }
-        messagesLastChecked = DateTime.now();
-      }
+    // Timer.periodic(Duration(seconds: 5), (timer) async {
+    //   if ((FirebaseAuth.instance.currentUser != null) && !chats.isEmpty) {
+    //     List<Message> newMessagesFetched =
+    //         await Get.find<RequestService>().loadNewMessages();
+    //     if (!newMessagesFetched.isEmpty) {
+    //       for (Message message in newMessagesFetched) {
+    //         chats[message.chatId]?.message = message;
+    //         if (!newMessages.containsKey(message.chatId)) {
+    //           newMessages[message.chatId] = [message];
+    //         } else {
+    //           newMessages[message.chatId]!.add(message);
+    //         }
+    //       }
+    //       newMessagesBool = true;
+    //     }
+    //     messagesLastChecked = DateTime.now();
+    //   }
+    // });
 
-    });
-
-    Timer.periodic(Duration(seconds: 3), (timer) async{
+    Timer.periodic(Duration(seconds: 3), (timer) async {
       List<ChatDTO> newChats = await Get.find<RequestService>().fetchNewChats();
-      if (!newChats.isEmpty){
-        for (ChatDTO chat in newChats){
+      if (!newChats.isEmpty) {
+        for (ChatDTO chat in newChats) {
           Message? message = null;
-          if (chat.lastMessageSenderId!=null){
-            message = Message(chatId: chat.groupId,
+          if (chat.lastMessageSenderId != null) {
+            message = Message(
+                chatId: chat.groupId,
                 senderId: chat.lastMessageSenderId!,
                 text: chat.lastMessageText!,
                 time: chat.lastMessageTimeSent!,
                 messageStatus: chat.lastMessageMessagesStatus!,
                 attachedPhoto: chat.lastMessageAttachedPhoto);
           }
-          chats.putIfAbsent(chat.groupId, () => new Chat(
-              isFriendship: chat.friendship,
-              chatName: chat.groupName,
-              friendId: chat.friendId,
-              chatId: chat.groupId,
-              picture: chat.picture,
-              isMuted: chat.muted,
-              isPinned: chat.pinned,
-              message: message
-          ));
-          if (chat.groupUsers!=null){
+          chats.putIfAbsent(
+              chat.groupId,
+              () => new Chat(
+                  isFriendship: chat.friendship,
+                  chatName: chat.groupName,
+                  friendId: chat.friendId,
+                  chatId: chat.groupId,
+                  picture: chat.picture,
+                  isMuted: chat.muted,
+                  isPinned: chat.pinned,
+                  message: message));
+          if (chat.groupUsers != null) {
             groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
           }
-          if (chat.friendship){
+          if (chat.friendship) {
             friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
           }
         }
@@ -158,32 +160,35 @@ class MapService extends GetxService {
     });
   }
 
-  Future<void> loadChats() async{
-    List<ChatDTO> listedChats = await Get.find<RequestService>().loadChatsRequest();
-    for (ChatDTO chat in listedChats){
+  Future<void> loadChats() async {
+    List<ChatDTO> listedChats =
+        await Get.find<RequestService>().loadChatsRequest();
+    for (ChatDTO chat in listedChats) {
       Message? message = null;
-      if (chat.lastMessageSenderId!=null){
-        message = Message(chatId: chat.groupId,
+      if (chat.lastMessageSenderId != null) {
+        message = Message(
+            chatId: chat.groupId,
             senderId: chat.lastMessageSenderId!,
             text: chat.lastMessageText!,
             time: chat.lastMessageTimeSent!,
             messageStatus: chat.lastMessageMessagesStatus!,
             attachedPhoto: chat.lastMessageAttachedPhoto);
       }
-      chats.putIfAbsent(chat.groupId, () => new Chat(
-          isFriendship: chat.friendship,
-          chatName: chat.groupName,
-          friendId: chat.friendId,
-          chatId: chat.groupId,
-          picture: chat.picture,
-          isMuted: chat.muted,
-          isPinned: chat.pinned,
-          message: message
-      ));
-      if (chat.groupUsers!=null){
+      chats.putIfAbsent(
+          chat.groupId,
+          () => new Chat(
+              isFriendship: chat.friendship,
+              chatName: chat.groupName,
+              friendId: chat.friendId,
+              chatId: chat.groupId,
+              picture: chat.picture,
+              isMuted: chat.muted,
+              isPinned: chat.pinned,
+              message: message));
+      if (chat.groupUsers != null) {
         groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
       }
-      if (chat.friendship){
+      if (chat.friendship) {
         friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
       }
     }
@@ -422,7 +427,7 @@ class MapService extends GetxService {
 
   Future<void> getCurrUserId() async {
     int? userId = await Get.find<RequestService>().getCurrUserIdRequest();
-    if (userId!=null){
+    if (userId != null) {
       currUserId = userId;
     }
   }

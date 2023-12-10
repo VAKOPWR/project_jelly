@@ -334,23 +334,21 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<List<ChatDTO>> loadChatsRequest() async{
+  Future<List<ChatDTO>> loadChatsRequest() async {
     String endpoint = '/chats';
     print("${ApiPath}${endpoint}");
 
-    try{
+    try {
       Response response = await dio.get("${ApiPath}${endpoint}");
-      if (response.statusCode == 200){
+      if (response.statusCode == 200) {
         var data = response.data;
         print(data);
         return (data as List).map((item) => ChatDTO.fromJson(item)).toList();
-      }
-      else {
+      } else {
         print('Error loading chats. Status code: ${response.statusCode}');
         return List.empty();
       }
-    }
-    catch (error){
+    } catch (error) {
       print('Error loading chats: ${error.toString()}');
       return List.empty();
     }
@@ -359,14 +357,14 @@ class RequestService extends getx.GetxService {
   Future<List<Message>> loadNewMessages() async {
     String endpoint = '/chats/message/new/';
 
-    print(Get.find<MapService>().messagesLastChecked.toIso8601String());
-    print(Get.find<MapService>().chats.keys.toList());
     try {
       Response response = await dio.post(
         "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
-        data: {
-          'groupIds': Get.find<MapService>().chats.keys.toList(),
-        },
+        data: Get.find<MapService>()
+            .chats
+            .keys
+            .map((key) => key.toString())
+            .toList(),
       );
       if (response.statusCode == 200) {
         var data = response.data;
@@ -380,7 +378,6 @@ class RequestService extends getx.GetxService {
       return List.empty();
     }
   }
-
 
   Future<List<Message>> loadMessagesPaged(Long groupId, int page) async {
     String endpoint = '/chats/loadMessagesPaged';
@@ -403,7 +400,7 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<bool> sendMessage(int chatId, String text) async{
+  Future<bool> sendMessage(int chatId, String text) async {
     String endpoint = '/chats/message';
 
     try {
@@ -423,7 +420,6 @@ class RequestService extends getx.GetxService {
 
       print(response.statusCode);
       if (response.statusCode == 200) {
-
         return true;
       } else {
         print('Error sending message. Status code: ${response.statusCode}');
@@ -438,13 +434,12 @@ class RequestService extends getx.GetxService {
   Future<int?> getCurrUserIdRequest() async {
     String endpoint = '/user/getId/${FirebaseAuth.instance.currentUser!.email}';
 
-    try{
+    try {
       String url = "${ApiPath}${endpoint}";
 
       Response response = await dio.get(url);
 
       if (response.statusCode == 200) {
-
         return response.data as int;
       } else {
         print('Error getting user id. Status code: ${response.statusCode}');
@@ -454,25 +449,21 @@ class RequestService extends getx.GetxService {
       print('Error getting user id: ${error.toString()}');
       return null;
     }
-    }
+  }
 
   Future<List<ChatDTO>> fetchNewChats() async {
     String endpoint = '/chats/new';
 
-    Map<String, dynamic> queryData = {
-      'groupIds': Get.find<MapService>().chats.keys.toList(),
-    };
-    print(queryData);
     try {
       Response response = await dio.post(
         "${ApiPath}${endpoint}",
-        data: {
-          'groupIds': queryData,
-        },
+        data: Get.find<MapService>()
+            .chats
+            .keys
+            .toList()
+            .map((id) => id.toString())
+            .toList(),
       );
-
-      print(response.statusCode);
-
       if (response.statusCode == 200) {
         var data = response.data;
         print(response.data);
@@ -486,5 +477,4 @@ class RequestService extends getx.GetxService {
       return List.empty();
     }
   }
-  }
-
+}
