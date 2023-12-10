@@ -38,7 +38,7 @@ class OwnMessage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.7,
-          minWidth: 30.0,
+          minWidth: 70.0,
         ),
         child: Card(
           elevation: 1,

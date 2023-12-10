@@ -105,17 +105,18 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
             child: Column(
               children: [
                 Expanded(
-                  child: messages.isEmpty
-                      ? Center(
-                    child: Text(
-                      "This chat seems to be empty... try writing something",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  )
-                      : ListView.builder(
+                  child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: messages.length,
+                    itemCount: messages.isEmpty ? 1 : messages.length,
                     itemBuilder: (context, index) {
+                      if (messages.isEmpty){
+                        return Center(
+                          child: Text(
+                            "This chat seems to be empty... try writing something",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        );
+                      }
                       if (messages[index].senderId==Get.find<MapService>().currUserId){
                         return OwnMessage(
                           message: messages[index].text,

@@ -362,7 +362,7 @@ class RequestService extends getx.GetxService {
     print(Get.find<MapService>().messagesLastChecked.toIso8601String());
     print(Get.find<MapService>().chats.keys.toList());
     try {
-      Response response = await dio.get(
+      Response response = await dio.post(
         "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
         data: {
           'groupIds': Get.find<MapService>().chats.keys.toList(),
@@ -460,11 +460,11 @@ class RequestService extends getx.GetxService {
     String endpoint = '/chats/new';
 
     Map<String, dynamic> queryData = {
-      'groupIds': Get.find<MapService>().chats.keys.toSet(),
+      'groupIds': Get.find<MapService>().chats.keys.toList(),
     };
     print(queryData);
     try {
-      Response response = await dio.get(
+      Response response = await dio.post(
         "${ApiPath}${endpoint}",
         data: {
           'groupIds': queryData,

@@ -71,20 +71,29 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.arrow_back),
-            // SizedBox(width: 10),
-            CircleAvatar(
-              radius: 10,
-            )
-          ],
+        appBar: AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: CircleAvatar(
+                  radius: 17,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 300),
+                  child: Text(
+                    Get.find<MapService>().chats[widget.chatId]!.chatName,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        title: Text(Get.find<MapService>().chats[widget.chatId]!.chatName),
-        centerTitle: true,
-      ),
       body:
       NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
@@ -101,17 +110,18 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         child: Column(
           children: [
             Expanded(
-              child: messages.isEmpty
-                  ? Center(
-                child: Text(
-                  "This chat seems to be empty... try writing something",
-                  style: TextStyle(fontSize: 18),
-                ),
-              )
-                  : ListView.builder(
+              child: ListView.builder(
                 controller: _scrollController,
-                itemCount: messages.length,
+                itemCount: messages.isEmpty ? 1 : messages.length,
                 itemBuilder: (context, index) {
+                  if (messages.isEmpty){
+                    return Center(
+                      child: Text(
+                        "This chat seems to be empty... try writing something",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    );
+                  }
                   if (messages[index].senderId==Get.find<MapService>().currUserId){
                     return OwnMessage(
                       message: messages[index].text,
