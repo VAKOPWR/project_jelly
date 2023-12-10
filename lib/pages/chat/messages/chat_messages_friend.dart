@@ -46,10 +46,13 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         });
       }
     });
+    Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
     _stateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       setState(() {
         if (Get.find<MapService>().newMessagesBool){
           fetchNewMessage();
+          print(messages);
+          print(Get.find<MapService>().newMessages[widget.chatId]);
         }
       });
     });
@@ -341,7 +344,11 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   Future<void> fetchNewMessage() async {
     if (Get.find<MapService>().newMessagesBool && Get.find<MapService>().newMessages.containsKey(widget.chatId)){
       setState(() {
-        messages.addAll(Get.find<MapService>().newMessages[widget.chatId]!);
+        messages.addAll(
+          Get.find<MapService>().newMessages[widget.chatId]!
+              .where((message) => message.senderId != Get.find<MapService>().currUserId)
+              .toList(),
+        );
         Get.find<MapService>().newMessages.remove(widget.chatId);
       });
     }
