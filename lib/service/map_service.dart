@@ -16,6 +16,7 @@ import 'package:project_jelly/classes/friend.dart';
 import 'package:project_jelly/logic/permissions.dart';
 import 'package:project_jelly/misc/image_modifier.dart';
 import 'package:project_jelly/misc/uint8list_image.dart';
+import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/service/visibility_service.dart';
 
@@ -136,7 +137,7 @@ class MapService extends GetxService {
                 chatId: chat.groupId,
                 senderId: chat.lastMessageSenderId!,
                 text: chat.lastMessageText!,
-                time: chat.lastMessageTimeSent!,
+                time: formatMessageTime(chat.lastMessageTimeSent!),
                 messageStatus: chat.lastMessageMessagesStatus!,
                 attachedPhoto: chat.lastMessageAttachedPhoto);
           }
@@ -175,7 +176,7 @@ class MapService extends GetxService {
             chatId: chat.groupId,
             senderId: chat.lastMessageSenderId!,
             text: chat.lastMessageText!,
-            time: chat.lastMessageTimeSent!,
+            time: formatMessageTime(chat.lastMessageTimeSent!),
             messageStatus: chat.lastMessageMessagesStatus!,
             attachedPhoto: chat.lastMessageAttachedPhoto);
       }

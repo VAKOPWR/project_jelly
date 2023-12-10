@@ -128,7 +128,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
                             if (chat.message != null)
                               buildReadStatusIcon(chat.message!.messageStatus),
                             Text(
-                              chat.message != null ? formatLastSentTime(chat.message!.time) : '',
+                              chat.message != null ? chat.message!.time : '',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
