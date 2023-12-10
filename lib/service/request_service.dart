@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/friend.dart';
@@ -25,7 +26,8 @@ class RequestService extends getx.GetxService {
   Battery battery = Battery();
   int batteryLevel = 100;
 
-  void setupInterceptor(String? idToken) {
+  void setupInterceptor() {
+    String? idToken = GetStorage().read('firebase_key');
     dio.interceptors.add(
       InterceptorsWrapper(onRequest:
           (RequestOptions options, RequestInterceptorHandler handler) async {
@@ -35,6 +37,7 @@ class RequestService extends getx.GetxService {
       }, onError: (error, handler) async {
         if (error.response?.statusCode == 500) {
           idToken = await refreshToken();
+          GetStorage().write('firebase_key', idToken);
           dio.options.headers['Authorization'] = idToken ?? '';
           dio.options.headers['Content-Type'] = 'application/json';
           return handler.resolve(await dio.fetch(error.requestOptions));
@@ -199,6 +202,7 @@ class RequestService extends getx.GetxService {
   }
 
   Future<bool> acceptFriendRequest(String friendId) async {
+    print('accepting request');
     try {
       String url = '/friend/accept/$friendId';
 
@@ -356,6 +360,13 @@ class RequestService extends getx.GetxService {
     String endpoint = '/chats/message/new/';
 
     try {
+      print(Get.find<MapService>()
+          .chats
+          .keys
+          .map((key) => key.toString())
+          .toList());
+      print(
+          "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}");
       Response response = await dio.post(
         "${ApiPath}${endpoint}${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
         data: Get.find<MapService>()
@@ -366,6 +377,7 @@ class RequestService extends getx.GetxService {
       );
       if (response.statusCode == 200) {
         var data = response.data;
+        print("new messages: ${response.data}");
         return (data as List).map((item) => Message.fromJson(item)).toList();
       } else {
         print('Error loading messages. Status code: ${response.statusCode}');
@@ -387,6 +399,7 @@ class RequestService extends getx.GetxService {
 
       if (response.statusCode == 200) {
         var data = response.data;
+        print(response.data);
         return (data as List).map((item) => Message.fromJson(item)).toList();
       } else {
         print('Error loading messages. Status code: ${response.statusCode}');

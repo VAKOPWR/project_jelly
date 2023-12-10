@@ -249,8 +249,10 @@ class _LogInPageState extends State<LogInPage> {
                                                         .instance.currentUser!
                                                         .getIdToken(true);
                                                 print(idToken);
+                                                GetStorage().write(
+                                                    'firebase_key', idToken);
                                                 Get.find<RequestService>()
-                                                    .setupInterceptor(idToken);
+                                                    .setupInterceptor();
                                                 await Get.find<RequestService>()
                                                     .createUser();
                                                 _submitBtnController.success();
