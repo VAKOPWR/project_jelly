@@ -10,15 +10,13 @@ import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/basic_user.dart';
+import 'package:project_jelly/classes/chat_DTO.dart';
 import 'package:project_jelly/classes/friend.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
-
 import 'fcm_service.dart';
-
-import '../classes/chat_DTO.dart';
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
