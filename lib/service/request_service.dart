@@ -38,7 +38,8 @@ class RequestService extends getx.GetxService {
         print(error);
         print(error.response);
         print('setup interceptor status code ${error.response?.statusCode}');
-        if (error.response?.statusCode == 500) {
+        if (error.response?.statusCode == 500 ||
+            error.response?.statusCode == 403) {
           idToken = await refreshToken();
           GetStorage().write('firebase_key', idToken);
           dio.options.headers['Authorization'] = idToken ?? '';
