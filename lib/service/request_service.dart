@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:battery/battery.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' as getx;
 import 'package:dio/dio.dart';
@@ -74,7 +73,7 @@ class RequestService extends getx.GetxService {
   }
 
   Future<dynamic> updateFcmToken() async {
-    String token = await Get.find<FCMService>().getFCMToken();
+    String token = await getx.Get.find<FCMService>().getFCMToken();
     try {
       Response response = await dio.put(
         "${ApiPath}/user/fcm/update/${token}",
@@ -367,9 +366,9 @@ class RequestService extends getx.GetxService {
 
     try {
       Response response = await dio.put(
-        "${ApiPath}${endpoint}?lastChecked=${Get.find<MapService>().messagesLastChecked.toIso8601String()}",
+        "${ApiPath}${endpoint}?lastChecked=${getx.Get.find<MapService>().messagesLastChecked.toIso8601String()}",
         data: {
-          'groupIds': Get.find<MapService>().chats.keys.toList(),
+          'groupIds': getx.Get.find<MapService>().chats.keys.toList(),
         },
       );
 

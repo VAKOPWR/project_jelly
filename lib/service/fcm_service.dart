@@ -1,7 +1,5 @@
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
-import 'package:project_jelly/service/request_service.dart';
 
 class FCMService {
   final _firebaseMessaging = FirebaseMessaging.instance;
@@ -20,7 +18,6 @@ class FCMService {
   Future<void> setupInteractedMessage() async {
     RemoteMessage? initialMessage =
     await FirebaseMessaging.instance.getInitialMessage();
-    print(initialMessage!.notification);
     if (initialMessage != null) {
       _handleMessage(initialMessage);
     }
@@ -28,9 +25,7 @@ class FCMService {
   }
 
   void _handleMessage(RemoteMessage message) {
-    if (message.notification!.android!.clickAction == 'ACCEPTED_FRIEND_REQUEST') {
-      Get.offNamed('/FriendsPage');
-    }
+    Get.toNamed('/map');
   }
 }
 
