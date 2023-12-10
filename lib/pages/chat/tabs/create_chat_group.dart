@@ -110,76 +110,81 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Group Chat',
-            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        iconTheme: IconThemeData(
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Chat Name'),
-                    onSaved: (value) => chatName = value ?? '',
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Description'),
-                    onSaved: (value) => description = value ?? '',
-                  ),
-                ],
-              ),
+    return GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Create Group Chat',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
+            centerTitle: true,
           ),
-          Expanded(
-            child: SearchBarWidget(
-              onSearchChanged: _onSearchChanged,
-              content: ListView.separated(
-                itemCount: filteredFriends.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  return _buildRow(filteredFriends[index]);
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.only(bottom: 40.0), // Add your desired padding
-            child: SizedBox(
-              height: 60,
-              width: 200,
-              child: Container(
-                color: Theme.of(context).colorScheme.background,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      _createGroupChat();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                  ),
-                  child: Text(
-                    'Save',
-                    style: TextStyle(fontSize: 32),
+          body: Column(
+            children: [
+              Form(
+                key: _formKey,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(labelText: 'Chat Name'),
+                        onSaved: (value) => chatName = value ?? '',
+                      ),
+                      TextFormField(
+                        decoration: InputDecoration(labelText: 'Description'),
+                        onSaved: (value) => description = value ?? '',
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
+              Expanded(
+                child: SearchBarWidget(
+                  onSearchChanged: _onSearchChanged,
+                  content: ListView.separated(
+                    itemCount: filteredFriends.length,
+                    separatorBuilder: (context, index) => const Divider(),
+                    itemBuilder: (context, index) {
+                      return _buildRow(filteredFriends[index]);
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    bottom: 40.0), // Add your desired padding
+                child: SizedBox(
+                  height: 60,
+                  width: 200,
+                  child: Container(
+                    color: Theme.of(context).colorScheme.background,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          _createGroupChat();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      child: Text(
+                        'Save',
+                        style: TextStyle(fontSize: 32),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

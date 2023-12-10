@@ -17,8 +17,6 @@ class ReplyMessageGroup extends StatelessWidget {
   final String? imageUrl;
   final String? profilePictureUrl;
 
-  //TODO: colors here
-
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -37,7 +35,13 @@ class ReplyMessageGroup extends StatelessWidget {
               Card(
                 elevation: 1,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                ),
+                color: Color.fromRGBO(30, 30, 30, 1),
                 margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                 child: Stack(
                   children: [
@@ -64,9 +68,7 @@ class ReplyMessageGroup extends StatelessWidget {
                       ),
                       child: Text(
                         message,
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
                     Positioned(
@@ -76,7 +78,7 @@ class ReplyMessageGroup extends StatelessWidget {
                         time,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey[600],
+                          color: Colors.grey[300],
                         ),
                       ),
                     ),

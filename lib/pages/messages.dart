@@ -11,7 +11,6 @@ class MessagesPage extends StatefulWidget {
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
-// TODO hide keyboard on tab chnage
 class _MessagesPageState extends State<MessagesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;

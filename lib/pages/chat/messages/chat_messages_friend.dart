@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:ffi';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/classes/message_status.dart';
@@ -75,6 +73,11 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
         },
         child: Scaffold(
           appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            centerTitle: true,
+            iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
             title: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -86,9 +89,13 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                       Container(
                         constraints: BoxConstraints(maxWidth: 300),
                         child: Text(
-                          Get.find<MapService>().chats[widget.chatId]!.chatName,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                            Get.find<MapService>()
+                                .chats[widget.chatId]!
+                                .chatName,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onPrimary)),
                       ),
                     ],
                   ),
@@ -96,13 +103,26 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: CircleAvatar(
-                    radius: 17,
+                    radius: 28,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: Image(
+                      image: Get.find<MapService>().imageProviders[MarkerId(
+                              Get.find<MapService>()
+                                  .chats[widget.chatId]!
+                                  .friendId
+                                  .toString())] ??
+                          Get.find<MapService>().defaultImageProvider!,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           body: Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             color: Theme.of(context).colorScheme.background,
@@ -115,9 +135,13 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                     itemBuilder: (context, index) {
                       if (messages.isEmpty) {
                         return Center(
-                          child: Text(
-                            "This chat seems to be empty... try writing something",
-                            style: TextStyle(fontSize: 18),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "This chat seems to be empty... try writing something",
+                              style: TextStyle(fontSize: 18),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         );
                       }
@@ -238,7 +262,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                             ),
                             Padding(
                               padding: const EdgeInsets.only(
-                                bottom: 15,
+                                bottom: 25,
                                 right: 3,
                                 left: 3,
                               ),
@@ -292,8 +316,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                     ),
                   ),
                 ),
-
-                //TODO: colors for the emoji panel. May be left as is
                 Offstage(
                   offstage: !emojiShowing,
                   child: SizedBox(
