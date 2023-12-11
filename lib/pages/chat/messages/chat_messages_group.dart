@@ -5,9 +5,9 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project_jelly/classes/chat_user.dart';
 import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/classes/message_status.dart';
+import 'package:project_jelly/pages/chat/tabs/group_chat_info.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/own_message.dart';
@@ -33,7 +33,6 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   XFile? _pickedImage;
   late Timer _stateTimer;
   int page = 0;
-  Map<int, ChatUser> chatUsers = {};
 
   @override
   void initState() {
@@ -100,10 +99,15 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
               )),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: CircleAvatar(
-                  radius: 17,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.to(GroupChatInfo(chat: Get.find<MapService>().chats[widget.chatId]!));
+                  },
+                  child: CircleAvatar(
+                    radius: 17,
+                  ),
                 ),
-              ),
+              )
             ]),
           ),
           body: Container(
@@ -143,10 +147,9 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                           time: formatMessageTimeStr(messages[index].time),
                           imageUrl: messages[index].attachedPhoto,
                           senderNickname:
-                              chatUsers[messages[index].senderId]!.nickname,
+                              Get.find<MapService>().groupChatUsers[widget.chatId]![messages[index].senderId]!.nickname,
                           profilePictureUrl:
-                              chatUsers[messages[index].senderId]!
-                                  .profilePicture,
+                          Get.find<MapService>().groupChatUsers[widget.chatId]![messages[index].senderId]!.profilePicture,
                         );
                       }
                     },
@@ -277,7 +280,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
                                       String messageText = _controller.text;
                                       messages.add(Message(
                                           text: messageText,
-                                          time: formatMessageTimeStr(timeahaha),
+                                          time: timeahaha,
                                           chatId: widget.chatId,
                                           senderId:
                                               Get.find<MapService>().currUserId,

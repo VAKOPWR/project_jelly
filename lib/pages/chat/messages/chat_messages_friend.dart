@@ -288,7 +288,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                       String messageText = _controller.text;
                                       messages.add(Message(
                                           text: messageText,
-                                          time: formatMessageTimeStr(timeahaha),
+                                          time: timeahaha,
                                           chatId: widget.chatId,
                                           senderId:
                                               Get.find<MapService>().currUserId,
