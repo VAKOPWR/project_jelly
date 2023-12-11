@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/chat_DTO.dart';
@@ -511,4 +512,29 @@ class RequestService extends getx.GetxService {
       return 'You';
     }
   }
+
+  // Future<void> asyncFileUpload(XFile xFileImage, int groupId) async {
+  //   File imageFile = File(xFileImage.path);
+  //   var request = http.MultipartRequest("POST", Uri.parse("${ApiPath}/group/avatar/" + groupId.toString()));
+  //
+  //   String? mimeType = lookupMimeType(imageFile.path);
+  //
+  //   mimeType ??= 'image/jpeg';
+  //
+  //   var pic = await http.MultipartFile.fromPath(
+  //       "file_field",
+  //       imageFile.path,
+  //       contentType:  MediaType.parse(mimeType)
+  //   );
+  //   request.files.add(pic);
+  //   print(request.fields);
+  //   print(request.files.first.length);
+  //   print(pic.contentType);
+  //   print(pic);
+  //   var response = await request.send();
+  //
+  //   var responseData = await response.stream.toBytes();
+  //   var responseString = String.fromCharCodes(responseData);
+  //   print(responseString);
+  // }
 }
