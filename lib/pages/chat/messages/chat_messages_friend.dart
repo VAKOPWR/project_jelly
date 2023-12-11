@@ -219,8 +219,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                             TextAlignVertical.center,
                                         decoration: InputDecoration(
                                           contentPadding: EdgeInsets.symmetric(
-                                              horizontal:
-                                                  16), // Adjust padding as needed
+                                              horizontal: 16),
                                           border: InputBorder.none,
                                           hintText: "Type a message",
                                           hintStyle:

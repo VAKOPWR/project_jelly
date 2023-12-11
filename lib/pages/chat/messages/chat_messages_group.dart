@@ -33,7 +33,6 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   XFile? _pickedImage;
   late Timer _stateTimer;
   int page = 0;
-  double _scrollPosition = 0.0;
   Map<int, ChatUser> chatUsers = {};
 
   @override
@@ -72,255 +71,284 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: CircleAvatar(
-                radius: 17,
-              ),
+    return GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            centerTitle: true,
+            iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Container(
-                constraints: BoxConstraints(maxWidth: 300),
-                child: Text(
-                  Get.find<MapService>().chats[widget.chatId]!.chatName,
-                  overflow: TextOverflow.ellipsis,
+            title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Expanded(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(width: 8),
+                  Container(
+                    constraints: BoxConstraints(maxWidth: 300),
+                    child: Text(
+                        Get.find<MapService>().chats[widget.chatId]!.chatName,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary)),
+                  ),
+                ],
+              )),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: CircleAvatar(
+                  radius: 17,
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        color: Colors.grey[700],
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: messages.isEmpty ? 1 : messages.length,
-                itemBuilder: (context, index) {
-                  if (messages.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "This chat seems to be empty... try writing something",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    );
-                  }
-                  if (messages[index].senderId ==
-                      Get.find<MapService>().currUserId) {
-                    return OwnMessage(
-                      message: messages[index].text,
-                      time: formatMessageTimeStr(messages[index].time),
-                      messageStatus: messages[index].messageStatus,
-                      imageUrl: messages[index].attachedPhoto,
-                    );
-                  } else {
-                    return ReplyMessageGroup(
-                      message: messages[index].text,
-                      time: formatMessageTimeStr(messages[index].time),
-                      imageUrl: messages[index].attachedPhoto,
-                      senderNickname:
-                          chatUsers[messages[index].senderId]!.nickname,
-                      profilePictureUrl:
-                          chatUsers[messages[index].senderId]!.profilePicture,
-                    );
-                  }
-                },
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 70,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (_pickedImage != null)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Icon(Icons.image),
-                            SizedBox(width: 8),
-                            Text(
-                              "Attached Image: ${_pickedImage!.name}",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _pickedImage = null;
-                                  });
-                                },
-                                icon: Icon(Icons.delete_outline))
-                          ],
-                        ),
-                      ),
-                    Row(
+            ]),
+          ),
+          body: Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            color: Theme.of(context).colorScheme.background,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messages.isEmpty ? 1 : messages.length,
+                    itemBuilder: (context, index) {
+                      if (messages.isEmpty) {
+                        return Center(
+                            child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "This chat seems to be empty... try writing something",
+                            style: TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                        ));
+                      }
+                      if (messages[index].senderId ==
+                          Get.find<MapService>().currUserId) {
+                        return OwnMessage(
+                          message: messages[index].text,
+                          time: formatMessageTimeStr(messages[index].time),
+                          messageStatus: messages[index].messageStatus,
+                          imageUrl: messages[index].attachedPhoto,
+                        );
+                      } else {
+                        return ReplyMessageGroup(
+                          message: messages[index].text,
+                          time: formatMessageTimeStr(messages[index].time),
+                          imageUrl: messages[index].attachedPhoto,
+                          senderNickname:
+                              chatUsers[messages[index].senderId]!.nickname,
+                          profilePictureUrl:
+                              chatUsers[messages[index].senderId]!
+                                  .profilePicture,
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    height: 80,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width - 65,
-                            child: Card(
-                              margin:
-                                  EdgeInsets.only(left: 3, right: 3, bottom: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: TextField(
-                                    focusNode: focusNode,
-                                    controller: _controller,
-                                    keyboardType: TextInputType.multiline,
-                                    maxLines: 3,
-                                    minLines: 1,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "Type a message",
-                                      hintStyle: TextStyle(color: Colors.grey),
-                                      alignLabelWithHint: true,
-                                      prefixIcon: IconButton(
-                                        icon: Icon(
-                                          emojiShowing
-                                              ? Icons.keyboard
-                                              : Icons.emoji_emotions_outlined,
+                        if (_pickedImage != null)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.image),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Attached Image: ${_pickedImage!.name}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _pickedImage = null;
+                                      });
+                                    },
+                                    icon: Icon(Icons.delete_outline))
+                              ],
+                            ),
+                          ),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(5, 0, 0, 15),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width - 65,
+                                child: Card(
+                                  margin: EdgeInsets.only(
+                                      left: 3, right: 3, bottom: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: TextField(
+                                        focusNode: focusNode,
+                                        controller: _controller,
+                                        keyboardType: TextInputType.multiline,
+                                        maxLines: 3,
+                                        minLines: 1,
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
+                                        decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          border: InputBorder.none,
+                                          hintText: "Type a message",
+                                          hintStyle:
+                                              TextStyle(color: Colors.grey),
+                                          alignLabelWithHint: true,
+                                          prefixIcon: IconButton(
+                                            icon: Icon(
+                                              emojiShowing
+                                                  ? Icons.keyboard
+                                                  : Icons
+                                                      .emoji_emotions_outlined,
+                                            ),
+                                            onPressed: () {
+                                              if (!emojiShowing) {
+                                                focusNode.unfocus();
+                                                focusNode.canRequestFocus =
+                                                    false;
+                                                setState(() {
+                                                  emojiShowing = !emojiShowing;
+                                                });
+                                              } else {
+                                                focusNode.requestFocus();
+                                              }
+                                            },
+                                          ),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                                Icons.attach_file_outlined),
+                                            onPressed: () {
+                                              _pickImage();
+                                            },
+                                          ),
                                         ),
-                                        onPressed: () {
-                                          if (!emojiShowing) {
-                                            focusNode.unfocus();
-                                            focusNode.canRequestFocus = false;
-                                            setState(() {
-                                              emojiShowing = !emojiShowing;
-                                            });
-                                          } else {
-                                            focusNode.requestFocus();
-                                          }
-                                        },
                                       ),
-                                      suffixIcon: IconButton(
-                                        icon: Icon(Icons.attach_file_outlined),
-                                        onPressed: () {
-                                          _pickImage();
-                                        },
-                                      ),
-                                      contentPadding: EdgeInsets.zero,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 8,
-                            right: 3,
-                            left: 3,
-                          ),
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.green[600],
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.send,
-                                color: Colors.white,
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 25,
+                                right: 3,
+                                left: 3,
                               ),
-                              onPressed: () async {
-                                if (_controller.text != "" ||
-                                    (_controller.isBlank ?? false)) {
-                                  String timeahaha = await _sendMessage();
-                                  _scrollController.animateTo(
-                                      _scrollController
-                                          .position.maxScrollExtent,
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                  String messageText = _controller.text;
-                                  messages.add(Message(
-                                      text: messageText,
-                                      time: formatMessageTimeStr(timeahaha),
-                                      chatId: widget.chatId,
-                                      senderId:
-                                          Get.find<MapService>().currUserId,
-                                      messageStatus: MessageStatus.SENT));
-                                  _controller.clear();
-                                  _scrollController.animateTo(
-                                    _scrollController.position.maxScrollExtent,
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                  setState(() {
-                                    sortMessages();
-                                  });
-                                }
-                              },
+                              child: CircleAvatar(
+                                radius: 25,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.send,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                  onPressed: () async {
+                                    if (_controller.text != "" ||
+                                        (_controller.isBlank ?? false)) {
+                                      String timeahaha = await _sendMessage();
+                                      _scrollController.animateTo(
+                                          _scrollController
+                                                  .position.maxScrollExtent +
+                                              60,
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeOut);
+                                      String messageText = _controller.text;
+                                      messages.add(Message(
+                                          text: messageText,
+                                          time: formatMessageTimeStr(timeahaha),
+                                          chatId: widget.chatId,
+                                          senderId:
+                                              Get.find<MapService>().currUserId,
+                                          messageStatus: MessageStatus.SENT));
+                                      _controller.clear();
+                                      _scrollController.animateTo(
+                                        _scrollController
+                                                .position.maxScrollExtent +
+                                            60,
+                                        duration: Duration(milliseconds: 300),
+                                        curve: Curves.easeOut,
+                                      );
+                                      setState(() {
+                                        sortMessages();
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                Offstage(
+                  offstage: !emojiShowing,
+                  child: SizedBox(
+                      height: 250,
+                      child: EmojiPicker(
+                        textEditingController: _controller,
+                        onBackspacePressed: _onBackspacePressed,
+                        config: Config(
+                          columns: 7,
+                          verticalSpacing: 0,
+                          horizontalSpacing: 0,
+                          gridPadding: EdgeInsets.zero,
+                          initCategory: Category.RECENT,
+                          bgColor: Theme.of(context).colorScheme.background,
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          iconColor: Theme.of(context).colorScheme.onBackground,
+                          iconColorSelected:
+                              Theme.of(context).colorScheme.primary,
+                          backspaceColor: Theme.of(context).colorScheme.primary,
+                          skinToneDialogBgColor:
+                              Theme.of(context).colorScheme.onBackground,
+                          skinToneIndicatorColor:
+                              Theme.of(context).colorScheme.onBackground,
+                          enableSkinTones: true,
+                          recentTabBehavior: RecentTabBehavior.RECENT,
+                          recentsLimit: 28,
+                          replaceEmojiOnLimitExceed: false,
+                          noRecents: const Text(
+                            'No Recents',
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black26),
+                            textAlign: TextAlign.center,
+                          ),
+                          loadingIndicator: const SizedBox.shrink(),
+                          tabIndicatorAnimDuration: kTabScrollDuration,
+                          categoryIcons: const CategoryIcons(),
+                          buttonMode: ButtonMode.MATERIAL,
+                          checkPlatformCompatibility: true,
+                        ),
+                      )),
+                )
+              ],
             ),
-            Offstage(
-              offstage: !emojiShowing,
-              child: SizedBox(
-                  height: 250,
-                  child: EmojiPicker(
-                    textEditingController: _controller,
-                    onBackspacePressed: _onBackspacePressed,
-                    config: Config(
-                      columns: 7,
-                      verticalSpacing: 0,
-                      horizontalSpacing: 0,
-                      gridPadding: EdgeInsets.zero,
-                      initCategory: Category.RECENT,
-                      bgColor: Theme.of(context).colorScheme.background,
-                      indicatorColor: Theme.of(context).colorScheme.primary,
-                      iconColor: Theme.of(context).colorScheme.onBackground,
-                      iconColorSelected: Theme.of(context).colorScheme.primary,
-                      backspaceColor: Theme.of(context).colorScheme.primary,
-                      skinToneDialogBgColor:
-                          Theme.of(context).colorScheme.onBackground,
-                      skinToneIndicatorColor:
-                          Theme.of(context).colorScheme.onBackground,
-                      enableSkinTones: true,
-                      recentTabBehavior: RecentTabBehavior.RECENT,
-                      recentsLimit: 28,
-                      replaceEmojiOnLimitExceed: false,
-                      noRecents: const Text(
-                        'No Recents',
-                        style: TextStyle(fontSize: 20, color: Colors.black26),
-                        textAlign: TextAlign.center,
-                      ),
-                      loadingIndicator: const SizedBox.shrink(),
-                      tabIndicatorAnimDuration: kTabScrollDuration,
-                      categoryIcons: const CategoryIcons(),
-                      buttonMode: ButtonMode.MATERIAL,
-                      checkPlatformCompatibility: true,
-                    ),
-                  )),
-            )
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   Future<void> _pickImage() async {
@@ -348,7 +376,7 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
           Get.find<MapService>()
               .newMessages[widget.chatId]!
               .where((message) =>
-                  message.senderId == Get.find<MapService>().currUserId)
+                  message.senderId != Get.find<MapService>().currUserId)
               .toList(),
         );
         sortMessages();
@@ -360,10 +388,10 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
   Future<void> loadMessages() async {
     List<Message> messagePage =
         await Get.find<RequestService>().loadMessagesPaged(widget.chatId, page);
+    messages.addAll(messagePage);
+    page++;
     setState(() {
-      messages.addAll(messagePage);
-      page++;
-      _scrollController.jumpTo(_scrollPosition);
+      sortMessages();
     });
   }
 
@@ -374,6 +402,10 @@ class _ChatMessagesGroupState extends State<ChatMessagesGroup> {
 
     setState(() {
       sortMessages();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 60);
+      });
     });
   }
 

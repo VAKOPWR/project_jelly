@@ -4,6 +4,7 @@ import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/classes/chat_user.dart';
 import 'package:project_jelly/classes/friend.dart';
+import 'package:project_jelly/pages/chat/messages/chat_messages_group.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
@@ -67,7 +68,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
     );
   }
 
-  Future<void> _createGroupChat() async {
+  Future<int?> _createGroupChat() async {
     GroupChatResponse? groupChatResponse = await Get.find<RequestService>()
         .createGroupChat(chatName, description, userIds);
     if (groupChatResponse != null) {
@@ -95,6 +96,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
           backgroundColor: Colors.green[400],
           margin: EdgeInsets.zero,
           snackStyle: SnackStyle.GROUNDED);
+      return chatId;
     } else {
       Get.snackbar("Ooops!", "Failed to create group ${chatName}",
           icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
@@ -105,6 +107,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
           backgroundColor: Colors.red[400],
           margin: EdgeInsets.zero,
           snackStyle: SnackStyle.GROUNDED);
+      return null;
     }
   }
 
@@ -166,10 +169,16 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
                   child: Container(
                     color: Theme.of(context).colorScheme.background,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
-                          _createGroupChat();
+                          int? success = await _createGroupChat();
+                          if (success != null) {
+                            Navigator.pop(context);
+                            Get.to(
+                              () => ChatMessagesGroup(chatId: success),
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
