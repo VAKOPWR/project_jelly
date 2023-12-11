@@ -24,8 +24,6 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   String chatName = '';
   String description = '';
   XFile? image;
-  final ImagePicker picker = ImagePicker();
-  String groupAvatar = "";
 
   @override
   void initState() {
@@ -34,6 +32,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   }
 
   Future getImage(ImageSource media) async {
+    final ImagePicker picker = ImagePicker();
     var img = await picker.pickImage(source: media);
 
     setState(() {
@@ -155,7 +154,8 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
 
     int chatId = groupChatResponse.groupId;
     String? groupAvatar = image != null
-        ? await Get.find<RequestService>().asyncFileUpload(image!, chatId)
+        ? await Get.find<RequestService>()
+            .asyncGroupChatAvatarFileUpload(image!, chatId)
         : null;
 
       List<ChatUser> chatUsersList =

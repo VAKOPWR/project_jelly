@@ -515,9 +515,33 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<String> asyncFileUpload(XFile xFileImage, int groupId) async {
+  Future<String> asyncGroupChatAvatarFileUpload(XFile xFileImage, int groupId) async {
     File imageFile = File(xFileImage.path);
     String endpoint = "${ApiPath}/group/avatar/" + groupId.toString();
+
+    var formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(imageFile.path,
+          filename: 'upload.jpg', contentType: MediaType('image', 'jpeg')),
+    });
+
+    try {
+      var response = await dio.post(endpoint, data: formData);
+      if (response.statusCode == 200) {
+        print("Uploaded!");
+        return response.data as String;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return "";
+      }
+    } catch (e) {
+      print("Error uploading file: $e");
+    }
+    return "";
+  }
+
+  Future<String> asyncProfileAvatarFileUpload(XFile xFileImage) async {
+    File imageFile = File(xFileImage.path);
+    String endpoint = "${ApiPath}/user/avatars";
 
     var formData = FormData.fromMap({
       'image': await MultipartFile.fromFile(imageFile.path,
