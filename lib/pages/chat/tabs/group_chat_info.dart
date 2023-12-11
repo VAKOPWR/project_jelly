@@ -14,12 +14,12 @@ class GroupChatInfo extends StatefulWidget {
 }
 
 class _GroupChatInfoState extends State<GroupChatInfo> {
-  late List<ChatUser> members;
+  late Map<int, ChatUser> members;
 
   @override
   void initState() {
     super.initState();
-    members = Get.find<MapService>().chatUsers[widget.chat.chatId] ?? [];
+    members = Get.find<MapService>().groupChatUsers[widget.chat.chatId] ?? {};
   }
 
   @override
@@ -72,13 +72,16 @@ class _GroupChatInfoState extends State<GroupChatInfo> {
     return ListView.builder(
       itemCount: members.length,
       itemBuilder: (context, index) {
+        final member = members.values.elementAt(index);
+        print("haha, nonexistent picture: ${member?.profilePicture ?? "wow, no picture!"}");
         return ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(members[index].profilePicture),
+            backgroundImage: NetworkImage(member!.profilePicture),
           ),
-          title: Text(members[index].nickname),
+          title: Text(member.nickname),
         );
       },
     );
   }
+
 }

@@ -59,7 +59,6 @@ class MapService extends GetxService {
   late DateTime messagesLastChecked;
   late DateTime chatsLastChecked;
   Map<int, List<Message>> newMessages = <int, List<Message>>{};
-  Map<int, List<ChatUser>> chatUsers = <int, List<ChatUser>>{};
   Map<int, Map<int, ChatUser>> groupChatUsers = <int, Map<int, ChatUser>>{};
   Map<int, int> friendChatMapping = {};
   late int currUserId;
@@ -138,33 +137,38 @@ class MapService extends GetxService {
       if (!newChats.isEmpty) {
         for (ChatDTO chat in newChats) {
           Message? message = null;
-          if (chat.lastMessageSenderId != null) {
-            message = Message(
-                chatId: chat.groupId,
-                senderId: chat.lastMessageSenderId!,
-                text: chat.lastMessageText!,
-                time: formatMessageTime(chat.lastMessageTimeSent!),
-                messageStatus: chat.lastMessageMessagesStatus!,
-                attachedPhoto: chat.lastMessageAttachedPhoto);
+          if (chats.containsKey(chat.groupId)){
+            chats.remove(chat.groupId);
           }
-          chats.putIfAbsent(
-              chat.groupId,
-              () => new Chat(
-                  isFriendship: chat.friendship,
-                  chatName: chat.groupName,
-                  friendId: chat.friendId,
+          else{
+            if (chat.lastMessageSenderId != null) {
+              message = Message(
                   chatId: chat.groupId,
-                  picture: chat.picture,
-                  isMuted: chat.muted,
-                  isPinned: chat.pinned,
-                  message: message));
-          if (chat.groupUsers != null) {
-            groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
-            newGroupChatsBool = true;
-          }
-          if (chat.friendship) {
-            friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
-            newFriendChatsBool = true;
+                  senderId: chat.lastMessageSenderId!,
+                  text: chat.lastMessageText!,
+                  time: formatMessageTime(chat.lastMessageTimeSent!),
+                  messageStatus: chat.lastMessageMessagesStatus!,
+                  attachedPhoto: chat.lastMessageAttachedPhoto);
+            }
+            chats.putIfAbsent(
+                chat.groupId,
+                    () => new Chat(
+                    isFriendship: chat.friendship,
+                    chatName: chat.groupName,
+                    friendId: chat.friendId,
+                    chatId: chat.groupId,
+                    picture: chat.picture,
+                    isMuted: chat.muted,
+                    isPinned: chat.pinned,
+                    message: message));
+            if (chat.groupUsers != null) {
+              groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
+              newGroupChatsBool = true;
+            }
+            else if (chat.friendship) {
+              friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
+              newFriendChatsBool = true;
+            }
           }
         }
       }

@@ -76,7 +76,15 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
       List<ChatUser> chatUsersList =
           groupChatResponse.chatUser.cast<ChatUser>();
 
-      Get.find<MapService>().chatUsers.putIfAbsent(chatId, () => chatUsersList);
+      Map<int, ChatUser> chatUserMap = chatUsersList.fold(
+        <int, ChatUser>{},
+            (Map<int, ChatUser> map, ChatUser chatUser) {
+          map[chatUser.id] = chatUser;
+          return map;
+        },
+      );
+
+      Get.find<MapService>().groupChatUsers.putIfAbsent(chatId, () => chatUserMap);
 
       Chat newChat = Chat(
           chatId: chatId,
