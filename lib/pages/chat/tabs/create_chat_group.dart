@@ -25,6 +25,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   String description = '';
   XFile? image;
   final ImagePicker picker = ImagePicker();
+  String groupAvatar = "";
 
   @override
   void initState() {
@@ -89,9 +90,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
       child: CircleAvatar(
         radius: 40,
         backgroundImage: image != null ? FileImage(File(image!.path)) : null,
-        child: image == null
-            ? Icon(Icons.add_a_photo, size: 40)
-            : null,
+        child: image == null ? Icon(Icons.add_a_photo, size: 40) : null,
       ),
     );
   }
@@ -140,16 +139,24 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   Future<int?> _createGroupChat() async {
     GroupChatResponse? groupChatResponse = await Get.find<RequestService>()
         .createGroupChat(chatName, description, userIds);
-    if (groupChatResponse != null) {
-      int chatId = groupChatResponse.groupId;
-      // if (image != null) {
-      //   await Get.find<RequestService>()
-      //       .asyncFileUpload(image!, chatId).then((_) {
-      //     print("Image uploaded successfully for group chat ID $chatId");
-      //   }).catchError((error) {
-      //     print("Error uploading image: $error");
-      //   });
-      // }
+
+    if (groupChatResponse == null) {
+      Get.snackbar("Ooops!", "Failed to create group $chatName",
+          icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+              color: Colors.white, size: 35),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: false,
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red[400],
+          margin: EdgeInsets.zero,
+          snackStyle: SnackStyle.GROUNDED);
+      return null;
+    }
+
+    int chatId = groupChatResponse.groupId;
+    String? groupAvatar = image != null
+        ? await Get.find<RequestService>().asyncFileUpload(image!, chatId)
+        : null;
 
       List<ChatUser> chatUsersList =
           groupChatResponse.chatUser.cast<ChatUser>();
@@ -164,37 +171,27 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
 
       Get.find<MapService>().groupChatUsers.putIfAbsent(chatId, () => chatUserMap);
 
-      Chat newChat = Chat(
-          chatId: chatId,
-          chatName: chatName,
-          isFriendship: false,
-          isMuted: false,
-          isPinned: false);
-      Get.find<MapService>().chats.putIfAbsent(chatId, () => newChat);
-      Get.find<MapService>().newMessagesBool = true;
+    Chat newChat = Chat(
+      chatId: chatId,
+      chatName: chatName,
+      isFriendship: false,
+      isMuted: false,
+      isPinned: false,
+      picture: groupAvatar ?? "",
+    );
+    Get.find<MapService>().chats.putIfAbsent(chatId, () => newChat);
+    Get.find<MapService>().newMessagesBool = true;
 
-      Get.snackbar("Congratulations!", "Your group was created! ${chatName}",
-          icon: Icon(Icons.sentiment_satisfied_alt_outlined,
-              color: Colors.white, size: 35),
-          snackPosition: SnackPosition.TOP,
-          isDismissible: false,
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.green[400],
-          margin: EdgeInsets.zero,
-          snackStyle: SnackStyle.GROUNDED);
-      return chatId;
-    } else {
-      Get.snackbar("Ooops!", "Failed to create group ${chatName}",
-          icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
-              color: Colors.white, size: 35),
-          snackPosition: SnackPosition.TOP,
-          isDismissible: false,
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red[400],
-          margin: EdgeInsets.zero,
-          snackStyle: SnackStyle.GROUNDED);
-      return null;
-    }
+    Get.snackbar("Congratulations!", "Your group was created! ${chatName}",
+        icon: Icon(Icons.sentiment_satisfied_alt_outlined,
+            color: Colors.white, size: 35),
+        snackPosition: SnackPosition.TOP,
+        isDismissible: false,
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.green[400],
+        margin: EdgeInsets.zero,
+        snackStyle: SnackStyle.GROUNDED);
+    return chatId;
   }
 
   @override

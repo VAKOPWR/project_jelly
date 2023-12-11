@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:battery/battery.dart';
@@ -19,6 +20,7 @@ import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'fcm_service.dart';
+import 'package:http_parser/http_parser.dart';
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
@@ -513,28 +515,27 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  // Future<void> asyncFileUpload(XFile xFileImage, int groupId) async {
-  //   File imageFile = File(xFileImage.path);
-  //   var request = http.MultipartRequest("POST", Uri.parse("${ApiPath}/group/avatar/" + groupId.toString()));
-  //
-  //   String? mimeType = lookupMimeType(imageFile.path);
-  //
-  //   mimeType ??= 'image/jpeg';
-  //
-  //   var pic = await http.MultipartFile.fromPath(
-  //       "file_field",
-  //       imageFile.path,
-  //       contentType:  MediaType.parse(mimeType)
-  //   );
-  //   request.files.add(pic);
-  //   print(request.fields);
-  //   print(request.files.first.length);
-  //   print(pic.contentType);
-  //   print(pic);
-  //   var response = await request.send();
-  //
-  //   var responseData = await response.stream.toBytes();
-  //   var responseString = String.fromCharCodes(responseData);
-  //   print(responseString);
-  // }
+  Future<String> asyncFileUpload(XFile xFileImage, int groupId) async {
+    File imageFile = File(xFileImage.path);
+    String endpoint = "${ApiPath}/group/avatar/" + groupId.toString();
+
+    var formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(imageFile.path,
+          filename: 'upload.jpg', contentType: MediaType('image', 'jpeg')),
+    });
+
+    try {
+      var response = await dio.post(endpoint, data: formData);
+      if (response.statusCode == 200) {
+        print("Uploaded!");
+        return response.data as String;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return "";
+      }
+    } catch (e) {
+      print("Error uploading file: $e");
+    }
+    return "";
+  }
 }
