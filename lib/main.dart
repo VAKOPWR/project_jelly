@@ -29,7 +29,6 @@ import 'package:project_jelly/service/style_service.dart';
 import 'package:project_jelly/themes/theme_constants.dart';
 import 'package:project_jelly/controller/theme_controller.dart';
 
-
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message}");

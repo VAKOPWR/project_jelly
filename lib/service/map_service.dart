@@ -132,42 +132,46 @@ class MapService extends GetxService {
       }
     });
 
+    // TODO Change duration to 3 seconds
     Timer.periodic(Duration(seconds: 3), (timer) async {
-      List<ChatDTO> newChats = await Get.find<RequestService>().fetchNewChats();
-      if (!newChats.isEmpty) {
-        for (ChatDTO chat in newChats) {
-          Message? message = null;
-          if (chats.containsKey(chat.groupId)){
-            chats.remove(chat.groupId);
-          }
-          else{
-            if (chat.lastMessageSenderId != null) {
-              message = Message(
-                  chatId: chat.groupId,
-                  senderId: chat.lastMessageSenderId!,
-                  text: chat.lastMessageText!,
-                  time: formatMessageTime(chat.lastMessageTimeSent!),
-                  messageStatus: chat.lastMessageMessagesStatus!,
-                  attachedPhoto: chat.lastMessageAttachedPhoto);
-            }
-            chats.putIfAbsent(
-                chat.groupId,
-                    () => new Chat(
-                    isFriendship: chat.friendship,
-                    chatName: chat.groupName,
-                    friendId: chat.friendId,
+      if (FirebaseAuth.instance.currentUser != null) {
+        List<ChatDTO> newChats =
+            await Get.find<RequestService>().fetchNewChats();
+        if (!newChats.isEmpty) {
+          for (ChatDTO chat in newChats) {
+            Message? message = null;
+            if (chats.containsKey(chat.groupId)) {
+              chats.remove(chat.groupId);
+            } else {
+              if (chat.lastMessageSenderId != null) {
+                message = Message(
                     chatId: chat.groupId,
-                    picture: chat.picture,
-                    isMuted: chat.muted,
-                    isPinned: chat.pinned,
-                    message: message));
-            if (chat.groupUsers != null) {
-              groupChatUsers.putIfAbsent(chat.groupId, () => chat.groupUsers!);
-              newGroupChatsBool = true;
-            }
-            else if (chat.friendship) {
-              friendChatMapping.putIfAbsent(chat.friendId!, () => chat.groupId);
-              newFriendChatsBool = true;
+                    senderId: chat.lastMessageSenderId!,
+                    text: chat.lastMessageText!,
+                    time: formatMessageTime(chat.lastMessageTimeSent!),
+                    messageStatus: chat.lastMessageMessagesStatus!,
+                    attachedPhoto: chat.lastMessageAttachedPhoto);
+              }
+              chats.putIfAbsent(
+                  chat.groupId,
+                  () => new Chat(
+                      isFriendship: chat.friendship,
+                      chatName: chat.groupName,
+                      friendId: chat.friendId,
+                      chatId: chat.groupId,
+                      picture: chat.picture,
+                      isMuted: chat.muted,
+                      isPinned: chat.pinned,
+                      message: message));
+              if (chat.groupUsers != null) {
+                groupChatUsers.putIfAbsent(
+                    chat.groupId, () => chat.groupUsers!);
+                newGroupChatsBool = true;
+              } else if (chat.friendship) {
+                friendChatMapping.putIfAbsent(
+                    chat.friendId!, () => chat.groupId);
+                newFriendChatsBool = true;
+              }
             }
           }
         }

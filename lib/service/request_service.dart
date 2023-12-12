@@ -85,8 +85,6 @@ class RequestService extends getx.GetxService {
     }
   }
 
-
-
   Future<Uint8List> getUint8ListFromImageUrl(String imageUrl) async {
     final http.Response response = await http.get(Uri.parse(imageUrl));
 
@@ -443,10 +441,10 @@ class RequestService extends getx.GetxService {
 
   Future<List<ChatDTO>> fetchNewChats() async {
     String endpoint = '/chats/new';
-
     try {
-      Response response = await dio.post("${ApiPath}${endpoint}",
-          data: Get.find<MapService>().chats.keys.toList());
+      List requestBody = Get.find<MapService>().chats.keys.toList();
+      Response response =
+          await dio.post("${ApiPath}${endpoint}", data: requestBody);
       if (response.statusCode == 200) {
         var data = response.data;
         return (data as List).map((item) => ChatDTO.fromJson(item)).toList();

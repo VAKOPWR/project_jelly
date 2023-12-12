@@ -131,7 +131,7 @@ class _FriendsPageState extends State<FriendsPage>
         style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
       )),
       Tab(
-          child: Text("List",
+          child: Text("Find",
               style:
                   TextStyle(color: Theme.of(context).colorScheme.onPrimary))),
       Tab(
