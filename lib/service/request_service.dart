@@ -470,7 +470,15 @@ class RequestService extends getx.GetxService {
         "description": description,
         "userIds": userIds,
       });
-      Response response = await dio.post(endpoint, data: requestBody);
+      Response response = await dio.post(
+        endpoint,
+        data: requestBody,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
       if (response.statusCode == 200) {
         return GroupChatResponse.fromJson(response.data);
       } else {
@@ -499,23 +507,24 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<String> getUsername() async {
+  Future<BasicUser?> getBasicUserResponseFromCurrentUser() async {
     try {
       Response response = await dio.get(
-        "${ApiPath}/user",
+        "${ApiPath}/user/basic",
       );
       if (response.statusCode == 200) {
-        var responseData = response.data;
-        return responseData;
-      }
-      return 'You';
+        var data = response.data;
+        print(BasicUser.fromJson(data).avatar);
+        return BasicUser.fromJson(data);
+      } else {}
     } catch (error) {
       print(error.toString());
-      return 'You';
     }
+    return null;
   }
 
-  Future<String> asyncGroupChatAvatarFileUpload(XFile xFileImage, int groupId) async {
+  Future<String> asyncGroupChatAvatarFileUpload(
+      XFile xFileImage, int groupId) async {
     File imageFile = File(xFileImage.path);
     String endpoint = "${ApiPath}/group/avatar/" + groupId.toString();
 

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/login.dart';
 import 'package:project_jelly/service/request_service.dart';
@@ -17,22 +18,27 @@ class _ProfilePageState extends State<ProfilePage> {
   TextEditingController _usernameController = TextEditingController();
 
   XFile? image;
-  String profileAvatarUpdated = FirebaseAuth.instance.currentUser!.photoURL!;
+  String userAvatarProfileLink = "";
+
   final ImagePicker picker = ImagePicker();
 
   String userName = '';
 
   @override
   void initState() {
-    loadUsername();
+    loadBasicUserInfo();
     super.initState();
   }
 
-  Future<void> loadUsername() async {
-    String newUsername = await Get.find<RequestService>().getUsername();
-    setState(() {
-      userName = newUsername;
-    });
+  Future<void> loadBasicUserInfo() async {
+    BasicUser? basicUser =
+        await Get.find<RequestService>().getBasicUserResponseFromCurrentUser();
+    if (basicUser != null) {
+      setState(() {
+        userName = basicUser.name;
+        userAvatarProfileLink = basicUser.avatar!;
+      });
+    }
   }
 
   Future getImage(ImageSource media) async {
@@ -85,11 +91,17 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         });
 
+    String _newUserAvatar = "";
     if (image != null) {
-      profileAvatarUpdated = await Get.find<RequestService>().asyncProfileAvatarFileUpload(image!);
+      _newUserAvatar =
+          await Get.find<RequestService>().asyncProfileAvatarFileUpload(image!);
     } else {
-      profileAvatarUpdated = FirebaseAuth.instance.currentUser!.photoURL!;
+      _newUserAvatar = FirebaseAuth.instance.currentUser!.photoURL!;
     }
+
+    setState(() {
+      userAvatarProfileLink = _newUserAvatar;
+    });
   }
 
   @override
@@ -131,7 +143,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: NetworkImage(profileAvatarUpdated),
+                          image: NetworkImage(userAvatarProfileLink),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -219,7 +231,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       .changeUsername(_usernameController.text);
                   Navigator.of(context).pop();
                   if (usernameChangeSuccess) {
-                    loadUsername();
+                    loadBasicUserInfo();
                     Get.snackbar(
                         "Congratulations", "Username was successfully changed",
                         icon: Icon(Icons.sentiment_satisfied_alt_outlined,
