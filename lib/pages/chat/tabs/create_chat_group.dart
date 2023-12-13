@@ -158,18 +158,19 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
             .asyncGroupChatAvatarFileUpload(image!, chatId)
         : null;
 
-      List<ChatUser> chatUsersList =
-          groupChatResponse.chatUser.cast<ChatUser>();
+    List<ChatUser> chatUsersList = groupChatResponse.chatUser.cast<ChatUser>();
 
-      Map<int, ChatUser> chatUserMap = chatUsersList.fold(
-        <int, ChatUser>{},
-            (Map<int, ChatUser> map, ChatUser chatUser) {
-          map[chatUser.id] = chatUser;
-          return map;
-        },
-      );
+    Map<int, ChatUser> chatUserMap = chatUsersList.fold(
+      <int, ChatUser>{},
+      (Map<int, ChatUser> map, ChatUser chatUser) {
+        map[chatUser.id] = chatUser;
+        return map;
+      },
+    );
 
-      Get.find<MapService>().groupChatUsers.putIfAbsent(chatId, () => chatUserMap);
+    Get.find<MapService>()
+        .groupChatUsers
+        .putIfAbsent(chatId, () => chatUserMap);
 
     Chat newChat = Chat(
       chatId: chatId,
@@ -262,9 +263,9 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
                           int? success = await _createGroupChat();
                           if (success != null) {
                             Navigator.pop(context);
-                            Get.to(
-                              () => ChatMessagesGroup(chatId: success),
-                            );
+                            // Get.to(
+                            //   () => ChatMessagesGroup(chatId: success),
+                            // );
                           }
                         }
                       },

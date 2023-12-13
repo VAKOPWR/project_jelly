@@ -163,6 +163,29 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                     },
                   ),
                 ),
+                _pickedImage != null
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.image),
+                            SizedBox(width: 8),
+                            Text(
+                              "Attached Image: ${_pickedImage!.name.length > 19 ? _pickedImage!.name.substring(0, 19) + '...' : _pickedImage!.name}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _pickedImage = null;
+                                  });
+                                },
+                                icon: Icon(Icons.delete_outline))
+                          ],
+                        ),
+                      )
+                    : SizedBox(height: 1),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
@@ -170,28 +193,6 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        if (_pickedImage != null)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(Icons.image),
-                                SizedBox(width: 8),
-                                Text(
-                                  "Attached Image: ${_pickedImage!.name}",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _pickedImage = null;
-                                      });
-                                    },
-                                    icon: Icon(Icons.delete_outline))
-                              ],
-                            ),
-                          ),
                         Row(
                           children: [
                             Padding(
