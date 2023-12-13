@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,12 +43,19 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future getImage(ImageSource media) async {
+  Future<void> getImage(ImageSource media) async {
     var img = await picker.pickImage(source: media);
 
-    setState(() {
-      image = img;
-    });
+    if (img != null) {
+      setState(() {
+        image = img;
+      });
+
+      userAvatarProfileLink =
+          await Get.find<RequestService>().asyncProfileAvatarFileUpload(img);
+    } else {
+      userAvatarProfileLink = FirebaseAuth.instance.currentUser!.photoURL!;
+    }
   }
 
   Future<void> myAlert() async {
@@ -90,22 +99,19 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           );
         });
-
-    String _newUserAvatar = "";
-    if (image != null) {
-      _newUserAvatar =
-          await Get.find<RequestService>().asyncProfileAvatarFileUpload(image!);
-    } else {
-      _newUserAvatar = FirebaseAuth.instance.currentUser!.photoURL!;
-    }
-
-    setState(() {
-      userAvatarProfileLink = _newUserAvatar;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider imageProvider;
+    if (image != null) {
+      imageProvider = FileImage(File(image!.path));
+    } else if (userAvatarProfileLink.isNotEmpty) {
+      imageProvider = NetworkImage(userAvatarProfileLink);
+    } else {
+      imageProvider = NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!);
+    }
+
     return Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(250),
@@ -143,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: NetworkImage(userAvatarProfileLink),
+                          image: imageProvider,
                           fit: BoxFit.cover,
                         ),
                       ),
