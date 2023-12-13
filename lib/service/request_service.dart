@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:battery/battery.dart';
@@ -9,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/classes/chat_DTO.dart';
@@ -18,6 +20,7 @@ import 'package:project_jelly/classes/message.dart';
 import 'package:project_jelly/misc/stealth_choice.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'fcm_service.dart';
+import 'package:http_parser/http_parser.dart';
 
 class RequestService extends getx.GetxService {
   Dio dio = Dio();
@@ -467,7 +470,15 @@ class RequestService extends getx.GetxService {
         "description": description,
         "userIds": userIds,
       });
-      Response response = await dio.post(endpoint, data: requestBody);
+      Response response = await dio.post(
+        endpoint,
+        data: requestBody,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
       if (response.statusCode == 200) {
         return GroupChatResponse.fromJson(response.data);
       } else {
@@ -496,19 +507,68 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<String> getUsername() async {
+  Future<BasicUser?> getBasicUserResponseFromCurrentUser() async {
     try {
       Response response = await dio.get(
-        "${ApiPath}/user",
+        "${ApiPath}/user/basic",
       );
       if (response.statusCode == 200) {
-        var responseData = response.data;
-        return responseData;
-      }
-      return 'You';
+        var data = response.data;
+        print(BasicUser.fromJson(data).avatar);
+        return BasicUser.fromJson(data);
+      } else {}
     } catch (error) {
       print(error.toString());
-      return 'You';
     }
+    return null;
+  }
+
+  Future<String> asyncGroupChatAvatarFileUpload(
+      XFile xFileImage, int groupId) async {
+    File imageFile = File(xFileImage.path);
+    String endpoint = "${ApiPath}/group/avatar/" + groupId.toString();
+
+    var formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(imageFile.path,
+          filename: 'upload.jpg', contentType: MediaType('image', 'jpeg')),
+    });
+
+    try {
+      var response = await dio.post(endpoint, data: formData);
+      if (response.statusCode == 200) {
+        print("Uploaded!");
+        return response.data as String;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return "";
+      }
+    } catch (e) {
+      print("Error uploading file: $e");
+    }
+    return "";
+  }
+
+  Future<String> asyncProfileAvatarFileUpload(XFile xFileImage) async {
+    File imageFile = File(xFileImage.path);
+    String endpoint = "${ApiPath}/user/avatars";
+
+    var formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(imageFile.path,
+          filename: 'upload.jpg', contentType: MediaType('image', 'jpeg')),
+    });
+
+    try {
+      var response = await dio.post(endpoint, data: formData);
+      if (response.statusCode == 200) {
+        print("Uploaded!");
+        return response.data as String;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return "";
+      }
+    } catch (e) {
+      print("Error uploading file: $e");
+    }
+    return "";
   }
 }

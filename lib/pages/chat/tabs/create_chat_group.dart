@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/classes/chat_user.dart';
@@ -20,11 +23,75 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   List<int> userIds = [];
   String chatName = '';
   String description = '';
+  XFile? image;
 
   @override
   void initState() {
     super.initState();
     filteredFriends = Get.find<MapService>().friendsData.values.toList();
+  }
+
+  Future getImage(ImageSource media) async {
+    final ImagePicker picker = ImagePicker();
+    var img = await picker.pickImage(source: media);
+
+    setState(() {
+      image = img;
+    });
+  }
+
+  void myAlert() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      getImage(ImageSource.gallery);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text('From Gallery'),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      getImage(ImageSource.camera);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text('From Camera'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget _buildAvatarSelector() {
+    return GestureDetector(
+      onTap: myAlert,
+      child: CircleAvatar(
+        radius: 40,
+        backgroundImage: image != null ? FileImage(File(image!.path)) : null,
+        child: image == null ? Icon(Icons.add_a_photo, size: 40) : null,
+      ),
+    );
   }
 
   void _onSearchChanged(String value) {
@@ -71,8 +138,26 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
   Future<int?> _createGroupChat() async {
     GroupChatResponse? groupChatResponse = await Get.find<RequestService>()
         .createGroupChat(chatName, description, userIds);
-    if (groupChatResponse != null) {
-      int chatId = groupChatResponse.groupId;
+
+    if (groupChatResponse == null) {
+      Get.snackbar("Ooops!", "Failed to create group $chatName",
+          icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
+              color: Colors.white, size: 35),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: false,
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red[400],
+          margin: EdgeInsets.zero,
+          snackStyle: SnackStyle.GROUNDED);
+      return null;
+    }
+
+    int chatId = groupChatResponse.groupId;
+    String? groupAvatar = image != null
+        ? await Get.find<RequestService>()
+            .asyncGroupChatAvatarFileUpload(image!, chatId)
+        : null;
+
       List<ChatUser> chatUsersList =
           groupChatResponse.chatUser.cast<ChatUser>();
 
@@ -86,37 +171,27 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
 
       Get.find<MapService>().groupChatUsers.putIfAbsent(chatId, () => chatUserMap);
 
-      Chat newChat = Chat(
-          chatId: chatId,
-          chatName: chatName,
-          isFriendship: false,
-          isMuted: false,
-          isPinned: false);
-      Get.find<MapService>().chats.putIfAbsent(chatId, () => newChat);
-      Get.find<MapService>().newMessagesBool = true;
+    Chat newChat = Chat(
+      chatId: chatId,
+      chatName: chatName,
+      isFriendship: false,
+      isMuted: false,
+      isPinned: false,
+      picture: groupAvatar ?? "",
+    );
+    Get.find<MapService>().chats.putIfAbsent(chatId, () => newChat);
+    Get.find<MapService>().newMessagesBool = true;
 
-      Get.snackbar("Congratulations!", "Your group was created! ${chatName}",
-          icon: Icon(Icons.sentiment_satisfied_alt_outlined,
-              color: Colors.white, size: 35),
-          snackPosition: SnackPosition.TOP,
-          isDismissible: false,
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.green[400],
-          margin: EdgeInsets.zero,
-          snackStyle: SnackStyle.GROUNDED);
-      return chatId;
-    } else {
-      Get.snackbar("Ooops!", "Failed to create group ${chatName}",
-          icon: Icon(Icons.sentiment_very_dissatisfied_outlined,
-              color: Colors.white, size: 35),
-          snackPosition: SnackPosition.TOP,
-          isDismissible: false,
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red[400],
-          margin: EdgeInsets.zero,
-          snackStyle: SnackStyle.GROUNDED);
-      return null;
-    }
+    Get.snackbar("Congratulations!", "Your group was created! ${chatName}",
+        icon: Icon(Icons.sentiment_satisfied_alt_outlined,
+            color: Colors.white, size: 35),
+        snackPosition: SnackPosition.TOP,
+        isDismissible: false,
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.green[400],
+        margin: EdgeInsets.zero,
+        snackStyle: SnackStyle.GROUNDED);
+    return chatId;
   }
 
   @override
@@ -138,6 +213,10 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
           ),
           body: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildAvatarSelector(),
+              ),
               Form(
                 key: _formKey,
                 child: Padding(

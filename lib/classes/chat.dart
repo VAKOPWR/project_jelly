@@ -5,7 +5,7 @@ class Chat {
   final int? friendId;
   final String chatName;
   final String? description;
-  final String? picture;
+  String? picture;
   final bool isFriendship;
   bool isPinned;
   bool isMuted;

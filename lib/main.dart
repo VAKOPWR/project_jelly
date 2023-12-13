@@ -11,7 +11,6 @@ import 'package:project_jelly/pages/auth/register_form.dart';
 import 'package:project_jelly/pages/auth/register_form_avatar.dart';
 import 'package:project_jelly/pages/auth/reset_password.dart';
 import 'package:project_jelly/pages/messages.dart';
-import 'package:project_jelly/pages/chat/tabs/create_chat_group.dart';
 import 'package:project_jelly/pages/ghost_mode/ghost_mode_screen.dart';
 import 'package:project_jelly/pages/home.dart';
 import 'package:project_jelly/pages/auth/login.dart';
@@ -123,11 +122,6 @@ class ProjectJelly extends StatelessWidget {
             GetPage(
               name: '/shake',
               page: () => ShakeItScreen(),
-              transition: Transition.rightToLeft,
-            ),
-            GetPage(
-              name: '/create_group_chat',
-              page: () => CreateGroupChat(),
               transition: Transition.rightToLeft,
             ),
           ],

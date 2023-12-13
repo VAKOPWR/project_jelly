@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:project_jelly/classes/basic_user.dart';
 import 'package:project_jelly/logic/auth.dart';
 import 'package:project_jelly/pages/auth/login.dart';
 import 'package:project_jelly/service/request_service.dart';
@@ -14,19 +16,91 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   TextEditingController _usernameController = TextEditingController();
-  // String userName = FirebaseAuth.instance.currentUser!.displayName!;
+
+  XFile? image;
+  String userAvatarProfileLink = "";
+
+  final ImagePicker picker = ImagePicker();
+
   String userName = '';
 
   @override
   void initState() {
-    loadUsername();
+    loadBasicUserInfo();
     super.initState();
   }
 
-  Future<void> loadUsername() async {
-    String newUsername = await Get.find<RequestService>().getUsername();
+  Future<void> loadBasicUserInfo() async {
+    BasicUser? basicUser =
+        await Get.find<RequestService>().getBasicUserResponseFromCurrentUser();
+    if (basicUser != null) {
+      setState(() {
+        userName = basicUser.name;
+        userAvatarProfileLink = basicUser.avatar!;
+      });
+    }
+  }
+
+  Future getImage(ImageSource media) async {
+    var img = await picker.pickImage(source: media);
+
     setState(() {
-      userName = newUsername;
+      image = img;
+    });
+  }
+
+  Future<void> myAlert() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      getImage(ImageSource.gallery);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text('From Gallery'),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      getImage(ImageSource.camera);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text('From Camera'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+
+    String _newUserAvatar = "";
+    if (image != null) {
+      _newUserAvatar =
+          await Get.find<RequestService>().asyncProfileAvatarFileUpload(image!);
+    } else {
+      _newUserAvatar = FirebaseAuth.instance.currentUser!.photoURL!;
+    }
+
+    setState(() {
+      userAvatarProfileLink = _newUserAvatar;
     });
   }
 
@@ -59,18 +133,33 @@ class _ProfilePageState extends State<ProfilePage> {
             flexibleSpace: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  width: 160,
-                  height: 160,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage(
-                          FirebaseAuth.instance.currentUser!.photoURL!),
-                      fit: BoxFit.cover,
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      width: 160,
+                      height: 160,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: NetworkImage(userAvatarProfileLink),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      right: 10,
+                      bottom: 30,
+                      child: GestureDetector(
+                        onTap: myAlert,
+                        child: CircleAvatar(
+                          radius: 15,
+                          child: Icon(Icons.add_a_photo, size: 15),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -142,7 +231,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       .changeUsername(_usernameController.text);
                   Navigator.of(context).pop();
                   if (usernameChangeSuccess) {
-                    loadUsername();
+                    loadBasicUserInfo();
                     Get.snackbar(
                         "Congratulations", "Username was successfully changed",
                         icon: Icon(Icons.sentiment_satisfied_alt_outlined,
