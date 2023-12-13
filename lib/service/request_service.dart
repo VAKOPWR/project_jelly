@@ -396,7 +396,7 @@ class RequestService extends getx.GetxService {
     }
   }
 
-  Future<String> sendMessage(int chatId, String text) async {
+  Future<Message?> sendMessage(int chatId, String text) async {
     String endpoint = '/chats/message';
 
     try {
@@ -411,14 +411,15 @@ class RequestService extends getx.GetxService {
       Response response = await dio.post(url, data: queryData);
 
       if (response.statusCode == 200) {
-        return response.data;
+        var data = response.data;
+        return new Message.fromJson(data);
       } else {
         print('Error sending message. Status code: ${response.statusCode}');
-        return "";
+        return null;
       }
     } catch (error) {
       print('Error sending message: ${error.toString()}');
-      return "";
+      return null;
     }
   }
 
@@ -571,4 +572,33 @@ class RequestService extends getx.GetxService {
     }
   }
 
+  Future<String> messageAttachImage(XFile xFileImage, int? messageId) async {
+    File imageFile = File(xFileImage.path);
+    if (messageId != null) {
+      String endpoint =
+          "${ApiPath}/chats/message/image/" + messageId.toString();
+
+      var formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(imageFile.path,
+            filename: 'upload.jpg', contentType: MediaType('image', 'jpeg')),
+      });
+
+      try {
+        var response = await dio.post(endpoint, data: formData);
+        if (response.statusCode == 200) {
+          print("Uploaded!");
+          return response.data as String;
+        } else {
+          print("Failed to upload message file: ${response.statusCode}");
+          return "";
+        }
+      } catch (e) {
+        print("Error uploading message file: $e");
+      }
+      return "";
+    } else {
+      print("no message id");
+      return "";
+    }
+  }
 }

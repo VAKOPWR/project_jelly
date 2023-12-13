@@ -3,6 +3,7 @@ import 'package:project_jelly/classes/chat_DTO.dart';
 import 'message_status.dart';
 
 class Message {
+  int? messageId;
   int chatId;
   int senderId;
   String text;
@@ -11,7 +12,8 @@ class Message {
   String? attachedPhoto;
 
   Message(
-      {required this.chatId,
+      {this.messageId,
+      required this.chatId,
       required this.senderId,
       required this.text,
       required this.time,
@@ -20,6 +22,7 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
+        messageId: json["messageId"],
         chatId: json["groupId"],
         senderId: json["senderId"],
         text: json["text"],

@@ -16,7 +16,7 @@ class _MessagesPageState extends State<MessagesPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         FocusScope.of(context).unfocus();
