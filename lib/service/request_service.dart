@@ -385,7 +385,6 @@ class RequestService extends getx.GetxService {
 
       if (response.statusCode == 200) {
         var data = response.data;
-        print("messages found: ${data}");
         return (data as List).map((item) => Message.fromJson(item)).toList();
       } else {
         print('Error loading messages. Status code: ${response.statusCode}');
@@ -574,11 +573,11 @@ class RequestService extends getx.GetxService {
     return "";
   }
 
-  Future<String> messageAttachImage(
-      XFile xFileImage, int? messageId) async {
+  Future<String> messageAttachImage(XFile xFileImage, int? messageId) async {
     File imageFile = File(xFileImage.path);
-    if (messageId!=null){
-      String endpoint = "${ApiPath}/chats/message/image/" + messageId.toString();
+    if (messageId != null) {
+      String endpoint =
+          "${ApiPath}/chats/message/image/" + messageId.toString();
 
       var formData = FormData.fromMap({
         'image': await MultipartFile.fromFile(imageFile.path,

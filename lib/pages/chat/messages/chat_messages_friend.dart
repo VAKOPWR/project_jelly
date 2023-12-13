@@ -280,26 +280,28 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                     if (_controller.text != "" ||
                                         (_controller.isBlank ?? false)) {
                                       Message? message = await _sendMessage();
-                                      if (message!=null){
+                                      if (message != null) {
                                         _scrollController.animateTo(
                                             _scrollController
-                                                .position.maxScrollExtent +
+                                                    .position.maxScrollExtent +
                                                 60,
-                                            duration: Duration(milliseconds: 300),
+                                            duration:
+                                                Duration(milliseconds: 300),
                                             curve: Curves.easeOut);
                                         String messageText = _controller.text;
                                         messages.add(Message(
                                             text: messageText,
-                                            time: formatMessageTimeStr(message.time),
+                                            time: message.time,
                                             chatId: widget.chatId,
-                                            senderId:
-                                            Get.find<MapService>().currUserId,
+                                            senderId: Get.find<MapService>()
+                                                .currUserId,
                                             messageStatus: MessageStatus.SENT,
-                                            attachedPhoto: message.attachedPhoto));
+                                            attachedPhoto:
+                                                message.attachedPhoto));
                                         _controller.clear();
                                         _scrollController.animateTo(
                                           _scrollController
-                                              .position.maxScrollExtent +
+                                                  .position.maxScrollExtent +
                                               60,
                                           duration: Duration(milliseconds: 300),
                                           curve: Curves.easeOut,
@@ -307,10 +309,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                         setState(() {
                                           sortMessages();
                                         });
-                                      }
-                                      else {
-                                        //TODO: handle null message (aka "message wasnt sent properly or govnokod backend")
-                                      }
+                                      } else {}
                                     }
                                   },
                                 ),
@@ -383,12 +382,13 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
   Future<Message?> _sendMessage() async {
     Message? message = await Get.find<RequestService>()
         .sendMessage(widget.chatId, _controller.text);
-    if (message!=null&&_pickedImage!=null){
-      message.attachedPhoto = await Get.find<RequestService>().messageAttachImage(_pickedImage!, message.messageId);
+    if (message != null && _pickedImage != null) {
+      message.attachedPhoto = await Get.find<RequestService>()
+          .messageAttachImage(_pickedImage!, message.messageId);
+      _pickedImage = null;
       return message;
     }
     return null;
-
   }
 
   Future<void> fetchNewMessage() async {

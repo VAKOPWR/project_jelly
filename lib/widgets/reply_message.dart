@@ -34,36 +34,38 @@ class ReplyMessage extends StatelessWidget {
           margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           child: Stack(
             children: [
-              if (imageUrl != null)
-                Image.asset(
-                  'assets/mock_image.png',
-                  width: double.infinity,
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 10,
-                  right: 30,
-                  top: 5,
-                  bottom: 22,
-                ),
-                child: Text(
-                  message,
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-              Positioned(
-                bottom: 4,
-                right: 10,
-                child: Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[300],
-                  ),
-                ),
-              ),
+              imageUrl != null
+                  ? Image.network(
+                      imageUrl!,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topLeft,
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(
+                        left: 10,
+                        right: 30,
+                        top: 5,
+                        bottom: 22,
+                      ),
+                      child: Text(
+                        message,
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+              imageUrl == null
+                  ? Positioned(
+                      bottom: 4,
+                      right: 10,
+                      child: Text(
+                        time,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                    )
+                  : SizedBox(height: 1)
             ],
           ),
         ),
