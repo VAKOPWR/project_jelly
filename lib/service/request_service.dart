@@ -552,23 +552,23 @@ class RequestService extends getx.GetxService {
     File imageFile = File(xFileImage.path);
     String endpoint = "${ApiPath}/user/avatars";
 
-    var formData = FormData.fromMap({
-      'image': await MultipartFile.fromFile(imageFile.path,
-          filename: 'upload.jpg', contentType: MediaType('image', 'jpeg')),
+    FormData formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(imageFile.path),
     });
 
     try {
       var response = await dio.post(endpoint, data: formData);
       if (response.statusCode == 200) {
         print("Uploaded!");
-        return response.data as String;
+        return response.data.toString();
       } else {
         print("Failed to upload file: ${response.statusCode}");
         return "";
       }
     } catch (e) {
       print("Error uploading file: $e");
+      return "";
     }
-    return "";
   }
+
 }
