@@ -97,7 +97,7 @@ class _ChatGroupsTabState extends State<ChatGroupsTab> {
                   final chat = filteredChats[index];
                   return GestureDetector(
                     onTap: () {
-                      Get.to(() => ChatMessagesGroup(chatId: chat.chatId));
+                      // Get.to(() => ChatMessagesGroup(chatId: chat.chatId));
                     },
                     child: ListTile(
                       leading: Stack(

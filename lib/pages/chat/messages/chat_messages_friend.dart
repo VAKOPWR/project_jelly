@@ -279,32 +279,38 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                   onPressed: () async {
                                     if (_controller.text != "" ||
                                         (_controller.isBlank ?? false)) {
-                                      String timeahaha = await _sendMessage();
-                                      _scrollController.animateTo(
+                                      Message? message = await _sendMessage();
+                                      if (message!=null){
+                                        _scrollController.animateTo(
+                                            _scrollController
+                                                .position.maxScrollExtent +
+                                                60,
+                                            duration: Duration(milliseconds: 300),
+                                            curve: Curves.easeOut);
+                                        String messageText = _controller.text;
+                                        messages.add(Message(
+                                            text: messageText,
+                                            time: formatMessageTimeStr(message.time),
+                                            chatId: widget.chatId,
+                                            senderId:
+                                            Get.find<MapService>().currUserId,
+                                            messageStatus: MessageStatus.SENT,
+                                            attachedPhoto: message.attachedPhoto));
+                                        _controller.clear();
+                                        _scrollController.animateTo(
                                           _scrollController
-                                                  .position.maxScrollExtent +
+                                              .position.maxScrollExtent +
                                               60,
                                           duration: Duration(milliseconds: 300),
-                                          curve: Curves.easeOut);
-                                      String messageText = _controller.text;
-                                      messages.add(Message(
-                                          text: messageText,
-                                          time: timeahaha,
-                                          chatId: widget.chatId,
-                                          senderId:
-                                              Get.find<MapService>().currUserId,
-                                          messageStatus: MessageStatus.SENT));
-                                      _controller.clear();
-                                      _scrollController.animateTo(
-                                        _scrollController
-                                                .position.maxScrollExtent +
-                                            60,
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeOut,
-                                      );
-                                      setState(() {
-                                        sortMessages();
-                                      });
+                                          curve: Curves.easeOut,
+                                        );
+                                        setState(() {
+                                          sortMessages();
+                                        });
+                                      }
+                                      else {
+                                        //TODO: handle null message (aka "message wasnt sent properly or govnokod backend")
+                                      }
                                     }
                                   },
                                 ),
@@ -367,17 +373,22 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
+    if ((image != null)) {
       setState(() {
         _pickedImage = image;
       });
     }
   }
 
-  Future<String> _sendMessage() async {
-    return await Get.find<RequestService>()
+  Future<Message?> _sendMessage() async {
+    Message? message = await Get.find<RequestService>()
         .sendMessage(widget.chatId, _controller.text);
-    //TODO: handle images
+    if (message!=null&&_pickedImage!=null){
+      message.attachedPhoto = await Get.find<RequestService>().messageAttachImage(_pickedImage!, message.messageId);
+      return message;
+    }
+    return null;
+
   }
 
   Future<void> fetchNewMessage() async {
