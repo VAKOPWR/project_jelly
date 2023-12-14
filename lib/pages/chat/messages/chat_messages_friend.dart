@@ -280,6 +280,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
                                     if (_controller.text != "" ||
                                         (_controller.isBlank ?? false)) {
                                       Message? message = await _sendMessage();
+                                      print(message);
                                       if (message != null) {
                                         _scrollController.animateTo(
                                             _scrollController
@@ -388,7 +389,7 @@ class _ChatMessagesFriendState extends State<ChatMessagesFriend> {
       _pickedImage = null;
       return message;
     }
-    return null;
+    return message;
   }
 
   Future<void> fetchNewMessage() async {

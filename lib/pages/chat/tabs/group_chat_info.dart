@@ -39,12 +39,12 @@ class _GroupChatInfoState extends State<GroupChatInfo> {
     );
   }
 
-
   Widget _buildAvatar() {
     return Center(
       child: CircleAvatar(
         radius: 40,
-        backgroundImage: NetworkImage(widget.chat.picture ?? 'https://cataas.com/cat/rrsvsbRgL7zaJuR3'),
+        backgroundImage: NetworkImage(
+            widget.chat.picture ?? 'https://cataas.com/cat/rrsvsbRgL7zaJuR3'),
       ),
     );
   }
@@ -73,15 +73,14 @@ class _GroupChatInfoState extends State<GroupChatInfo> {
       itemCount: members.length,
       itemBuilder: (context, index) {
         final member = members.values.elementAt(index);
-        print("haha, nonexistent picture: ${member?.profilePicture ?? "wow, no picture!"}");
+        print("haha, nonexistent picture: ${member.profilePicture}");
         return ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(member!.profilePicture),
+            backgroundImage: NetworkImage(member.profilePicture),
           ),
           title: Text(member.nickname),
         );
       },
     );
   }
-
 }

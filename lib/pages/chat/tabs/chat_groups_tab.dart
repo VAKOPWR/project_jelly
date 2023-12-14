@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_jelly/classes/chat.dart';
-import 'package:project_jelly/pages/chat/messages/chat_messages_group.dart';
 import 'package:project_jelly/pages/chat/messages/common.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';

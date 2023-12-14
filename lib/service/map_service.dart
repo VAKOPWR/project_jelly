@@ -132,7 +132,6 @@ class MapService extends GetxService {
       }
     });
 
-    // TODO Change duration to 3 seconds
     Timer.periodic(Duration(seconds: 3), (timer) async {
       if (FirebaseAuth.instance.currentUser != null) {
         List<ChatDTO> newChats =

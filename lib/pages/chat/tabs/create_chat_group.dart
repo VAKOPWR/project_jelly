@@ -7,7 +7,6 @@ import 'package:project_jelly/classes/GroupChatResponse.dart';
 import 'package:project_jelly/classes/chat.dart';
 import 'package:project_jelly/classes/chat_user.dart';
 import 'package:project_jelly/classes/friend.dart';
-import 'package:project_jelly/pages/chat/messages/chat_messages_group.dart';
 import 'package:project_jelly/service/map_service.dart';
 import 'package:project_jelly/service/request_service.dart';
 import 'package:project_jelly/widgets/search_bar.dart';
