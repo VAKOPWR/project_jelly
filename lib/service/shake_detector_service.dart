@@ -34,7 +34,7 @@ class ShakeDetectorService extends GetxService {
       Get.find<GlobalShakeController>().shakeCount = 0;
     }
 
-    if (Get.find<GlobalShakeController>().shakeCount >= 2) {
+    if (Get.find<GlobalShakeController>().shakeCount >= 3) {
       Get.find<GlobalShakeController>().shakeCount = 0;
       Get.find<GlobalShakeController>().lastShakeTimestamp = now;
       bool detectedShake = true;
