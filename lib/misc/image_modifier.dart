@@ -37,7 +37,7 @@ Future<Uint8List> modifyImage(
         text: statusText,
         style: GoogleFonts.bebasNeue(
             color: Colors.deepPurpleAccent,
-            fontSize: 46.0,
+            fontSize: 60.0,
             fontWeight: FontWeight.w900),
       ),
       textDirection: TextDirection.ltr,
@@ -79,7 +79,7 @@ Future<Uint8List> modifyImage(
         text: statusText,
         style: GoogleFonts.bebasNeue(
           color: Colors.purpleAccent,
-          fontSize: 46.0,
+          fontSize: 60.0,
           fontWeight: FontWeight.w900,
         ),
       ),

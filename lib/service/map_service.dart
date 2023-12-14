@@ -25,6 +25,7 @@ import '../classes/chat.dart';
 import '../classes/chat_DTO.dart';
 import '../classes/chat_user.dart';
 import '../classes/message.dart';
+import 'package:image/image.dart' as IMG;
 
 class MapService extends GetxService {
   Position? _currentLocation;
@@ -353,8 +354,12 @@ class MapService extends GetxService {
       String key = avatar.key;
       Uint8List? value = avatar.value;
       if (value != null) {
+        Uint8List? resizedData = value;
+        IMG.Image img = IMG.decodeImage(value)!;
+        IMG.Image resized = IMG.copyResize(img, width: 150, height: 150);
+        resizedData = IMG.encodePng(resized);
         avatars[MarkerId(key)] = await modifyImage(
-            value,
+            resizedData,
             friendsData[MarkerId(key)]!.isOnline,
             friendsData[MarkerId(key)]!.offlineStatus);
       } else {
