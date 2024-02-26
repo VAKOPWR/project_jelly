@@ -1,4 +1,4 @@
-# Project Name: Project Jelly - Social Network with Live-Location Sharing
+# Project Jelly - Social Network with Live-Location Sharing
 
 **Description:**
 Welcome to Project Jelly, a dynamic social network designed to bring friends closer through innovative features and customization options. Built on Dart using the Flutter framework, this mobile application redefines social networking by integrating live-location sharing, robust messaging capabilities, and an array of customization options.
