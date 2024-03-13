@@ -18,7 +18,7 @@ Welcome to Project Jelly, a dynamic social network designed to bring friends clo
 4. Authentication: Firebase (Google Auth)
 
 **Project Resources:**
-1. Project Presentation (ToDo)
+1. [Project Presentation](https://docs.google.com/presentation/d/1DTDBPNX9lyfIDsK7ZHZYm3cqVlrtUnsLtD5QIYFw5W4/edit?usp=sharing)
 2. [Project Documentation](https://docs.google.com/document/d/12w32zDuOyp9MlhFqKdjyJvSp14NPq0NDU6xYpiLwDJg/edit?usp=sharing)
 3. [Backend Repository](https://github.com/VAKOPWR/jelly-backend)
 
