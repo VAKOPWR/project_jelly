@@ -14,7 +14,7 @@ Welcome to Project Jelly, a dynamic social network designed to bring friends clo
 **Technology Stack:**
 1. Frontend: Flutter (Dart)
 2. Backend: Spring Boot
-3. Database: MySQL
+3. Database: Microsoft SQL Server
 4. Authentication: Firebase (Google Auth)
 
 **Project Resources:**
